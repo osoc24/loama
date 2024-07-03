@@ -1,0 +1,9 @@
+services:
+  css:
+    image: solidproject/community-server
+    ports:
+      - 3000:3000
+    volumes:
+      - ./css/data:/data
+    environment:
+      - CSS_CONFIG=config/default.json
