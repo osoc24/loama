@@ -1,0 +1,11 @@
+services:
+  css:
+    image: solidproject/community-server
+    command: --seedConfig /config/seeds.json
+    ports:
+      - 3000:3000
+    volumes:
+      - ./css/data:/data
+      - ./css/config:/config
+    environment:
+      - CSS_CONFIG=/config/default.json
