@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.com/index-configuration",
+  "$id": "https://github.com/osoc24/loama/controller/schema.json",
   "title": "Index configuration",
   "description": "The json schema for the index configuration file inside a Solid data pod",
   "type": "array",
