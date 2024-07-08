@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/osoc24/loama/controller/schema.json",
+  "title": "Index configuration",
+  "description": "The json schema for the index configuration file inside a Solid data pod",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "resource": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/url"
+        },
+        "minItems": 1
+      },
+      "userType": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "url": {
+                "$ref": "#/$defs/url"
+              },
+              "type": {
+                "enum": [
+                  "Group",
+                  "WebId"
+                ]
+              }
+            },
+            "required": [
+              "url",
+              "type"
+            ]
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      },
+      "permission": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "Read",
+            "Write",
+            "Append",
+            "Control"
+          ]
+        },
+        "minItems": 1
+      },
+      "isEnabled": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "resource",
+      "userType",
+      "permission",
+      "isEnabled"
+    ]
+  },
+  "$defs": {
+    "url": {
+      "type": "string",
+      "format": "uri"
+    }
+  }
+}
