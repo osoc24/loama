@@ -8,7 +8,7 @@
 // import { universalAccess } from "@inrupt/solid-client";
 import { sayHello } from 'controller';
 
-console.log(sayHello())
+sayHello()
 </script>
 
 <style></style>
