@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@inrupt/solid-client-authn-browser": "^2.2.4",
+    "controller": "link:../controller",
     "nuxt": "^3.12.3",
     "vue": "latest"
   },

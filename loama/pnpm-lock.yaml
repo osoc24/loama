@@ -11,6 +11,9 @@ importers:
       '@inrupt/solid-client-authn-browser':
         specifier: ^2.2.4
         version: 2.2.4
+      controller:
+        specifier: link:../controller
+        version: link:../controller
       nuxt:
         specifier: ^3.12.3
         version: 3.12.3(@parcel/watcher@2.4.1)(@types/node@20.14.10)(ioredis@5.4.1)(magicast@0.3.4)(rollup@4.18.0)(terser@5.31.1)(vite@5.3.3(@types/node@20.14.10)(terser@5.31.1))

@@ -5,6 +5,7 @@
     <div v-else>
       <p> {{ session.info }}</p>
       <button type="button" @click="logout">Logout</button>
+      <NuxtLink to="/list">List authorized users</NuxtLink>
     </div>
   </div>
 </template>
