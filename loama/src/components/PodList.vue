@@ -2,24 +2,40 @@
     <div>
         Pods:
         <dl>
-            <div v-for="pod in pods" :key="pod.pod">
+            <template v-for="pod in pods" :key="pod.pod">
                 <dt>{{ pod.pod }}</dt>
                 <dd>
-                    <dl>
-                        <div v-for="thing in pod.things" :key="thing.url">
-                            <dt>{{ thing.url }}</dt>
-                            <dd>{{ thing.properties }}</dd>
-                        </div>
-                    </dl>
+                    <table>
+                        <thead>
+                            <th>URL</th>
+                            <th>Properties</th>
+                            <th>Access Modes</th>
+                        </thead>
+                        <tbody>
+                            <tr v-for="thing in pod.things" :key="thing.url">
+                                <td>{{ thing.url }}</td>
+                                <td>
+                                    <ul>
+                                        <li v-for="property in thing.properties" :key="property">{{ property }}</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    {{ thing.accessModes }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </dd>
-            </div>
+            </template>
         </dl>
     </div>
 </template>
 
 <script setup lang="ts">
 import { store } from "@/store";
-import { listPods } from "loama-controller";
+import { listPods, listPod } from "loama-controller";
 
 const pods = await listPods(store.session);
+
+// const pods = [await listPod(store.session, "https://css12.onto-deside.ilabt.imec.be/osoc5/")]
 </script>
