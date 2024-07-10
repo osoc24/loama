@@ -1,6 +1,6 @@
 <template>
   <header>
-    LOAMA
+    <h1>LOAMA</h1>
   </header>
 
   <RouterView />

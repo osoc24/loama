@@ -2,6 +2,7 @@
   <main>
     <button @click="logout">Logout</button>
 
+    <hr />
     <Suspense>
       <PodList />
 
