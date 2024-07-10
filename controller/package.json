@@ -1,11 +1,16 @@
 {
   "name": "loama-controller",
   "version": "1.0.0",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "keywords": [],
-  "author": "",
+  "author": "Open Summer of Code",
+  "contributors": ["BT-Creator", "Vicba", "Zelzahn"],
   "license": "ISC",
   "files": [
     "/dist"
