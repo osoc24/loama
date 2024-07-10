@@ -11,6 +11,11 @@ import {
 } from "@inrupt/solid-client/universal";
 import { Session } from "@inrupt/solid-client-authn-browser";
 
+/**
+ * List the pods that are from the currently authenticated user.
+ * @param session An active Solid client connection
+ * @returns The pods with their things listed
+ */
 export async function listPods(session: Session): Promise<
   {
     pod: string;
@@ -51,6 +56,12 @@ async function listThings(
   );
 }
 
+/**
+ * Gets the access modes for all the defined agents on a resource and for the public.
+ * @param session An active Solid client connection
+ * @param url The URL to a resource
+ * @returns The access modes with their agents
+ */
 async function getAccessModes(
   session: Session,
   url: string
