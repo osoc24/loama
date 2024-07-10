@@ -1,9 +1,19 @@
 <template>
     <div>
         Pods:
-        <ul>
-            <li v-for="pod in pods" :key="pod">{{ pod }}</li>
-        </ul>
+        <dl>
+            <div v-for="pod in pods" :key="pod.pod">
+                <dt>{{ pod.pod }}</dt>
+                <dd>
+                    <dl>
+                        <div v-for="thing in pod.things" :key="thing.url">
+                            <dt>{{ thing.url }}</dt>
+                            <dd>{{ thing.properties }}</dd>
+                        </div>
+                    </dl>
+                </dd>
+            </div>
+        </dl>
     </div>
 </template>
 
