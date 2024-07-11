@@ -10,6 +10,7 @@ import {
   getPublicAccess,
 } from "@inrupt/solid-client/universal";
 import { Session } from "@inrupt/solid-client-authn-browser";
+import { url } from "./types";
 
 /**
  * List the pods that are from the currently authenticated user.
@@ -18,11 +19,11 @@ import { Session } from "@inrupt/solid-client-authn-browser";
  */
 export async function listPods(session: Session): Promise<
   {
-    pod: string;
+    pod: url;
     things: {
-      url: string;
-      properties: string[];
-      accessModes: Record<string, AccessModes>;
+      url: url;
+      properties: url[];
+      accessModes: Record<url, AccessModes>;
     }[];
   }[]
 > {
@@ -32,18 +33,18 @@ export async function listPods(session: Session): Promise<
   return Promise.all(pods.map(async (url) => listPod(session, url)));
 }
 
-export async function listPod(session: Session, url: string) {
+export async function listPod(session: Session, url: url) {
   return { pod: url, things: await listThings(session, url) };
 }
 
 async function listThings(
   session: Session,
-  url: string
+  url: url
 ): Promise<
   {
-    url: string;
-    properties: string[];
-    accessModes: Record<string, AccessModes>;
+    url: url;
+    properties: url[];
+    accessModes: Record<url, AccessModes>;
   }[]
 > {
   const dataset = await getSolidDataset(url, { fetch: session.fetch });
@@ -64,8 +65,8 @@ async function listThings(
  */
 async function getAccessModes(
   session: Session,
-  url: string
-): Promise<Record<string, AccessModes>> {
+  url: url
+): Promise<Record<url, AccessModes>> {
   return Promise.all([
     getAgentAccessAll(url, { fetch: session.fetch }) as Promise<
       Record<string, AccessModes>

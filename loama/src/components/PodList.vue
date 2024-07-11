@@ -31,12 +31,13 @@
 
 <script setup lang="ts">
 import { store } from "@/store";
-import { listPods, getIndexFile } from "loama-controller";
+import { listPods, getOrCreateIndex, addPermissions } from "loama-controller";
+import { Permission } from "loama-controller/dist/types";
 
 const pods = await listPods(store.session);
 
-const indexFile = await getIndexFile(store.session, pods[0].pod);
-console.log(indexFile)
+const indexFile = await getOrCreateIndex(store.session, pods[0].pod); // .then((index) => addPermissions(store.session, index, ["example.com"], true, [Permission.Read]))
+// const indexFile = await getOrCreateIndex(store.session, pods[0].pod).then((index) => addPermissions(store.session, index, ["https://css12.onto-deside.ilabt.imec.be/osoc1/README"], true, [Permission.Read, Permission.Write]))
 
 // const pods = [await listPod(store.session, "https://css12.onto-deside.ilabt.imec.be/osoc5/")]
 </script>
