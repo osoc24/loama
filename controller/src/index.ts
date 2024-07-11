@@ -1,2 +1,2 @@
 export { sayHello } from "./hello-world";
-export { listPods } from "./pod";
+export { listPods, listPod } from "./pod";
