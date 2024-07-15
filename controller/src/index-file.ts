@@ -123,7 +123,7 @@ export async function editPermissions(
     true
   );
 
-  item.permissions = permissions;
+  index.items[itemIndex].permissions = permissions;
 
   await updateRemoteIndex(session, index);
 
