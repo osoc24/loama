@@ -7,8 +7,19 @@
         <nav>
             <slot></slot>
         </nav>
-        <img :src="pfpSrc" alt="User profile picture"/>
+        <img :src="pfpSrc" alt="User profile picture" @click="showContextMenu()"/>
     </header>
+    <aside :class="{visible: isContextMenuOpen}">
+        <div>
+            <strong>Name of Pod</strong>
+            <p>https://css12.onto-deside.ilabt.imec.be/osoc1/</p>
+        </div>
+        <select>
+            <option selected>https://css12.onto-deside.ilabt.imec.be/osoc1/</option>
+            <option>https://css12.onto-deside.ilabt.imec.be/osoc1/</option>
+        </select>
+            
+    </aside>
 </template>
 
 <style scoped>
@@ -58,11 +69,35 @@
         border-radius: 100%;
         width: calc(var(--base-unit)*8);
     }
+
+    aside {
+        background-color: var(--solid-purple);
+        min-height: 200px;
+        min-width: 200px;
+        display: none;
+        position: absolute;
+        right: 0;
+        color: var(--off-white);
+    }
+    
+    .visible {
+        display: block;
+    }
 </style>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import Loama from '../assets/loama.svg'
+import { store } from '@/store';
 const props = defineProps<{
-    pfpSrc: string
+    pfpSrc: string,
+
 }>()
+
+const isContextMenuOpen = ref(false)
+console.log(store.usedPod)
+
+function showContextMenu() {
+    isContextMenuOpen.value = !isContextMenuOpen.value
+}
 </script>

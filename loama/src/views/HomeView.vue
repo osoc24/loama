@@ -1,6 +1,6 @@
 <template>
   <Header pfp-src="https://thispersondoesnotexist.com">
-    <HeaderTab href="/home" active>Files</HeaderTab>
+      <HeaderTab href="/home" active>Files</HeaderTab>
   </Header>
   <main>
     <button @click="logout">Logout</button>
@@ -17,7 +17,8 @@
 </template>
 
 <script setup lang="ts">
-import HeaderTab from "..//components/HeaderTab.vue";
+import { Fragment } from "vue/jsx-runtime";
+import HeaderTab from "../components/HeaderTab.vue";
 import Header from '../components/Header.vue'
 import PodList from '../components/PodList.vue'
 import router from "@/router";
