@@ -26,18 +26,22 @@
             <h4>{{ `${pod.pod}index.json` }}</h4>
             {{ indexFile }}
         </template>
+        <button @click="addReadmePermissions">Add README permissions</button>
     </div>
 </template>
 
 <script setup lang="ts">
 import { store } from "@/store";
+import type { Session } from "@inrupt/solid-client-authn-browser";
 import { listPods, getOrCreateIndex, addPermissions } from "loama-controller";
 import { Permission } from "loama-controller/dist/types";
+import { ref } from "vue";
 
-const pods = await listPods(store.session);
+const pods = await listPods(store.session as Session);
 
-const indexFile = await getOrCreateIndex(store.session, pods[0].pod); // .then((index) => addPermissions(store.session, index, ["example.com"], true, [Permission.Read]))
-// const indexFile = await getOrCreateIndex(store.session, pods[0].pod).then((index) => addPermissions(store.session, index, ["https://css12.onto-deside.ilabt.imec.be/osoc1/README"], true, [Permission.Read, Permission.Write]))
+const indexFile = ref(await getOrCreateIndex(store.session as Session, pods[0].pod)); // .then((index) => addPermissions(store.session, index, ["example.com"], true, [Permission.Read]))
 
 // const pods = [await listPod(store.session, "https://css12.onto-deside.ilabt.imec.be/osoc5/")]
+
+const addReadmePermissions = async () => indexFile.value = await addPermissions(store.session as Session, indexFile.value, ["https://css12.onto-deside.ilabt.imec.be/osoc1/README"], true, [Permission.Read, Permission.Write]);
 </script>
