@@ -9,6 +9,7 @@ export interface Index {
 }
 
 export interface IndexItem {
+  id: string;
   isEnabled: boolean;
   permissions: Permission[];
   resources: string[];
