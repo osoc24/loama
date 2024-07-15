@@ -15,25 +15,21 @@ import { Permission, url } from "./types";
 /**
  * List the pods that are from the currently authenticated user.
  * @param session An active Solid client connection
- * @returns The pods with their things listed
+ * @returns The URL's to the pods the user has access to
  */
-export async function listPods(session: Session): Promise<
-  {
-    pod: url;
-    things: {
-      url: url;
-      properties: url[];
-      accessModes: Record<url, Permission[]>;
-    }[];
-  }[]
-> {
-  const pods = await getPodUrlAll(session.info.webId!, {
+export async function listPods(session: Session): Promise<url[]> {
+  return await getPodUrlAll(session.info.webId!, {
     fetch: session.fetch,
   });
-  return Promise.all(pods.map(async (url) => listPod(session, url)));
 }
 
-export async function listPod(session: Session, url: url) {
+/**
+ *
+ * @param session An active Solid client connection
+ * @param url URL to the user's pod
+ * @returns The pod with the things inside
+ */
+export async function getPod(session: Session, url: url) {
   return { pod: url, things: await listThings(session, url) };
 }
 
