@@ -15,6 +15,7 @@
   "dependencies": {
     "@inrupt/solid-client-authn-browser": "^2.2.4",
     "loama-controller": "link:../controller",
+    "vite-svg-loader": "^5.1.0",
     "vue": "^3.4.29",
     "vue-router": "^4.3.3"
   },
