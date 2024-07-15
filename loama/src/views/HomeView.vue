@@ -17,7 +17,8 @@
 </template>
 
 <script setup lang="ts">
-import Header from '@/components/Header.vue'
+import HeaderTab from "..//components/HeaderTab.vue";
+import Header from '../components/Header.vue'
 import PodList from '../components/PodList.vue'
 import router from "@/router";
 import { store } from "@/store";

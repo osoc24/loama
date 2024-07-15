@@ -12,19 +12,28 @@
 </template>
 
 <style scoped>
-    header, .wordmark {
+    header, .wordmark, nav {
         display: flex;
         flex-flow: row nowrap;
     }
+
+    .wordmark, img {
+        margin-bottom: calc(var(--base-unit));
+    }
+
+    header, img {
+        border: 0.25rem solid var(--solid-purple);
+    }
+
     header {
         width: 100%;
-        gap: var(--base-unit);
-        border-radius: 0 0 0.5rem 0.5rem;
-        border: 0.25rem solid var(--solid-purple);
+        gap: calc(var(--base-unit)*5);
+        border-radius: 0 0 var(--base-corner) var(--base-corner);
         border-bottom: 0.5rem solid var(--solid-purple);
         border-top: 0;
         padding: calc(var(--base-unit)*3) calc(var(--base-unit)*6) 0 calc(var(--base-unit)*3);
     }
+
     h1 {
         font-family: "JetBrains Mono";
         font-size: calc(var(--base-unit)*6);
@@ -34,16 +43,19 @@
         color: var(--solid-purple);
         text-transform: uppercase;
     }
+
     nav {
         flex-grow: 1;
+        align-items: end;
     }
+
     svg {
         width: calc(var(--base-unit)*8);
         height: calc(var(--base-unit)*8);
     }
+
     img {
         border-radius: 100%;
-        border: 0.25rem solid var(--solid-purple);
         width: calc(var(--base-unit)*8);
     }
 </style>

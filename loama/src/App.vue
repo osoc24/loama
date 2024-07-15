@@ -13,6 +13,7 @@
   --off-black: #170D33;
   --lama-gray: #F7F7F7;
   --base-unit: 0.5rem;
+  --base-corner: 0.5rem;
 }
 html{
   background-color: var(--off-white);
