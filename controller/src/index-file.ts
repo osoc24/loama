@@ -93,6 +93,43 @@ export async function removePermissions(
   return index;
 }
 
+export async function editPermissions(
+  session: Session,
+  index: Index,
+  itemId: string,
+  permissions: Permission[]
+) {
+  const itemIndex = index.items.findIndex(({ id }) => id === itemId);
+
+  if (itemIndex === -1) {
+    throw new Error("Element not found");
+  }
+
+  const item = index.items[itemIndex];
+
+  const oldPermissionsSet = new Set(item.permissions);
+  const newPermissionsSet = new Set(item.permissions);
+  const addedPermissions = newPermissionsSet.difference(oldPermissionsSet);
+  const removedPermissions = oldPermissionsSet.difference(newPermissionsSet);
+
+  await updateACL(session, item.resources, item.userType, [
+    ...addedPermissions,
+  ]);
+  await updateACL(
+    session,
+    item.resources,
+    item.userType,
+    [...removedPermissions],
+    true
+  );
+
+  item.permissions = permissions;
+
+  await updateRemoteIndex(session, index);
+
+  return index;
+}
+
 async function updateACL(
   session: Session,
   resources: url[],
