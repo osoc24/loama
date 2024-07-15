@@ -3,68 +3,76 @@
   "$id": "https://github.com/osoc24/loama/controller/schema.json",
   "title": "Index configuration",
   "description": "The json schema for the index configuration file inside a Solid data pod",
-  "type": "array",
-  "items": {
-    "type": "object",
-    "properties": {
-      "resource": {
-        "type": "array",
-        "items": {
-          "$ref": "#/$defs/url"
-        },
-        "minItems": 1
-      },
-      "userType": {
-        "oneOf": [
-          {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "url": {
-                "$ref": "#/$defs/url"
-              },
-              "type": {
-                "enum": [
-                  "Group",
-                  "WebId"
-                ]
-              }
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/url"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "resources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/url"
             },
-            "required": [
-              "url",
-              "type"
+            "minItems": 1
+          },
+          "userType": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "$ref": "#/$defs/url"
+                  },
+                  "type": {
+                    "enum": [
+                      "Group",
+                      "WebId"
+                    ]
+                  }
+                },
+                "required": [
+                  "url",
+                  "type"
+                ]
+              },
+              {
+                "type": "boolean"
+              }
             ]
           },
-          {
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Read",
+                "Write",
+                "Append",
+                "Control"
+              ]
+            },
+            "minItems": 1
+          },
+          "isEnabled": {
             "type": "boolean"
           }
-        ]
-      },
-      "permission": {
-        "type": "array",
-        "items": {
-          "type": "string",
-          "enum": [
-            "Read",
-            "Write",
-            "Append",
-            "Control"
-          ]
         },
-        "minItems": 1
-      },
-      "isEnabled": {
-        "type": "boolean"
+        "required": [
+          "resources",
+          "userType",
+          "permissions",
+          "isEnabled"
+        ]
       }
-    },
-    "required": [
-      "resource",
-      "userType",
-      "permission",
-      "isEnabled"
-    ]
+    }
   },
   "$defs": {
     "url": {
