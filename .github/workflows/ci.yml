@@ -17,48 +17,41 @@ on:
   push:
     branches: [ "root" ]
   pull_request:
-    # The branches below must be a subset of the branches above
     branches: [ "root" ]
-  schedule:
-    - cron: '33 15 * * 4'
 
 jobs:
-  cache-and-install:
+  eslint:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        with:
-          run_install: false
-
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: package.json
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install
-  eslint:
-    name: Run eslint scanning
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
-      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
+          node-version-file: "package.json"
+      - uses: pnpm/action-setup@v4
+        name: Install PNPM
+        with:
+          version: latest
+          run_install: false
+      - name: Get pnpm store directory
+        shell: bash
+        id: cache
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        name: Setup PNPM cache
+        env:
+          STORE_PATH: ${{ steps.cache.outputs.STORE_PATH }}
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
       - name: Install ESLint
         run: |
           pnpm install eslint@8.10.0
           pnpm install @microsoft/eslint-formatter-sarif@2.1.7
-
       - name: Run ESLint
         run: pnpm exec eslint .
           --config .eslintrc.cjs
@@ -66,7 +59,6 @@ jobs:
           --format @microsoft/eslint-formatter-sarif
           --output-file eslint-results.sarif
         continue-on-error: true
-
       - name: Upload analysis results to GitHub
         uses: github/codeql-action/upload-sarif@v2
         with:
