@@ -45,7 +45,7 @@ export async function addPermissions(
   session: Session,
   index: Index,
   resources: url[],
-  user: boolean | UserTypeObject,
+  user: UserTypeObject | undefined,
   permissions: Permission[]
 ): Promise<Index> {
   const newItem: IndexItem = {
@@ -133,13 +133,13 @@ export async function editPermissions(
 async function updateACL(
   session: Session,
   resources: url[],
-  user: boolean | UserTypeObject,
+  user: UserTypeObject | undefined,
   permissions: Permission[],
   removePermission?: boolean
 ) {
   return await Promise.all(
     resources.map(async (resource) => {
-      if (typeof user === "boolean") {
+      if (user === undefined) {
         return await setPublicAccess(
           resource,
           permissionsToAccessModes(permissions, removePermission),

@@ -13,7 +13,8 @@ export interface IndexItem {
   isEnabled: boolean;
   permissions: Permission[];
   resources: string[];
-  userType: boolean | UserTypeObject;
+  // `undefined` means that this item applies for the public access
+  userType?: UserTypeObject;
   [property: string]: any;
 }
 
