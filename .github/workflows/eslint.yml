@@ -7,7 +7,11 @@
 # More details at https://github.com/eslint/eslint
 # and https://eslint.org
 
-name: ESLint
+name: AMA ESLint
+
+defaults:
+  run:
+    working-directory: loama
 
 on:
   push:
@@ -19,6 +23,27 @@ on:
     - cron: '33 15 * * 4'
 
 jobs:
+  cache-and-install:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: 8
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
   eslint:
     name: Run eslint scanning
     runs-on: ubuntu-latest
@@ -32,12 +57,12 @@ jobs:
 
       - name: Install ESLint
         run: |
-          npm install eslint@8.10.0
-          npm install @microsoft/eslint-formatter-sarif@2.1.7
+          pnpm install eslint@8.10.0
+          pnpm install @microsoft/eslint-formatter-sarif@2.1.7
 
-      - name: Run AMA ESLint
-        run: npx eslint loama/
-          --config loama/.eslintrc.cjs
+      - name: Run ESLint
+        run: pnpm exec eslint .
+          --config .eslintrc.cjs
           --ext .js,.jsx,.ts,.tsx
           --format @microsoft/eslint-formatter-sarif
           --output-file eslint-results.sarif
