@@ -46,6 +46,8 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
+      - name: Insall dependencies
+        run: pnpm install
       - name: Run Eslint
         run: pnpm run lint:ci
       - name: Upload analysis results to GitHub
