@@ -1,5 +1,5 @@
 <template>
-    <a :href="href" :class="{active: active }"><slot/></a>
+    <a :href="href" :class="{ active: active }"><slot/></a>
 </template>
 
 <style scoped>

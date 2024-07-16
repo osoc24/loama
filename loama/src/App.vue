@@ -15,12 +15,7 @@
   --base-unit: 0.5rem;
   --base-corner: 0.5rem;
 }
-html{
-  background-color: var(--off-white);
-  font-family: "Raleway", sans-serif;
-  font-optical-sizing: auto;
-  font-style: normal;
-}
+
 /* Reset CSS*/
 /*
   1. Use a more-intuitive box-sizing model.
@@ -67,5 +62,13 @@ p, h1, h2, h3, h4, h5, h6 {
 */
 #root, #__next {
   isolation: isolate;
+}
+
+/* Global styles */
+html{
+  background-color: var(--off-white);
+  font-family: "Raleway", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 </style>
