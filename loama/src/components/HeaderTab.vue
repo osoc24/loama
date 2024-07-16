@@ -2,6 +2,13 @@
     <a :href="href" :class="{ active: active }"><slot/></a>
 </template>
 
+<script setup lang="ts">
+const props = defineProps<{
+    href: string
+    active: boolean
+}>()
+</script>
+
 <style scoped>
 a {
     background-color: var(--lama-gray);
@@ -22,10 +29,3 @@ a {
     color: var(--off-white);
 }
 </style>
-
-<script setup lang="ts">
-const props = defineProps<{
-    href: string
-    active: boolean
-}>()
-</script>

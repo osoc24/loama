@@ -2,7 +2,7 @@
     <header>
         <div class="wordmark">
             <Loama />
-            <h1>Loama</h1>
+            <span>Loama</span>
         </div>
         <nav>
             <slot></slot>
@@ -22,6 +22,27 @@
         <button @click.prevent="logout">Sign out</button>
     </aside>
 </template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+import Loama from '../assets/loama.svg'
+import { store } from '@/store';
+import router from '@/router';
+const props = defineProps<{
+    pfpSrc: string,
+
+}>()
+
+const isContextMenuOpen = ref(false)
+
+async function logout() {
+    store.session.logout();
+    router.push('/'); 
+}
+function showContextMenu() {
+    isContextMenuOpen.value = !isContextMenuOpen.value
+}
+</script>
 
 <style scoped>
     header, .wordmark, nav {
@@ -46,7 +67,7 @@
         padding: calc(var(--base-unit)*3) calc(var(--base-unit)*6) 0 calc(var(--base-unit)*3);
     }
 
-    h1 {
+    span {
         font-family: "JetBrains Mono";
         font-size: calc(var(--base-unit)*6);
         font-style: normal;
@@ -85,26 +106,3 @@
         display: block;
     }
 </style>
-
-<script setup lang="ts">
-import { ref } from 'vue';
-import Loama from '../assets/loama.svg'
-import { store } from '@/store';
-import router from '@/router';
-const props = defineProps<{
-    pfpSrc: string,
-
-}>()
-
-const isContextMenuOpen = ref(false)
-console.log(store.usedPod)
-
-const session = store.session;
-async function logout() {
-    session.logout();
-    router.push('/'); 
-}
-function showContextMenu() {
-    isContextMenuOpen.value = !isContextMenuOpen.value
-}
-</script>
