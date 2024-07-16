@@ -1,7 +1,9 @@
 <template>
-  <Header pfp-src="https://thispersondoesnotexist.com">
+  <Suspense>
+    <Header pfp-src="https://thispersondoesnotexist.com">
       <HeaderTab href="/home" active>Files</HeaderTab>
-  </Header>
+    </Header>
+  </Suspense>
   <main>
     <hr />
     <Suspense>

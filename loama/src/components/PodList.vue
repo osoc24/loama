@@ -39,7 +39,6 @@ import { Permission } from "loama-controller/dist/types";
 import { ref } from "vue";
 
 const pods = await listPods(store.session as Session);
-
 const indexFile = ref(await getOrCreateIndex(store.session as Session, pods[0])); // .then((index) => addPermissions(store.session, index, ["example.com"], true, [Permission.Read]))
 
 // const pods = [await listPod(store.session, "https://css12.onto-deside.ilabt.imec.be/osoc5/")]

@@ -1,26 +1,17 @@
 <template>
     <header>
         <div class="wordmark">
-            <Loama />
+            <Loama/>
             <span>Loama</span>
         </div>
         <nav>
             <slot></slot>
         </nav>
         <img :src="pfpSrc" alt="User profile picture" @click="showContextMenu"/>
+        <Suspense>
+            <HeaderContextMenu class="menu" :class="{hidden: isContextMenuHidden}" @click="showContextMenu"/>
+        </Suspense>
     </header>
-    <aside :class="{visible: isContextMenuOpen}">
-        <div>
-            <strong>Name of Pod</strong>
-            <p>https://css12.onto-deside.ilabt.imec.be/osoc1/</p>
-        </div>
-        <label for="pod">Selected Pod</label>
-        <select>
-            <option selected>https://css12.onto-deside.ilabt.imec.be/osoc1/</option>
-            <option>https://css12.onto-deside.ilabt.imec.be/osoc1/</option>
-        </select>
-        <button @click.prevent="logout">Sign out</button>
-    </aside>
 </template>
 
 <script setup lang="ts">
@@ -28,20 +19,21 @@ import { ref } from 'vue';
 import Loama from '../assets/loama.svg'
 import { store } from '@/store';
 import router from '@/router';
+import HeaderContextMenu from './HeaderContextMenu.vue'
+
 const props = defineProps<{
     pfpSrc: string,
-
 }>()
-
-const isContextMenuOpen = ref(false)
+const isContextMenuHidden = ref(true)
 
 async function logout() {
     store.session.logout();
     router.push('/'); 
 }
 function showContextMenu() {
-    isContextMenuOpen.value = !isContextMenuOpen.value
+    isContextMenuHidden.value = !isContextMenuHidden.value
 }
+
 </script>
 
 <style scoped>
@@ -67,7 +59,7 @@ function showContextMenu() {
         padding: calc(var(--base-unit)*3) calc(var(--base-unit)*6) 0 calc(var(--base-unit)*3);
     }
 
-    span {
+    .wordmark > span {
         font-family: "JetBrains Mono";
         font-size: calc(var(--base-unit)*6);
         font-style: normal;
@@ -91,18 +83,13 @@ function showContextMenu() {
         border-radius: 100%;
         width: calc(var(--base-unit)*8);
     }
-
-    aside {
-        background-color: var(--solid-purple);
-        min-height: 200px;
-        min-width: 200px;
+    
+    .hidden {
         display: none;
+    }
+
+    .menu {
         position: absolute;
         right: 0;
-        color: var(--off-white);
-    }
-    
-    .visible {
-        display: block;
     }
 </style>
