@@ -1,8 +1,8 @@
 <template>
   <Suspense>
-    <Header pfp-src="https://thispersondoesnotexist.com">
+    <HeaderBase pfp-src="https://thispersondoesnotexist.com">
       <HeaderTab href="/home" active>Files</HeaderTab>
-    </Header>
+    </HeaderBase>
   </Suspense>
   <main>
     <hr />
@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import HeaderTab from "../components/HeaderTab.vue";
-import Header from '../components/Header.vue'
+import HeaderTab from "../components/header/HeaderTab.vue";
+import HeaderBase from '../components/header/HeaderBase.vue'
 import PodList from '../components/PodList.vue'
 </script>

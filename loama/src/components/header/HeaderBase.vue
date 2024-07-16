@@ -7,16 +7,20 @@
         <nav>
             <slot></slot>
         </nav>
+        
         <img :src="pfpSrc" alt="User profile picture" @click="showContextMenu"/>
         <Suspense>
             <HeaderContextMenu class="menu" :class="{hidden: isContextMenuHidden}" @click="showContextMenu"/>
+            <template #fallback>
+                Loading context menu...
+            </template>
         </Suspense>
     </header>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import Loama from '../assets/loama.svg'
+import Loama from '../../assets/loama.svg'
 import { store } from '@/store';
 import router from '@/router';
 import HeaderContextMenu from './HeaderContextMenu.vue'

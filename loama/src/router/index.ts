@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import LandingView from '@/views/LandingView.vue'
 import { store } from '@/store'
-import { listPods } from 'loama-controller'
+import { getPod, listPods } from 'loama-controller'
 import type { Session } from '@inrupt/solid-client-authn-browser'
 
 const router = createRouter({
