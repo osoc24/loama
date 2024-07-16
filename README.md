@@ -1,3 +1,4 @@
+![Crest](https://github.com/user-attachments/assets/b083b4d0-f655-4385-9a6e-08c632b860b7)
 # Loama
 
 ## Getting started
