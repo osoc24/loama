@@ -9,10 +9,12 @@ export interface Index {
 }
 
 export interface IndexItem {
+  id: string;
   isEnabled: boolean;
   permissions: Permission[];
   resources: string[];
-  userType: boolean | UserTypeObject;
+  // `undefined` means that this item applies for the public access
+  userType?: UserTypeObject;
   [property: string]: any;
 }
 

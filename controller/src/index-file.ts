@@ -45,10 +45,11 @@ export async function addPermissions(
   session: Session,
   index: Index,
   resources: url[],
-  user: UserTypeObject,
+  user: UserTypeObject | undefined,
   permissions: Permission[]
 ): Promise<Index> {
   const newItem: IndexItem = {
+    id: crypto.randomUUID(),
     isEnabled: true,
     permissions: permissions,
     resources: resources,
@@ -58,20 +59,97 @@ export async function addPermissions(
   // NOTE: No checks are performed to see if the item isn't already present
   index.items.push(newItem);
 
-  // Update the ACL
-  await Promise.all(
+  await updateACL(session, resources, user, permissions);
+  await updateRemoteIndex(session, index);
+
+  return index;
+}
+
+export async function removePermissions(
+  session: Session,
+  index: Index,
+  itemId: string
+): Promise<Index> {
+  const itemIndex = index.items.findIndex(({ id }) => id === itemId);
+
+  if (itemIndex === -1) {
+    throw new Error("Element not found");
+  }
+
+  const item = index.items[itemIndex];
+
+  await updateACL(
+    session,
+    item.resources,
+    item.userType,
+    item.permissions,
+    true
+  );
+
+  index.items[itemIndex].isEnabled = false;
+
+  await updateRemoteIndex(session, index);
+
+  return index;
+}
+
+export async function editPermissions(
+  session: Session,
+  index: Index,
+  itemId: string,
+  permissions: Permission[]
+) {
+  const itemIndex = index.items.findIndex(({ id }) => id === itemId);
+
+  if (itemIndex === -1) {
+    throw new Error("Element not found");
+  }
+
+  const item = index.items[itemIndex];
+
+  const oldPermissionsSet = new Set(item.permissions);
+  const newPermissionsSet = new Set(item.permissions);
+  const addedPermissions = newPermissionsSet.difference(oldPermissionsSet);
+  const removedPermissions = oldPermissionsSet.difference(newPermissionsSet);
+
+  await updateACL(session, item.resources, item.userType, [
+    ...addedPermissions,
+  ]);
+  await updateACL(
+    session,
+    item.resources,
+    item.userType,
+    [...removedPermissions],
+    true
+  );
+
+  index.items[itemIndex].permissions = permissions;
+
+  await updateRemoteIndex(session, index);
+
+  return index;
+}
+
+async function updateACL(
+  session: Session,
+  resources: url[],
+  user: UserTypeObject | undefined,
+  permissions: Permission[],
+  removePermission?: boolean
+) {
+  return await Promise.all(
     resources.map(async (resource) => {
-      if (typeof user === "boolean") {
+      if (user === undefined) {
         return await setPublicAccess(
           resource,
-          permissionsToAccessModes(permissions),
+          permissionsToAccessModes(permissions, removePermission),
           { fetch: session.fetch }
         );
       } else {
         return await setAgentAccess(
           resource,
           user.url,
-          permissionsToAccessModes(permissions),
+          permissionsToAccessModes(permissions, removePermission),
           {
             fetch: session.fetch,
           }
@@ -79,10 +157,6 @@ export async function addPermissions(
       }
     })
   );
-
-  await updateRemoteIndex(session, index);
-
-  return index;
 }
 
 /**
@@ -103,25 +177,36 @@ function indexToIndexFile(index: Index): File {
 
 /**
  * Maps the permission structure that the controller uses to the one from `@inrupt/solid-client`.
+ *
+ * @param removePermission Boolean to indicate if the permissions should be removed or not.
  */
 function permissionsToAccessModes(
-  permissions: Permission[]
+  permissions: Permission[],
+  removePermission?: boolean
 ): Partial<AccessModes> {
   const accessModes: Partial<AccessModes> = {};
+  // false: Remove the AccessMode
+  const accessModeValue = !removePermission ?? true;
 
   for (const permission of permissions) {
     switch (permission) {
       case Permission.Append:
-        accessModes.append = true;
+        accessModes.append = accessModeValue;
         break;
       case Permission.Control:
-        accessModes.controlRead = true;
-        accessModes.controlWrite = true;
+        accessModes.controlRead = accessModeValue;
+        accessModes.controlWrite = accessModeValue;
       case Permission.Read:
-        accessModes.read = true;
+        accessModes.read = accessModeValue;
         break;
       case Permission.Write:
-        accessModes.write = true;
+        accessModes.write = accessModeValue;
+
+        // Setting Write also enables Append, but removing Write doesn't remove Append
+        if (accessModeValue === false) {
+          accessModes.append = false;
+        }
+
         break;
     }
   }

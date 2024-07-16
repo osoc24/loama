@@ -13,6 +13,9 @@
       "items": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "resources": {
             "type": "array",
             "items": {
@@ -66,6 +69,7 @@
           }
         },
         "required": [
+          "id",
           "resources",
           "userType",
           "permissions",
