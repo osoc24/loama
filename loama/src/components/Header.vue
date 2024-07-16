@@ -7,18 +7,19 @@
         <nav>
             <slot></slot>
         </nav>
-        <img :src="pfpSrc" alt="User profile picture" @click="showContextMenu()"/>
+        <img :src="pfpSrc" alt="User profile picture" @click="showContextMenu"/>
     </header>
     <aside :class="{visible: isContextMenuOpen}">
         <div>
             <strong>Name of Pod</strong>
             <p>https://css12.onto-deside.ilabt.imec.be/osoc1/</p>
         </div>
+        <label for="pod">Selected Pod</label>
         <select>
             <option selected>https://css12.onto-deside.ilabt.imec.be/osoc1/</option>
             <option>https://css12.onto-deside.ilabt.imec.be/osoc1/</option>
         </select>
-            
+        <button @click.prevent="logout">Sign out</button>
     </aside>
 </template>
 
@@ -89,6 +90,7 @@
 import { ref } from 'vue';
 import Loama from '../assets/loama.svg'
 import { store } from '@/store';
+import router from '@/router';
 const props = defineProps<{
     pfpSrc: string,
 
@@ -97,6 +99,11 @@ const props = defineProps<{
 const isContextMenuOpen = ref(false)
 console.log(store.usedPod)
 
+const session = store.session;
+async function logout() {
+    session.logout();
+    router.push('/'); 
+}
 function showContextMenu() {
     isContextMenuOpen.value = !isContextMenuOpen.value
 }
