@@ -11,7 +11,7 @@
   --solid-purple: #7C4DFF;
   --off-white: #F7F7F7;
   --off-black: #170D33;
-  --lama-gray: #F7F7F7;
+  --lama-gray: #DADADA;
   --base-unit: 0.5rem;
   --base-corner: 0.5rem;
 }
@@ -70,5 +70,19 @@ html{
   font-family: "Raleway", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
+  color: var(--off-black);
+  font-size: var(--base-unit)*2;
 }
+
+select {
+  padding: var(--base-unit);
+  border-radius: var(--base-corner);
+  background-color: var(--off-white);
+  border: 0.125rem solid var(--off-black);
+}
+
+select:active {
+  border-color: var(--solid-purple);
+}
+
 </style>

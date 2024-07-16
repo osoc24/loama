@@ -90,6 +90,11 @@ function showContextMenu() {
 
     .menu {
         position: absolute;
-        right: 0;
+        right: var(--base-unit);
+        top: calc(var(--base-unit)*14);
+        min-width: fit-content;
+        min-height: fit-content;
+        max-width: 25vw;
+        max-height: 50vw;
     }
 </style>
