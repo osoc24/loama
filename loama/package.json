@@ -10,10 +10,11 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "lint:ci": "eslint . --config .eslintrc.cjs --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --format node_modules/eslint-formatter-markdown/markdown.js"
   },
   "engines": {
-    "node": ">= 22"
+    "node": ">=22.0.0"
   },
   "packageManager": "pnpm@9.5.0+sha512.140036830124618d624a2187b50d04289d5a087f326c9edfc0ccd733d76c4f52c3a313d4fc148794a2a9d81553016004e6742e8cf850670268a7387fc220c903",
   "dependencies": {
@@ -32,6 +33,7 @@
     "@vue/eslint-config-typescript": "^13.0.0",
     "@vue/tsconfig": "^0.5.1",
     "eslint": "^8.57.0",
+    "eslint-formatter-markdown": "^1.0.4",
     "eslint-plugin-vue": "^9.23.0",
     "npm-run-all2": "^6.2.0",
     "prettier": "^3.2.5",
