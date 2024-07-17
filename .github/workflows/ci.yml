@@ -88,7 +88,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: controller-dist
-          path: ../controller/dist
+          path: ~/controller/dist
   
   vue-tsc:
     name: 'TSC (Loama)'
@@ -104,7 +104,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: controller-dist
-          path: controller/dist
+          path: ~/controller/dist
       - name: Display structure of downloaded files
         run: ls -al ../controller
       - name: Install Node.js
@@ -146,7 +146,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: controller-dist
-          path: controller/dist
+          path: ~/controller/dist
       - name: Display structure of downloaded files
         run: ls -al ../controller
       - name: Install Node.js
