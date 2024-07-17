@@ -1,31 +1,7 @@
 <template>
     <div>
         <h2>Pods:</h2>
-        <template v-for="pod in pods" :key="pod.pod">
-            <h4>{{ pod.pod }}</h4>
-            <table>
-                <thead>
-                    <th>URL</th>
-                    <th>Properties</th>
-                    <th>Access Modes</th>
-                </thead>
-                <tbody>
-                    <tr v-for="thing in pod.things" :key="thing.url">
-                        <td>{{ thing.url }}</td>
-                        <td>
-                            <ul>
-                                <li v-for="property in thing.properties" :key="property">{{ property }}</li>
-                            </ul>
-                        </td>
-                        <td>
-                            {{ thing.accessModes }}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <h4>{{ `${pod.pod}index.json` }}</h4>
-            {{ indexFile }}
-        </template>
+        
         <button @click="addReadmePermissions">Add README permissions</button>
         <button @click="removeReadmePermissions">Revoke README permissions</button>
     </div>
