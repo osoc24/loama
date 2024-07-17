@@ -11,7 +11,7 @@
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
-    "lint:ci": "eslint . --config .eslintrc.cjs --ext .js,.jsx,.ts,.tsx"
+    "lint:ci": "eslint . --config .eslintrc.cjs --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --format node_modules/eslint-formatter-markdown/markdown.js"
   },
   "engines": {
     "node": ">=22.0.0"
@@ -25,7 +25,6 @@
     "vue-router": "^4.3.3"
   },
   "devDependencies": {
-    "@microsoft/eslint-formatter-sarif": "^3.1.0",
     "@rushstack/eslint-patch": "^1.8.0",
     "@tsconfig/node20": "^20.1.4",
     "@types/node": "^20.14.5",
@@ -34,6 +33,7 @@
     "@vue/eslint-config-typescript": "^13.0.0",
     "@vue/tsconfig": "^0.5.1",
     "eslint": "^8.57.0",
+    "eslint-formatter-markdown": "^1.0.4",
     "eslint-plugin-vue": "^9.23.0",
     "npm-run-all2": "^6.2.0",
     "prettier": "^3.2.5",
