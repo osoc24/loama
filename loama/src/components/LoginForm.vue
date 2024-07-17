@@ -1,29 +1,41 @@
 <template>
-  <div>
+  <header>
     <h1>{{ title }}</h1>
-    <h2 v-if="subtitle">{{ subtitle }}</h2>
-  </div>
+    <p class="tagline" v-if="subtitle">{{ subtitle }}</p>
+  </header>
   <form @submit.prevent="login">
-    <div class="input-group">
-      <label for="solid-pod-url">Solid Pod URL</label>
-      <input type="url" id="solid-pod-url" v-model="solidPodUrl" required placeholder="https://pod.pod/pod/card#me">
+    <fieldset>
+      <legend>Solid Pod URL
+        <PhQuestion :size="24" @mouseover="showPopup = true;" @mouseleave="showPopup = false" />
+      </legend>
+      <label for="solid-pod-url">
+        <PhLink :size="24" class="icon" />
+        <input type="url" id="solid-pod-url" v-model="solidPodUrl" required placeholder="https://pod.pod/pod/card#me" />
+      </label>
       <p v-if="showWarning" class="warning">Invalid Solid Pod URL. Please check and try again.</p>
-    </div>
-    <div class="btn-group">
-      <button @click.prevent="setDefaultIdp" :disabled="isLoading" class="outlined">No Pod?</button>
+    </fieldset>
+    <fieldset>
+      <button @click.prevent="setDefaultIdp" :disabled="isLoading" class="outlined">
+        <PhQuestion :size="24" /> No Pod?
+      </button>
       <button type="submit" :disabled="isLoading">
         <span v-if="isLoading">Loading...</span>
-        <span v-else>Login</span>
+        <span v-else>Login
+          <PhArrowRight :size="24" />
+        </span>
       </button>
-    </div>
+    </fieldset>
   </form>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 import { store } from '@/store';
+import { PhArrowRight, PhLink, PhQuestion } from '@phosphor-icons/vue';
 
 defineProps<{ title: string, subtitle?: string }>();
+
+const showPopup = defineModel<boolean>('showPopup');
 
 const emit = defineEmits<{
   toggleProvider: []
@@ -60,6 +72,50 @@ const setDefaultIdp = () => {
 </script>
 
 <style scoped>
+.tagline {
+  color: var(--Off-Black, #170D33);
+  font-family: Raleway;
+  font-size: calc(var(--base-unit)*4);
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+
+legend {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+button,
+span {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  font-weight: 700;
+  gap: var(--base-unit);
+}
+
+label {
+  display: flex;
+  position: relative;
+  flex-grow: 1;
+}
+
+.icon {
+  position: absolute;
+  left: var(--base-unit);
+  top: 50%;
+  margin-top: calc(-1 * var(--base-unit));
+}
+
+input[type="url"] {
+  padding: 1rem calc(var(--base-unit) + 24px);
+  width: 100%;
+  border-color: var(--off-black);
+  border-radius: var(--base-corner);
+}
+
 .warning {
   color: red;
 }
@@ -72,11 +128,6 @@ label,
 p,
 input {
   color: var(--Off-Black, #170D33);
-  font-family: Raleway;
-  font-size: calc(var(--base-unit)*2);
-  font-style: normal;
-  font-weight: 300;
-  line-height: normal;
 }
 
 h1,
@@ -85,23 +136,18 @@ h2 {
 }
 
 form {
-  width: calc(100% - 4rem);
+  width: 100%;
 }
 
 form div {
   margin-bottom: 4rem;
 }
 
-input[type="url"] {
-  display: block;
-  margin: 10px auto;
-  padding: 10px;
-  width: 100%;
+fieldset {
   border: none;
-  border-radius: 5px;
 }
 
-.btn-group {
+fieldset:has(button) {
   width: 100%;
   display: flex;
   justify-content: space-between;

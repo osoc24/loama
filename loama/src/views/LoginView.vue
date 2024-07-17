@@ -1,10 +1,12 @@
 <template>
   <div class="signin-container">
     <div class="left-panel">
-      <LoginForm @toggle-provider="toggleSidePanel" title="LOAMA" subtitle="SOLID permissions made easy" />
+      <LoginForm @toggle-provider="toggleSidePanel" v-model:showPopup="showPopup" title="LOAMA"
+        subtitle="SOLID permissions made easy" />
       <SidePanel :is-open="isPanelOpen" @toggle-provider="toggleSidePanel" ref="sidePanel" />
     </div>
     <div class="right-panel">
+      <InfoPopup v-show="showPopup" />
       <img src="../assets/loama.svg" />
     </div>
   </div>
@@ -14,8 +16,11 @@
 import { ref } from 'vue';
 import LoginForm from '@/components/LoginForm.vue';
 import SidePanel from '@/components/SidePanel.vue';
+import InfoPopup from '@/components/InfoPopup.vue';
 
 const isPanelOpen = ref(false);
+// TEMP: true for debugging
+const showPopup = ref(true);
 
 const toggleSidePanel = () => {
   isPanelOpen.value = !isPanelOpen.value;

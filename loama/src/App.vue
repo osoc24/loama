@@ -17,11 +17,21 @@ h1 {
 }
 
 h2 {
-  color: var(--Off-Black, #170D33);
-  font-family: Raleway;
+  font-family: "JetBrains Mono";
   font-size: calc(var(--base-unit)*4);
   font-style: normal;
-  font-weight: 600;
+  font-weight: 700;
+  line-height: normal;
+  color: var(--off-black);
+}
+
+label,
+input,
+p {
+  font-family: Raleway;
+  font-size: calc(var(--base-unit)*2);
+  font-style: normal;
+  font-weight: 400;
   line-height: normal;
 }
 
