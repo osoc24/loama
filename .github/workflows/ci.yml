@@ -84,6 +84,8 @@ jobs:
         run: pnpm install
       - name: Run Typescript Check
         run: pnpm run build >> $GITHUB_STEP_SUMMARY
+      - name: Display structure of generated files
+        run: ls -al
       - name: Save distribution files
         uses: actions/upload-artifact@v4
         with:
