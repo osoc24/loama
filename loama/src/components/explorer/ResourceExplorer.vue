@@ -1,8 +1,7 @@
 <template>
-   <div v-for="thing in resource" :key="thing.url">
-        <component :is="thing.icon" :size="40" />
-        <span>{{ thing.name }}</span>
-   </div>
+    <div>
+        <ExplorerEntry v-for="thing in resource" :key="thing.url" :icon="thing.icon" :authProtected="false">{{thing.name}}</ExplorerEntry>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -11,6 +10,7 @@ import type { Session } from "@inrupt/solid-client-authn-browser";
 import { listPods, getPod } from "loama-controller";
 import { ref } from "vue";
 import { PhFolder, PhFile } from "@phosphor-icons/vue";
+import ExplorerEntry from "./ExplorerEntry.vue";
 
 const resource = ref(await getTopLevelThings());
 
@@ -28,7 +28,7 @@ async function getTopLevelThings(){
         .map(thing => {
             const uri = thing.url.replace(store.usedPod, '');
             const depth = uri.split('/').length;
-            console.log(thing)
+            console.log(thing.accessModes);
             return {
                 icon: (depth === 2) ? PhFolder : PhFile,
                 name: uri.replace('/', ''),
@@ -41,14 +41,9 @@ async function getTopLevelThings(){
 <style scoped>
     div {
         display: flex;
-        flex-flow: row nowrap;
+        flex-flow: column nowrap;
         align-items: center;
         gap: var(--base-unit);
-    }
-    span {
-        font-size: calc(var(--base-unit)*3);
-        font-style: normal;
-        font-weight: 700;
-        line-height: normal;
+        margin: calc(var(--base-unit)*2);
     }
 </style>
