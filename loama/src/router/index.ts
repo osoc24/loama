@@ -22,10 +22,8 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  console.log(store.session.info)
   if (!store.session.info.isLoggedIn) {
     await store.session.handleIncomingRedirect();
-    console.log(store.session.info)
     if(store.session.info.isLoggedIn){
       store.setUsedPod((await listPods(store.session as Session))[0])
     }
