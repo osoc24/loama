@@ -47,7 +47,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
       - name: Insall dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
       - name: Run Eslint
         run: pnpm run lint:ci >> $GITHUB_STEP_SUMMARY
   controller-tsc:
@@ -81,7 +81,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
       - name: Insall dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
       - name: Run Typescript Check
         run: pnpm run build >> $GITHUB_STEP_SUMMARY
       - name: Save distribution files
@@ -105,8 +105,6 @@ jobs:
         with:
           name: controller-dist
           path: ${{github.workspace}}/controller/dist
-      - name: Display structure of downloaded files
-        run: ls -al ../controller
       - name: Install Node.js
         uses: actions/setup-node@v4
       - uses: pnpm/action-setup@v4
@@ -129,7 +127,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
       - name: Insall dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
       - name: Run Typescript Check
         run: pnpm run type-check >> $GITHUB_STEP_SUMMARY
   build:
@@ -147,8 +145,6 @@ jobs:
         with:
           name: controller-dist
           path: ${{github.workspace}}/controller/dist
-      - name: Display structure of downloaded files
-        run: ls -al ../controller
       - name: Install Node.js
         uses: actions/setup-node@v4
       - uses: pnpm/action-setup@v4
@@ -170,7 +166,10 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
-      - name: Insall dependencies
-        run: pnpm install
+      - name: Install dependencies of controller
+        working-directory: controller
+        run: pnpm install --frozen-lockfile
+      - name: Install dependencies of loama
+        run: pnpm install --frozen-lockfile
       - name: Run Typescript Check
         run: pnpm run build-only >> $GITHUB_STEP_SUMMARY
