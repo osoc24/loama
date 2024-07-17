@@ -1,5 +1,5 @@
 <template>
-    <button :class="type">
+    <button :class="classList">
         <component :v-if="leftIcon" :is="leftIcon" :size="24"/>
         <span><slot></slot></span>
         <component :v-if="rightIcon" :is="rightIcon" :size="24"/>
@@ -26,7 +26,7 @@ const props = withDefaults(defineProps<{
     variant: "primary"
 })
 
-const type = computed(() => {
+const classList = computed(() => {
     return {
         primary: props.variant === "primary",
         secondary: props.variant === "secondary"
