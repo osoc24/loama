@@ -6,8 +6,8 @@
         </div>
         <nav>
             <slot></slot>
+            <IconButton :rightIcon="PhShareFat" class="share">Share access</IconButton>
         </nav>
-        
         <img :src="pfpSrc" alt="User profile picture" @click="showContextMenu"/>
         <Suspense>
             <HeaderContextMenu class="menu" :class="{hidden: isContextMenuHidden}" @click="showContextMenu"/>
@@ -21,19 +21,16 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import Loama from '../../assets/loama.svg'
-import { store } from '@/store';
-import router from '@/router';
+import IconButton from '../IconButton.vue'
 import HeaderContextMenu from './HeaderContextMenu.vue'
-
-const props = defineProps<{
+import { PhShareFat } from '@phosphor-icons/vue';
+defineProps<{
     pfpSrc: string,
 }>()
+
 const isContextMenuHidden = ref(true)
 
-async function logout() {
-    store.session.logout();
-    router.push('/'); 
-}
+
 function showContextMenu() {
     isContextMenuHidden.value = !isContextMenuHidden.value
 }
@@ -76,6 +73,11 @@ function showContextMenu() {
     nav {
         flex-grow: 1;
         align-items: end;
+    }
+
+    .share {
+        align-self: center;
+        margin-left: auto;
     }
 
     svg {
