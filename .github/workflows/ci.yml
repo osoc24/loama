@@ -1,0 +1,175 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# ESLint is a tool for identifying and reporting on patterns
+# found in ECMAScript/JavaScript code.
+# More details at https://github.com/eslint/eslint
+# and https://eslint.org
+
+name: AMA ESLint
+
+on:
+  push:
+    branches: [ "root" ]
+  pull_request:
+    branches: [ "root" ]
+
+jobs:
+  eslint:
+    name: 'ESLint'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: loama
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v4
+        name: Install PNPM
+        with:
+          version: latest
+          run_install: false
+      - name: Get pnpm store directory
+        shell: bash
+        id: cache
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        name: Setup PNPM cache
+        env:
+          STORE_PATH: ${{ steps.cache.outputs.STORE_PATH }}
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      - name: Insall dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run Eslint
+        run: pnpm run lint:ci >> $GITHUB_STEP_SUMMARY
+  controller-tsc:
+    name: 'TSC (Controller)'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: controller
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v4
+        name: Install PNPM
+        with:
+          version: latest
+          run_install: false
+      - name: Get pnpm store directory
+        shell: bash
+        id: cache
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        name: Setup PNPM cache
+        env:
+          STORE_PATH: ${{ steps.cache.outputs.STORE_PATH }}
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      - name: Insall dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run Typescript Check
+        run: pnpm run build >> $GITHUB_STEP_SUMMARY
+      - name: Save distribution files
+        uses: actions/upload-artifact@v4
+        with:
+          name: controller-dist
+          path: ${{github.workspace}}/controller/dist
+  
+  vue-tsc:
+    name: 'TSC (Loama)'
+    runs-on: ubuntu-latest
+    needs: controller-tsc
+    defaults:
+      run:
+        working-directory: loama
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Download controller dist
+        uses: actions/download-artifact@v4
+        with:
+          name: controller-dist
+          path: ${{github.workspace}}/controller/dist
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v4
+        name: Install PNPM
+        with:
+          version: latest
+          run_install: false
+      - name: Get pnpm store directory
+        shell: bash
+        id: cache
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        name: Setup PNPM cache
+        env:
+          STORE_PATH: ${{ steps.cache.outputs.STORE_PATH }}
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      - name: Insall dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run Typescript Check
+        run: pnpm run type-check >> $GITHUB_STEP_SUMMARY
+  build:
+    name: 'Build (Loama)'
+    runs-on: ubuntu-latest
+    needs: controller-tsc
+    defaults:
+      run:
+        working-directory: loama
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Download controller dist
+        uses: actions/download-artifact@v4
+        with:
+          name: controller-dist
+          path: ${{github.workspace}}/controller/dist
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v4
+        name: Install PNPM
+        with:
+          version: latest
+          run_install: false
+      - name: Get pnpm store directory
+        shell: bash
+        id: cache
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        name: Setup PNPM cache
+        env:
+          STORE_PATH: ${{ steps.cache.outputs.STORE_PATH }}
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      - name: Install dependencies of controller
+        working-directory: controller
+        run: pnpm install --frozen-lockfile
+      - name: Install dependencies of loama
+        run: pnpm install --frozen-lockfile
+      - name: Run Typescript Check
+        run: pnpm run build-only >> $GITHUB_STEP_SUMMARY
