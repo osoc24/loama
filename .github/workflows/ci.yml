@@ -9,10 +9,6 @@
 
 name: AMA ESLint
 
-defaults:
-  run:
-    working-directory: loama
-
 on:
   push:
     branches: [ "root" ]
@@ -23,6 +19,9 @@ jobs:
   eslint:
     name: 'ESLint'
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: loama
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -51,9 +50,12 @@ jobs:
         run: pnpm install
       - name: Run Eslint
         run: pnpm run lint:ci >> $GITHUB_STEP_SUMMARY
-  tsc:
-    name: 'Typescript Check'
+  controller-tsc:
+    name: 'TSC (Controller)'
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: controller
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -81,13 +83,72 @@ jobs:
       - name: Insall dependencies
         run: pnpm install
       - name: Run Typescript Check
-        run: pnpm run type-check > $GITHUB_STEP_SUMMARY
+        run: pnpm run build >> $GITHUB_STEP_SUMMARY
+      - name: Save distribution files
+        uses: actions/upload-artifact@v4
+        with:
+          name: controller-dist
+          path: dist
+  
+  vue-tsc:
+    name: 'TSC (Loama)'
+    runs-on: ubuntu-latest
+    needs: controller-tsc
+    defaults:
+      run:
+        working-directory: loama
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Download controller dist
+        uses: actions/download-artifact@v4
+        with:
+          name: controller-dist
+          path: controller/dist
+      - name: Display structure of downloaded files
+        run: ls -R
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v4
+        name: Install PNPM
+        with:
+          version: latest
+          run_install: false
+      - name: Get pnpm store directory
+        shell: bash
+        id: cache
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        name: Setup PNPM cache
+        env:
+          STORE_PATH: ${{ steps.cache.outputs.STORE_PATH }}
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      - name: Insall dependencies
+        run: pnpm install
+      - name: Run Typescript Check
+        run: pnpm run type-check >> $GITHUB_STEP_SUMMARY
   build:
-    name: 'Build Check'
+    name: 'Build (Loama)'
     runs-on: ubuntu-latest
+    needs: controller-tsc
+    defaults:
+      run:
+        working-directory: loama
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Download controller dist
+        uses: actions/download-artifact@v4
+        with:
+          name: controller-dist
+          path: controller/dist
+      - name: Display structure of downloaded files
+        run: ls -R
       - name: Install Node.js
         uses: actions/setup-node@v4
       - uses: pnpm/action-setup@v4
@@ -112,4 +173,4 @@ jobs:
       - name: Insall dependencies
         run: pnpm install
       - name: Run Typescript Check
-        run: pnpm run build-only > $GITHUB_STEP_SUMMARY
+        run: pnpm run build-only >> $GITHUB_STEP_SUMMARY
