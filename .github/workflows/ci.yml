@@ -50,9 +50,4 @@ jobs:
       - name: Insall dependencies
         run: pnpm install
       - name: Run Eslint
-        run: pnpm run lint:ci
-      - name: Upload analysis results to GitHub
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: ./eslint-results.sarif
-          wait-for-processing: true
+        run: pnpm run lint:ci >> $GITHUB_STEP_SUMMARY

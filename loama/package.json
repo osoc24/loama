@@ -11,7 +11,7 @@
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
-    "lint:ci": "eslint . --config .eslintrc.cjs --ext .js,.jsx,.ts,.tsx --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif"
+    "lint:ci": "eslint . --config .eslintrc.cjs --ext .js,.jsx,.ts,.tsx"
   },
   "engines": {
     "node": ">=22.0.0"
