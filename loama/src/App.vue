@@ -17,6 +17,14 @@ h1 {
 }
 
 h2 {
+  color: var(--Solid-Purple);
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+}
+
+h3 {
   font-family: "JetBrains Mono";
   font-size: calc(var(--base-unit)*4);
   font-style: normal;

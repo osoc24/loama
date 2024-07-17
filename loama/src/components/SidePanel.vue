@@ -2,7 +2,7 @@
   <div class="extra-panel" v-if="isOpen">
     <div>
       <h2>No Pod yet?</h2>
-      <p>No worries, you can create a pod with a pod provider or even host one yourself! We'll give you some
+      <p>No worries, you can create a pod with a pod provider or even <u>host one</u> yourself! We'll give you some
         recommendations of hosts you can use:</p>
       <button v-for="pod in podListData" :key="pod.name" @click="openPodUrl(pod)" :aria-label="'Open ' + pod.name">
         {{ pod.name }}
@@ -40,20 +40,20 @@ const openPodUrl = (pod: { name: string; url: string }) => {
   margin-top: 10px;
 }
 
-.extra-panel h2 {
+h2 {
   font-size: 30px;
   margin-bottom: 20px;
 }
 
-.extra-panel p {
+p {
   margin-bottom: 30px;
 }
 
-.extra-panel>div {
+div {
   margin-bottom: 20px;
 }
 
-.extra-panel button {
+button {
   display: block;
   margin-bottom: 10px;
   padding: 10px;
@@ -65,7 +65,7 @@ const openPodUrl = (pod: { name: string; url: string }) => {
   border-radius: 5px;
 }
 
-.extra-panel button:hover {
+button:hover {
   background-color: #29487d;
 }
 
