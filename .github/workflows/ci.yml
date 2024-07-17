@@ -84,13 +84,11 @@ jobs:
         run: pnpm install
       - name: Run Typescript Check
         run: pnpm run build >> $GITHUB_STEP_SUMMARY
-      - name: Display structure of generated files
-        run: ls -al
       - name: Save distribution files
         uses: actions/upload-artifact@v4
         with:
           name: controller-dist
-          path: dist
+          path: ../controller/dist
   
   vue-tsc:
     name: 'TSC (Loama)'
@@ -108,7 +106,7 @@ jobs:
           name: controller-dist
           path: controller/dist
       - name: Display structure of downloaded files
-        run: ls -R
+        run: ls -al ../controller
       - name: Install Node.js
         uses: actions/setup-node@v4
       - uses: pnpm/action-setup@v4
@@ -150,7 +148,7 @@ jobs:
           name: controller-dist
           path: controller/dist
       - name: Display structure of downloaded files
-        run: ls -R
+        run: ls -al ../controller
       - name: Install Node.js
         uses: actions/setup-node@v4
       - uses: pnpm/action-setup@v4
