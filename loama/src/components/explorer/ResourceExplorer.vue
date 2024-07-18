@@ -15,9 +15,6 @@ import type { FormattedThing } from "loama-controller/dist/types";
 
 const data = ref(await getTopLevelThings());
 
-/**
- * TODO: This function causes the icons to be re-active, so we'll need to extract the format function to a separate function
- */
 async function getTopLevelThings(){
     const podUrl = (store.usedPod)
         ? store.usedPod
@@ -31,10 +28,11 @@ async function getTopLevelThings(){
 }
 
 function getViewFormattedThings(data: FormattedThing[]) {
+    console.log(data);
     return data.map(thing => {
             const uri = thing.url.replace(store.usedPod, '');
             const depth = uri.split('/').length;
-            console.log(thing.accessModes);
+            console.log(thing.accessModes.public);
             return {
                 icon: (depth === 2) ? PhFolder : PhFile,
                 name: uri.replace('/', ''),

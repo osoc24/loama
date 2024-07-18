@@ -73,6 +73,9 @@ async function getAccessModes(
 function accessModesToPermissions(
   record: Record<url, AccessModes>
 ): Record<url, Permission[]> {
+  const result: { 
+    [agent: string]: Permission[]
+  } = {};
   // List -> Set -> List is done to filter out possible duplicate Permission.Control's
   const mapToPermission = (accessModes: [string, boolean][]) => [
     ...new Set(
@@ -96,9 +99,9 @@ function accessModesToPermissions(
     ),
   ];
 
-  return Object.assign(
-    Object.entries(record).map(([agent, accessModes]) => ({
-      [agent]: mapToPermission(Object.entries(accessModes)),
-    }))
-  );
+  Object.entries(record).forEach(([agent, accessModes]) => {
+    result[agent] = mapToPermission(Object.entries(accessModes));
+  });
+
+  return result;
 }
