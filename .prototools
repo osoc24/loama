@@ -1,0 +1,2 @@
+[plugins]
+act = "https://raw.githubusercontent.com/theomessin/proto-toml-plugins/master/act.toml"
