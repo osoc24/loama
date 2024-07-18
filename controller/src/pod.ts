@@ -10,7 +10,7 @@ import {
   getPublicAccess,
 } from "@inrupt/solid-client/universal";
 import { Session } from "@inrupt/solid-client-authn-browser";
-import { Permission, url } from "./types";
+import { FormattedThing, Permission, url } from "./types";
 
 /**
  * List the pods that are from the currently authenticated user.
@@ -36,13 +36,7 @@ export async function getPod(session: Session, url: url) {
 async function listThings(
   session: Session,
   url: url
-): Promise<
-  {
-    url: url;
-    properties: url[];
-    accessModes: Record<url, Permission[]>;
-  }[]
-> {
+): Promise<FormattedThing[]> {
   const dataset = await getSolidDataset(url, { fetch: session.fetch });
   return Promise.all(
     getThingAll(dataset).map(async (t) => ({

@@ -23,6 +23,7 @@ defineProps<{
         border: none;
         gap: var(--base-unit);
         width: 100%;
+        color: var(--off-black);
     }
 
     span {

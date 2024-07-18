@@ -1,6 +1,6 @@
 <template>
     <div>
-        <ExplorerEntry v-for="thing in resource" :key="thing.url" :icon="thing.icon" :authProtected="false">{{thing.name}}</ExplorerEntry>
+        <ExplorerEntry v-for="thing in getViewFormattedThings(data)" :key="thing.url" :icon="thing.icon" :authProtected="false">{{thing.name}}</ExplorerEntry>
     </div>
 </template>
 
@@ -11,21 +11,27 @@ import { listPods, getPod } from "loama-controller";
 import { ref } from "vue";
 import { PhFolder, PhFile } from "@phosphor-icons/vue";
 import ExplorerEntry from "./ExplorerEntry.vue";
+import type { FormattedThing } from "loama-controller/dist/types";
 
-const resource = ref(await getTopLevelThings());
+const data = ref(await getTopLevelThings());
 
 /**
  * TODO: This function causes the icons to be re-active, so we'll need to extract the format function to a separate function
  */
 async function getTopLevelThings(){
-    const content = (await getPod(store.session as Session, store.usedPod || (await listPods(store.session as Session))[0])).things
+    const podUrl = (store.usedPod)
+        ? store.usedPod
+        : (await listPods(store.session as Session))[0]
+    return (await getPod(store.session as Session, podUrl)).things
         .filter(thing => thing.url !== store.usedPod)
         .filter(thing => {
             const depth = thing.url.replace(store.usedPod, '').split('/');
             return depth.length <= 2;
         })
-    return content
-        .map(thing => {
+}
+
+function getViewFormattedThings(data: FormattedThing[]) {
+    return data.map(thing => {
             const uri = thing.url.replace(store.usedPod, '');
             const depth = uri.split('/').length;
             console.log(thing.accessModes);

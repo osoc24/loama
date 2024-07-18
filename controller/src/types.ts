@@ -38,3 +38,9 @@ export enum Type {
 }
 
 export type url = string;
+
+export interface FormattedThing {
+  url: url;
+  properties: url[];
+  accessModes: Record<url, Permission[]>;
+}[]
