@@ -23,7 +23,7 @@ const props = withDefaults(defineProps<{
     /**
      * The variant of the button; defaults to primary.
      */
-    variant?: "primary" | "secondary" | "outlined"
+    variant?: "primary" | "secondary"
 }>(), {
     variant: "primary"
 })
@@ -31,8 +31,7 @@ const props = withDefaults(defineProps<{
 const classList = computed(() => {
     return {
         primary: props.variant === "primary",
-        secondary: props.variant === "secondary",
-        outlined: props.variant === "outlined"
+        secondary: props.variant === "secondary"
     }
 })
 </script>
@@ -76,15 +75,5 @@ button:hover:not([disabled]) {
     background-color: var(--solid-white);
     color: var(--off-black);
     border-color: var(--solid-purple);
-}
-
-.outlined {
-    border-color: var(--solid-purple);
-    background-color: var(--solid-white);
-    color: var(--off-black);
-}
-
-.outlined:hover {
-    color: var(--solid-white);
 }
 </style>

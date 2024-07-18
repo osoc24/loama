@@ -16,7 +16,7 @@
       <p v-if="showWarning" class="warning">Invalid Solid Pod URL. Please check and try again.</p>
     </fieldset>
     <fieldset>
-      <LoButton @click.prevent="noPod" :disabled="isLoading" class="outlined" :left-icon="PhQuestion">
+      <LoButton @click.prevent="noPod" :disabled="isLoading" class="secondary" :left-icon="PhQuestion">
         No Pod?
       </LoButton>
       <LoButton type="submit" :disabled="isLoading" :right-icon="PhArrowRight">

@@ -8,7 +8,7 @@
         {{ pod.name }}
       </LoButton>
     </div>
-    <LoButton :left-icon="PhX" class="outlined" @click="emit('toggleProvider')">Close Panel</LoButton>
+    <LoButton :left-icon="PhX" class="secondary" @click="emit('toggleProvider')">Close Panel</LoButton>
   </div>
 </template>
 
@@ -40,6 +40,7 @@ const openPodUrl = (pod: { name: string; url: string }) => {
 .extra-panel {
   width: 100%;
   margin-top: 10px;
+  border-right: .2em solid var(--solid-purple);
 }
 
 h2 {
