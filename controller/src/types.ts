@@ -40,15 +40,15 @@ export enum Type {
 export type url = string;
 
 export interface Post {
-  text: string | null;
-  video?: string | null;
-  image?: string | null;
+  text: string;
+  video?: string;
+  image?: string;
 }
 
 export interface Appointment {
-  type?: string | null;
-  location?: string | null;
-  provider?: string | null;
-  date?: string | null;
-  time?: string | null;
+  type?: string;
+  location?: string;
+  provider?: string;
+  date?: string;
+  time?: string;
 }

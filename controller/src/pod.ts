@@ -16,8 +16,9 @@ import {
   getPublicAccess,
 } from "@inrupt/solid-client/universal";
 import { Session } from "@inrupt/solid-client-authn-browser";
-import { FOAF } from "@inrupt/vocab-common-rdf";
+// import { FOAF } from "@inrupt/vocab-common-rdf";
 import { Permission, url, Post, Appointment } from "./types";
+import { Schema } from "./index";
 
 /**
  * List the pods that are from the currently authenticated user.
@@ -140,16 +141,12 @@ export async function getProfileInfo(
     throw new Error("Profile information not found");
   }
 
-  const name = getStringNoLocale(profileThing, FOAF.name) ?? "";
-  const mbox = getUrl(profileThing, FOAF.mbox) ?? "";
+  const name = getStringNoLocale(profileThing, Schema.name) ?? "";
+  const mbox = getUrl(profileThing, Schema.mbox) ?? "";
   const description =
-    getStringWithLocale(
-      profileThing,
-      "http://schema.org/description",
-      "en-us"
-    ) ?? "";
-  const img = getUrl(profileThing, FOAF.img) ?? "";
-  const phone = getUrl(profileThing, FOAF.phone) ?? "";
+    getStringWithLocale(profileThing, Schema.description, "en-us") ?? "";
+  const img = getUrl(profileThing, Schema.img) ?? "";
+  const phone = getUrl(profileThing, Schema.phone) ?? "";
 
   return { name, mbox, description, img, phone };
 }
@@ -157,15 +154,18 @@ export async function getProfileInfo(
 /**
  * @param session An active Solid client connection
  * @param url URL to the user's pod
- * @returns get the users posts
+ * @param mapFunction Function to map Thing to required type
+ * @returns The resources mapped to the required type
  */
-export async function getPosts(session: Session, url: url): Promise<Post[]> {
-  const postsDataset = await getSolidDataset(`${url}/profile/posts/`, {
-    fetch: session.fetch,
-  });
-  const resources = getContainedResourceUrlAll(postsDataset);
+async function fetchResources<T>(
+  session: Session,
+  url: string,
+  mapFunction: (thing: any) => T
+): Promise<T[]> {
+  const dataset = await getSolidDataset(url, { fetch: session.fetch });
+  const resources = getContainedResourceUrlAll(dataset);
 
-  const posts: Post[] = [];
+  const result: T[] = [];
 
   await Promise.all(
     resources.map(async (resource) => {
@@ -173,68 +173,46 @@ export async function getPosts(session: Session, url: url): Promise<Post[]> {
         fetch: session.fetch,
       });
       const things = getThingAll(resourceDataset);
-      posts.push(
-        ...things.map((thing) => {
-          const text = getStringNoLocale(thing, "https://schema.org/text");
-          const video = getUrl(thing, "https://schema.org/video");
-          const image = getUrl(thing, "https://schema.org/image");
-          return { text, video, image };
-        })
-      );
+      result.push(...things.map(mapFunction));
     })
   );
 
-  return posts;
+  return result;
 }
 
 /**
  * @param session An active Solid client connection
  * @param url URL to the user's pod
- * @returns the users appointments
+ * @returns Get the user's posts
+ */
+export async function getPosts(session: Session, url: string): Promise<Post[]> {
+  const mapPost = (thing: any): Post => ({
+    text: getStringNoLocale(thing, Schema.text) || "",
+    video: getUrl(thing, Schema.video) || "",
+    image: getUrl(thing, Schema.image) || "",
+  });
+  return fetchResources(session, `${url}/profile/posts/`, mapPost);
+}
+
+/**
+ * @param session An active Solid client connection
+ * @param url URL to the user's pod
+ * @returns Get the user's appointments
  */
 export async function getAppointments(
   session: Session,
-  url: url
+  url: string
 ): Promise<Appointment[]> {
-  const appointmentsDataset = await getSolidDataset(`${url}/appointments/`, {
-    fetch: session.fetch,
-  });
-  const resources = getContainedResourceUrlAll(appointmentsDataset);
+  const mapAppointment = (thing: any): Appointment => {
+    const scheduledTime = getDatetime(thing, Schema.scheduledTime);
+    return {
+      type: getStringNoLocale(thing, Schema.additionalType) || "",
+      location: getStringNoLocale(thing, Schema.location) || "",
+      provider: getStringNoLocale(thing, Schema.provider) || "",
+      date: scheduledTime ? new Date(scheduledTime).toLocaleDateString() : "",
+      time: scheduledTime ? new Date(scheduledTime).toLocaleTimeString() : "",
+    };
+  };
 
-  const appointments: Appointment[] = [];
-
-  await Promise.all(
-    resources.map(async (resource) => {
-      const resourceDataset = await getSolidDataset(resource, {
-        fetch: session.fetch,
-      });
-      const things = getThingAll(resourceDataset);
-      appointments.push(
-        ...things.map((thing) => {
-          const type =
-            getStringNoLocale(thing, "https://schema.org/additionalType") ??
-            null;
-          const location =
-            getStringNoLocale(thing, "https://schema.org/location") ?? null;
-          const provider =
-            getStringNoLocale(thing, "https://schema.org/provider") ?? null;
-          const scheduledTime = getDatetime(
-            thing,
-            "https://schema.org/scheduledTime"
-          );
-
-          const date = scheduledTime
-            ? new Date(scheduledTime).toLocaleDateString()
-            : null;
-          const time = scheduledTime
-            ? new Date(scheduledTime).toLocaleTimeString()
-            : null;
-
-          return { type, location, provider, date, time };
-        })
-      );
-    })
-  );
-
-  return appointments;
+  return fetchResources(session, `${url}/appointments/`, mapAppointment);
 }
