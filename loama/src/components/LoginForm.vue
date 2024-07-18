@@ -5,17 +5,18 @@
   </header>
   <form @submit.prevent="login">
     <fieldset>
-      <legend>Solid Pod URL
+      <legend>
+        Solid Pod URL
         <PhQuestion :size="24" @mouseover="showPopup = true;" @mouseleave="showPopup = false" />
       </legend>
       <label for="solid-pod-url">
         <PhLink :size="24" class="icon" />
-        <input type="url" id="solid-pod-url" v-model="solidPodUrl" required placeholder="https://pod.pod/pod/card#me" />
+        <input type="url" id="solid-pod-url" v-model="solidPodUrl" :placeholder="defaultSolidPodUrl" />
       </label>
       <p v-if="showWarning" class="warning">Invalid Solid Pod URL. Please check and try again.</p>
     </fieldset>
     <fieldset>
-      <button @click.prevent="setDefaultIdp" :disabled="isLoading" class="outlined">
+      <button :disabled="isLoading" class="outlined">
         <PhQuestion :size="24" /> No Pod?
       </button>
       <button type="submit" :disabled="isLoading">
@@ -37,18 +38,14 @@ defineProps<{ title: string, subtitle?: string }>();
 
 const showPopup = defineModel<boolean>('showPopup');
 
-const emit = defineEmits<{
-  toggleProvider: []
-}>()
-
 const solidPodUrl = ref<string>('');
-const idp = ref<string>('https://css12.onto-deside.ilabt.imec.be/');
+const defaultSolidPodUrl = import.meta.env.VITE_DEFAULT_IDP;
 const showWarning = ref<boolean>(false);
 const isLoading = ref<boolean>(false);
 
 const login = () => {
   isLoading.value = true;
-  const issuer = solidPodUrl.value.trim() || idp.value;
+  const issuer = solidPodUrl.value.trim() || defaultSolidPodUrl;
 
   store.session.login({
     oidcIssuer: issuer,
@@ -64,17 +61,11 @@ const login = () => {
       isLoading.value = false;
     });
 };
-
-const setDefaultIdp = () => {
-  idp.value = 'https://css12.onto-deside.ilabt.imec.be/';
-  emit('toggleProvider');
-};
 </script>
 
 <style scoped>
 .tagline {
-  color: var(--Off-Black, #170D33);
-  font-family: Raleway;
+  color: var(--off-black);
   font-size: calc(var(--base-unit)*4);
   font-style: normal;
   font-weight: 600;
@@ -127,7 +118,7 @@ input[type="url"] {
 label,
 p,
 input {
-  color: var(--Off-Black, #170D33);
+  color: var(--off-black, #170D33);
 }
 
 h1,

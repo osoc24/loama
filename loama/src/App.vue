@@ -6,41 +6,36 @@
 </script>
 
 <style>
-h1 {
-  font-family: "JetBrains Mono";
-  font-size: calc(var(--base-unit)*8);
+h1,
+h2,
+h3 {
+  font-family: "JetBrains Mono", system-ui;
   font-style: normal;
-  font-weight: 700;
   line-height: normal;
+}
+
+h1 {
+  font-size: calc(var(--base-unit)*8);
+  font-weight: 700;
   color: var(--solid-purple);
   text-transform: uppercase;
 }
 
 h2 {
   color: var(--Solid-Purple);
-  font-family: "JetBrains Mono";
-  font-style: normal;
   font-weight: 700;
-  line-height: normal;
 }
 
 h3 {
-  font-family: "JetBrains Mono";
   font-size: calc(var(--base-unit)*4);
-  font-style: normal;
-  font-weight: 700;
-  line-height: normal;
   color: var(--off-black);
 }
 
 label,
 input,
 p {
-  font-family: Raleway;
   font-size: calc(var(--base-unit)*2);
-  font-style: normal;
   font-weight: 400;
-  line-height: normal;
 }
 
 /* Variables */

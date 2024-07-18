@@ -1,11 +1,11 @@
 <template>
-    <div>
+    <span>
         <h3>Solid Pod URL</h3>
         <p>A URL that links to the pod that you want to use.</p>
         <aside>
             <PhQuestion :size="24" />In order to authenticate, you'll be redirected to the provider's website.
         </aside>
-    </div>
+    </span>
 </template>
 
 <script setup lang="ts">
@@ -14,7 +14,7 @@ import { PhQuestion } from '@phosphor-icons/vue';
 </script>
 
 <style scoped>
-div {
+span {
     position: absolute;
     left: calc(var(--base-unit) * 4);
     border: .2em solid var(--solid-purple);
