@@ -9,7 +9,7 @@ import { store } from "@/store";
 import type { Session } from "@inrupt/solid-client-authn-browser";
 import { listPods, getPod } from "loama-controller";
 import { ref } from "vue";
-import { PhFolder, PhFile } from "@phosphor-icons/vue";
+import { PhFolder, PhFile, PhLock, PhLockOpen } from "@phosphor-icons/vue";
 import ExplorerEntry from "./ExplorerEntry.vue";
 import type { FormattedThing } from "loama-controller/dist/types";
 
@@ -32,10 +32,14 @@ function getViewFormattedThings(data: FormattedThing[]) {
     return data.map(thing => {
             const uri = thing.url.replace(store.usedPod, '');
             const depth = uri.split('/').length;
-            console.log(thing.accessModes.public);
+            const publicAccess = thing.accessModes.public.length > 0;
             return {
                 icon: (depth === 2) ? PhFolder : PhFile,
                 name: uri.replace('/', ''),
+                public: {
+                    access: publicAccess,
+                    icon: (publicAccess) ? PhLockOpen : PhLock
+                },
                 ...thing
             }
         })
