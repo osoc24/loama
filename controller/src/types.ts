@@ -38,3 +38,17 @@ export enum Type {
 }
 
 export type url = string;
+
+export interface Post {
+  text: string | null;
+  video?: string | null;
+  image?: string | null;
+}
+
+export interface Appointment {
+  type?: string | null;
+  location?: string | null;
+  provider?: string | null;
+  date?: string | null;
+  time?: string | null;
+}
