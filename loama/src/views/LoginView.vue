@@ -19,8 +19,7 @@ import SidePanel from '@/components/SidePanel.vue';
 import InfoPopup from '@/components/InfoPopup.vue';
 
 const isPanelOpen = ref(false);
-// TEMP: true for debugging
-const showPopup = ref(true);
+const showPopup = ref(false);
 
 const toggleSidePanel = () => {
   isPanelOpen.value = !isPanelOpen.value;

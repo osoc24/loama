@@ -4,16 +4,18 @@
       <h2>No Pod yet?</h2>
       <p>No worries, you can create a pod with a pod provider or even <u>host one</u> yourself! We'll give you some
         recommendations of hosts you can use:</p>
-      <button v-for="pod in podListData" :key="pod.name" @click="openPodUrl(pod)" :aria-label="'Open ' + pod.name">
+      <LoButton v-for="pod in podListData" :key="pod.name" @click="openPodUrl(pod)" :aria-label="'Open ' + pod.name">
         {{ pod.name }}
-      </button>
+      </LoButton>
     </div>
-    <button id="close-btn" @click="emit('toggleProvider')">Close Panel</button>
+    <LoButton :left-icon="PhX" class="outlined" @click="emit('toggleProvider')">Close Panel</LoButton>
   </div>
 </template>
 
 <script setup lang="ts">
 import podList from '@/utils/podlist.json';
+import LoButton from './LoButton.vue';
+import { PhX } from '@phosphor-icons/vue';
 
 defineProps<{
   isOpen: Boolean
@@ -54,23 +56,8 @@ div {
 }
 
 button {
-  display: block;
   margin-bottom: 10px;
   padding: 10px;
   width: 100%;
-  background-color: #1d172f;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-button:hover {
-  background-color: #29487d;
-}
-
-#close-btn {
-  background-color: #ff4c4c;
-  color: white;
 }
 </style>

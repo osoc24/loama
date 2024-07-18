@@ -1,8 +1,10 @@
 <template>
     <button :class="classList">
-        <component :v-if="leftIcon" :is="leftIcon" :size="24"/>
-        <span><slot></slot></span>
-        <component :v-if="rightIcon" :is="rightIcon" :size="24"/>
+        <component :v-if="leftIcon" :is="leftIcon" :size="24" />
+        <span>
+            <slot></slot>
+        </span>
+        <component :v-if="rightIcon" :is="rightIcon" :size="24" />
     </button>
 </template>
 
@@ -21,7 +23,7 @@ const props = withDefaults(defineProps<{
     /**
      * The variant of the button; defaults to primary.
      */
-    variant?: "primary" | "secondary"
+    variant?: "primary" | "secondary" | "outlined"
 }>(), {
     variant: "primary"
 })
@@ -29,7 +31,8 @@ const props = withDefaults(defineProps<{
 const classList = computed(() => {
     return {
         primary: props.variant === "primary",
-        secondary: props.variant === "secondary"
+        secondary: props.variant === "secondary",
+        outlined: props.variant === "outlined"
     }
 })
 </script>
@@ -48,16 +51,40 @@ button {
     border-radius: var(--base-corner);
     height: fit-content;
     border: none;
+    cursor: pointer;
+    border: .2em solid;
+}
+
+button[disabled] {
+    background-color: grey;
+    cursor: not-allowed;
+}
+
+button:hover:not([disabled]) {
+    background-color: var(--off-black);
+    border-color: var(--off-black);
+    color: var(--off-white);
 }
 
 .primary {
     background-color: var(--solid-purple);
+    border-color: var(--solid-purple);
     color: var(--off-white);
 }
 
 .secondary {
     background-color: var(--solid-white);
     color: var(--off-black);
-    border: 0.25rem solid var(--solid-purple);
+    border-color: var(--solid-purple);
+}
+
+.outlined {
+    border-color: var(--solid-purple);
+    background-color: var(--solid-white);
+    color: var(--off-black);
+}
+
+.outlined:hover {
+    color: var(--solid-white);
 }
 </style>

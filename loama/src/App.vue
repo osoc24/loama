@@ -138,5 +138,4 @@ select {
 select:active {
   border-color: var(--solid-purple);
 }
-
 </style>

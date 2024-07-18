@@ -16,15 +16,13 @@
       <p v-if="showWarning" class="warning">Invalid Solid Pod URL. Please check and try again.</p>
     </fieldset>
     <fieldset>
-      <button :disabled="isLoading" class="outlined">
-        <PhQuestion :size="24" /> No Pod?
-      </button>
-      <button type="submit" :disabled="isLoading">
+      <LoButton @click.prevent="noPod" :disabled="isLoading" class="outlined" :left-icon="PhQuestion">
+        No Pod?
+      </LoButton>
+      <LoButton type="submit" :disabled="isLoading" :right-icon="PhArrowRight">
         <span v-if="isLoading">Loading...</span>
-        <span v-else>Login
-          <PhArrowRight :size="24" />
-        </span>
-      </button>
+        <span v-else>Login</span>
+      </LoButton>
     </fieldset>
   </form>
 </template>
@@ -33,10 +31,15 @@
 import { ref } from 'vue';
 import { store } from '@/store';
 import { PhArrowRight, PhLink, PhQuestion } from '@phosphor-icons/vue';
+import LoButton from './LoButton.vue';
 
 defineProps<{ title: string, subtitle?: string }>();
 
 const showPopup = defineModel<boolean>('showPopup');
+
+const emit = defineEmits<{
+  toggleProvider: []
+}>()
 
 const solidPodUrl = ref<string>('');
 const defaultSolidPodUrl = import.meta.env.VITE_DEFAULT_IDP;
@@ -61,6 +64,10 @@ const login = () => {
       isLoading.value = false;
     });
 };
+
+const noPod = () => {
+  emit('toggleProvider');
+};
 </script>
 
 <style scoped>
@@ -78,7 +85,6 @@ legend {
   width: 100%;
 }
 
-button,
 span {
   display: flex;
   flex-direction: row;
@@ -139,35 +145,12 @@ fieldset {
 }
 
 fieldset:has(button) {
-  width: 100%;
   display: flex;
   justify-content: space-between;
 }
 
 button {
   width: 45%;
-  background-color: var(--solid-purple);
-  color: var(--off-white);
-  border: none;
-  cursor: pointer;
-  border-radius: var(--base-corner);
-  padding: 10px;
-}
-
-.outlined {
-  border: 2px solid var(--solid-purple);
-  background-color: var(--off-white);
-  color: var(--off-black);
-}
-
-button[disabled] {
-  background-color: grey;
-  cursor: not-allowed;
-}
-
-button:hover:not([disabled]) {
-  background-color: var(--off-black);
-  border-color: var(--off-black);
-  color: var(--off-white);
+  justify-content: center;
 }
 </style>
