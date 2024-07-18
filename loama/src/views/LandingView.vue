@@ -8,7 +8,7 @@
 <script setup lang="ts">
 import { store } from "@/store";
 
-const idp = "https://hatapon.solidweb.org/";
+const idp = "https://css12.onto-deside.ilabt.imec.be/";
 
 const login = async () => {
     try {
