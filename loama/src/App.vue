@@ -44,6 +44,7 @@ p {
   --off-white: #F7F7F7;
   --off-black: #170D33;
   --lama-gray: #DADADA;
+  --lama-red: #DE4C59;
   --base-unit: 0.5rem;
   --base-corner: 0.5rem;
 }

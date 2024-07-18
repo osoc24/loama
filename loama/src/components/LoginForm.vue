@@ -6,7 +6,7 @@
   <form @submit.prevent="login">
     <fieldset>
       <legend>
-        Solid Pod URL
+        <span>Solid Pod URL</span>
         <PhQuestion :size="24" @mouseover="showPopup = true;" @mouseleave="showPopup = false" />
       </legend>
       <label for="solid-pod-url">
@@ -16,7 +16,7 @@
       <p v-if="showWarning" class="warning">Invalid Solid Pod URL. Please check and try again.</p>
     </fieldset>
     <fieldset>
-      <LoButton @click.prevent="noPod" :disabled="isLoading" class="secondary" :left-icon="PhQuestion">
+      <LoButton @click.prevent="noPod" :disabled="isLoading" variant="secondary" :left-icon="PhQuestion">
         No Pod?
       </LoButton>
       <LoButton type="submit" :disabled="isLoading" :right-icon="PhArrowRight">
@@ -114,11 +114,7 @@ input[type="url"] {
 }
 
 .warning {
-  color: red;
-}
-
-.loading {
-  color: blue;
+  color: var(--lama-red);
 }
 
 label,

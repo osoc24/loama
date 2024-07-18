@@ -51,15 +51,10 @@ button {
     height: fit-content;
     border: none;
     cursor: pointer;
-    border: .2em solid;
+    border: 0.25rem solid;
 }
 
-button[disabled] {
-    background-color: grey;
-    cursor: not-allowed;
-}
-
-button:hover:not([disabled]) {
+button:hover {
     background-color: var(--off-black);
     border-color: var(--off-black);
     color: var(--off-white);
