@@ -1,5 +1,5 @@
 <template>
-  <div class="signin-container">
+  <div class="panel-container">
     <div class="left-panel">
       <LoginForm @toggle-provider="toggleSidePanel" v-model:showPopup="showPopup" title="LOAMA"
         subtitle="SOLID permissions made easy" />
@@ -32,7 +32,7 @@ img {
   height: 65vh;
 }
 
-.signin-container {
+.panel-container {
   display: flex;
   height: 100vh;
   width: 100vw;
@@ -51,7 +51,7 @@ img {
   gap: 4rem;
   flex: 2;
   background-color: var(--lama-gray);
-  background: var(--Login-Fade, linear-gradient(180deg, #F7F7F7 95%, #BFA8FF 100%));
+  background: var(--login-fade, linear-gradient(180deg, #F7F7F7 95%, #BFA8FF 100%));
   padding: 0 4rem;
 }
 
@@ -59,18 +59,5 @@ img {
   flex: 5;
   background-color: var(--solid-purple);
   position: relative;
-}
-
-.extra-panel {
-  background-color: #f0f0f0;
-  width: 30%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  z-index: 999;
-  overflow-y: auto;
-  padding: 20px;
-  margin: 0;
 }
 </style>

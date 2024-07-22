@@ -52,7 +52,7 @@ const login = () => {
 
   store.session.login({
     oidcIssuer: issuer,
-    redirectUrl: new URL('/home', window.location.href).toString(),
+    redirectUrl: new URL('/home/', window.location.href).toString(),
     clientName: 'LOAMA',
   })
     .then(() => {

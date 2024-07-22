@@ -61,6 +61,7 @@ header {
     border-radius: 0 0 var(--base-corner) var(--base-corner);
     border-bottom: 0.5rem solid var(--solid-purple);
     border-top: 0;
+    border-inline: 0;
     padding: calc(var(--base-unit)*3) calc(var(--base-unit)*6) 0 calc(var(--base-unit)*3);
 }
 
@@ -92,6 +93,10 @@ svg {
 img {
     border-radius: 100%;
     width: calc(var(--base-unit)*8);
+}
+
+img:hover {
+    cursor: pointer;
 }
 
 .hidden {

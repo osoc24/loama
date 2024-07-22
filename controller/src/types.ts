@@ -39,6 +39,13 @@ export enum Type {
 
 export type url = string;
 
+export interface FormattedThing {
+  url: url;
+  properties: url[];
+  accessModes: Record<url, Permission[]>;
+}
+[];
+
 export interface Post {
   text: string;
   video?: string;

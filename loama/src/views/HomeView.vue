@@ -5,12 +5,10 @@
     </HeaderBase>
   </Suspense>
   <main>
-    <hr />
     <Suspense>
-      <PodList />
-
+      <ResourceExplorer />
       <template #fallback>
-        Loading pods...
+        <FallbackExplorer>Loading resource explorer...</FallbackExplorer>
       </template>
     </Suspense>
   </main>
@@ -19,5 +17,6 @@
 <script setup lang="ts">
 import HeaderTab from "../components/header/HeaderTab.vue";
 import HeaderBase from '../components/header/HeaderBase.vue'
-import PodList from '../components/PodList.vue'
+import ResourceExplorer from '../components/explorer/ResourceExplorer.vue'
+import FallbackExplorer from '../components/explorer/FallbackExplorer.vue'
 </script>

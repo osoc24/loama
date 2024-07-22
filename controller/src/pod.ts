@@ -16,8 +16,7 @@ import {
   getPublicAccess,
 } from "@inrupt/solid-client/universal";
 import { Session } from "@inrupt/solid-client-authn-browser";
-// import { FOAF } from "@inrupt/vocab-common-rdf";
-import { Permission, url, Post, Appointment } from "./types";
+import { Permission, url, Post, Appointment, FormattedThing } from "./types";
 import { Schema } from "./index";
 
 /**
@@ -44,13 +43,7 @@ export async function getPod(session: Session, url: url) {
 async function listThings(
   session: Session,
   url: url
-): Promise<
-  {
-    url: url;
-    properties: url[];
-    accessModes: Record<url, Permission[]>;
-  }[]
-> {
+): Promise<FormattedThing[]> {
   const dataset = await getSolidDataset(url, { fetch: session.fetch });
   return Promise.all(
     getThingAll(dataset).map(async (t) => ({
@@ -87,6 +80,9 @@ async function getAccessModes(
 function accessModesToPermissions(
   record: Record<url, AccessModes>
 ): Record<url, Permission[]> {
+  const result: { 
+    [agent: string]: Permission[]
+  } = {};
   // List -> Set -> List is done to filter out possible duplicate Permission.Control's
   const mapToPermission = (accessModes: [string, boolean][]) => [
     ...new Set(
@@ -110,11 +106,11 @@ function accessModesToPermissions(
     ),
   ];
 
-  return Object.assign(
-    Object.entries(record).map(([agent, accessModes]) => ({
-      [agent]: mapToPermission(Object.entries(accessModes)),
-    }))
-  );
+  Object.entries(record).forEach(([agent, accessModes]) => {
+    result[agent] = mapToPermission(Object.entries(accessModes));
+  });
+
+  return result;
 }
 
 /**

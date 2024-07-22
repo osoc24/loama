@@ -3,12 +3,12 @@
         <span>{{ store.usedPod }}</span>
         <div>
             <label for="pod">Selected Pod</label>
-        <select>
-            <option v-for="pod in pods" :key="pod">{{ pod }}</option>
-        </select>
+            <select>
+                <option v-for="pod in pods" :key="pod">{{ pod }}</option>
+            </select>
         </div>
         <a @click.prevent="logout">
-            <PhSignOut/>
+            <PhSignOut />
             <span>Sign out</span>
         </a>
     </aside>
@@ -24,30 +24,35 @@ const pods = await listPods(store.session as Session);
 
 async function logout() {
     store.session.logout();
-    router.push('/'); 
+    router.push('/');
 }
 </script>
 
 <style lang="css" scoped>
 aside {
+    z-index: 10;
     border-radius: 0.5rem;
     display: flex;
     flex-flow: column nowrap;
     border: 0.25rem solid var(--solid-purple);
     background-color: var(--off-white);
 }
-aside > div {
+
+aside>div {
     padding: var(--base-unit);
 }
+
 label {
     color: var(--off-black);
     font-weight: 700;
     display: block;
 }
+
 select {
     margin-bottom: var(--base-unit);
 }
-aside > span {
+
+aside>span {
     background-color: var(--solid-purple);
     color: var(--off-white);
     font-family: Raleway;
