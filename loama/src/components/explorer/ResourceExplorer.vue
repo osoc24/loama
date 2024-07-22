@@ -3,13 +3,20 @@
         <div class="left-panel">
             <ExplorerBreadcrumbs />
             <ExplorerEntry v-for="thing in getViewFormattedThings(data)" :key="thing.url"
-                :isContainer="thing.isContainer" :authProtected="false" :url="thing.name + '/'">{{ thing.name }}
+                @click="changeSelectedEntry(thing)" :isContainer="thing.isContainer" :authProtected="false"
+                :url="thing.name + '/'">{{ thing.name }}
+
             </ExplorerEntry>
         </div>
         <div class="right-panel">
-            <Vault class="side-image" />
-            <strong>No folder or file selected!</strong>
-            <i>Select one to get started</i>
+            <div v-if="!selectedEntry">
+                <Vault class="side-image" />
+                <strong>No folder or file selected!</strong>
+                <i>Select one to get started</i>
+            </div>
+            <div v-else class="selectedEntry">
+                {{ selectedEntry }}
+            </div>
         </div>
     </div>
 </template>
@@ -28,6 +35,10 @@ import ExplorerBreadcrumbs from "./ExplorerBreadcrumbs.vue";
 
 const data = ref(await getThingsAtLevel(store.usedPod));
 const route = useRoute();
+
+const selectedEntry = ref<FormattedThing | null>(null)
+
+const changeSelectedEntry = (thing: FormattedThing) => selectedEntry.value = thing;
 
 const fileUrl = (path: string | string[]) => `${store.usedPod}${path}`
 
@@ -72,13 +83,6 @@ function getViewFormattedThings(data: FormattedThing[]) {
 </script>
 
 <style scoped>
-/* div {
-    display: flex;
-    flex-flow: column nowrap;
-    align-items: center;
-    gap: var(--base-unit);
-    margin: calc(var(--base-unit)*2); */
-/* } */
 .side-image {
     margin-bottom: calc(var(--base-unit)*2);
 }
@@ -112,17 +116,25 @@ i {
 }
 
 .left-panel {
-    gap: 2rem;
+    gap: 1.5rem;
     flex: 3;
-    padding: 2rem 2rem 0 2rem;
+    padding: 2rem 1.5rem 0 2rem;
     background-color: var(--off-white);
+    border-right: 0.25rem solid var(--solid-purple);
 }
 
 .right-panel {
+    padding-left: 0.5rem;
     flex: 2;
     background-color: var(--lama-gray);
     position: relative;
     justify-content: center;
     align-items: center;
+}
+
+.selectedEntry {
+    background-color: var(--off-white);
+    height: 100%;
+    width: 100%;
 }
 </style>

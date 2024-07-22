@@ -34,6 +34,11 @@ div {
     justify-content: space-between;
 }
 
+div:hover {
+    background-color: color-mix(in srgb, var(--off-black) 80%, transparent);
+    border-radius: var(--base-corner);
+}
+
 a {
     text-decoration: none;
 }
@@ -48,6 +53,11 @@ a {
     border: none;
     width: 100%;
     color: var(--off-black);
+    cursor: context-menu;
+}
+
+.file:hover {
+    color: var(--off-white);
 }
 
 .view {
