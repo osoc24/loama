@@ -95,6 +95,10 @@ img {
     width: calc(var(--base-unit)*8);
 }
 
+img:hover {
+    cursor: pointer;
+}
+
 .hidden {
     display: none;
 }

@@ -1,6 +1,6 @@
 # LOAMA
 
-This is the actual Access Management App, written in Vue.
+LOAMA is a Linked Open Access Management App, written in Vue.
 
 ## IDP Provider
 

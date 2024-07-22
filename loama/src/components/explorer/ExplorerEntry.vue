@@ -14,7 +14,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue';
 import { RouterLink } from 'vue-router';
 import LoButton from "../LoButton.vue";
 import { PhFolder, PhFile, PhArrowRight } from '@phosphor-icons/vue';

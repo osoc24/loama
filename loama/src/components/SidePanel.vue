@@ -8,7 +8,9 @@
         {{ pod.name }}
       </LoButton>
     </div>
-    <LoButton :left-icon="PhX" variant="secondary" @click="emit('toggleProvider')">Close Panel</LoButton>
+    <LoButton :left-icon="PhX" variant="secondary" @click="emit('toggleProvider')">
+      Close Panel
+    </LoButton>
   </div>
 </template>
 
@@ -41,6 +43,16 @@ const openPodUrl = (pod: { name: string; url: string }) => {
   width: 100%;
   margin-top: 10px;
   border-right: 0.25rem solid var(--solid-purple);
+  background-color: #f0f0f0;
+  width: 30%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 999;
+  overflow-y: auto;
+  padding: 20px;
+  margin: 0;
 }
 
 h2 {

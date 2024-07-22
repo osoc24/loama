@@ -29,10 +29,10 @@ span {
     --gradient: conic-gradient(from -90deg at 10px 10px, var(--solid-purple) 90deg, #0000 0);
     background: var(--gradient), var(--gradient), var(--gradient);
     background-size: 50% 50%;
-    animation: l16 1s infinite;
+    animation: shifting 1s infinite;
 }
 
-@keyframes l16 {
+@keyframes shifting {
     0% {
         background-position: 0 0, 10px 10px, 20px 20px
     }
