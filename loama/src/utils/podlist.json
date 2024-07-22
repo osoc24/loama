@@ -1,0 +1,64 @@
+{
+  "podList": [
+    {
+      "name": "Data Pod",
+      "url": "https://igrant.io/datapod.html",
+      "owner": "iGrant.io.Sweden",
+      "location": "EU"
+    },
+    {
+      "name": "Inrupt Pod Spaces",
+      "url": "https://start.inrupt.com/profile",
+      "owner": "Inrupt Inc.",
+      "location": "EU"
+    },
+    {
+      "name": "redpencil.io",
+      "url": "https://solid.redpencil.io/",
+      "owner": "redpencil.io",
+      "location": "EU"
+    },
+    {
+      "name": "solidcommunity.net",
+      "url": "https://solidcommunity.net/register",
+      "owner": "Solid Project",
+      "location": "UK"
+    },
+    {
+      "name": "solidweb.me",
+      "url": "https://solidweb.me/.account/login/password/register/",
+      "owner": "Meisdata",
+      "location": "EU"
+    },
+    {
+      "name": "solidweb.org",
+      "url": "https://solidweb.org/register",
+      "owner": "Solid Grassoots",
+      "location": "EU"
+    },
+    {
+      "name": "teamid.live",
+      "url": "https://teamid.live/.account/login/password/register/",
+      "owner": "Meisdata",
+      "location": "EU"
+    },
+    {
+      "name": "trinpod.eu",
+      "url": "https://trinpod.eu/",
+      "owner": "Graphmetrix",
+      "location": "EU"
+    },
+    {
+      "name": "trinpod.us",
+      "url": "https://trinpod.us/",
+      "owner": "Graphmetrix",
+      "location": "USA"
+    },
+    {
+      "name": "use.id",
+      "url": "https://get.use.id/people",
+      "owner": "Digita",
+      "location": "EU"
+    }
+  ]
+}
