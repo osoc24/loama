@@ -24,10 +24,12 @@ import Loama from '../../assets/loama.svg'
 import LoButton from '../LoButton.vue'
 import HeaderContextMenu from './HeaderContextMenu.vue'
 import { PhShareFat } from '@phosphor-icons/vue';
-defineProps<{
-    pfpSrc: string,
-}>()
 
+import { getProfileInfo } from "loama-controller";
+import { store } from '@/store';
+import type { Session } from '@inrupt/solid-client-authn-browser';
+
+const pfpSrc = (await getProfileInfo(store.session as Session, store.usedPod.replace(/\/$/, ''))).img;
 const isContextMenuHidden = ref(true)
 
 

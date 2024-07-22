@@ -1,6 +1,6 @@
 <template>
   <Suspense>
-    <HeaderBase pfp-src="https://thispersondoesnotexist.com">
+    <HeaderBase>
       <HeaderTab href="/home" active>Files</HeaderTab>
     </HeaderBase>
   </Suspense>

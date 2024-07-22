@@ -1,9 +1,11 @@
 <template>
-    <a :href="href" :class="{ active: active }"><slot/></a>
+    <a :href="href" :class="{ active: active }">
+        <slot />
+    </a>
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{
+defineProps<{
     href: string
     active: boolean
 }>()
