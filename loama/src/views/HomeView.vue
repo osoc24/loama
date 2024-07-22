@@ -8,7 +8,7 @@
     <Suspense>
       <ResourceExplorer />
       <template #fallback>
-              <FallbackExplorer>Loading resource explorer...</FallbackExplorer>
+        <FallbackExplorer>Loading resource explorer...</FallbackExplorer>
       </template>
     </Suspense>
   </main>

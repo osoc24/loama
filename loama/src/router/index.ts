@@ -14,7 +14,7 @@ const router = createRouter({
       component: LoginView
     },
     {
-      path: '/home',
+      path: '/home/:filePath(.*)',
       name: 'home',
       component: HomeView
     }
@@ -25,6 +25,7 @@ router.beforeEach(async (to) => {
   if (!store.session.info.isLoggedIn) {
     await store.session.handleIncomingRedirect()
     if (store.session.info.isLoggedIn) {
+      // Default to the first pod
       store.setUsedPod((await listPods(store.session as Session))[0])
     }
     if (!store.session.info.isLoggedIn && to.name !== 'login') {

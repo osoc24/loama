@@ -43,7 +43,8 @@ export interface FormattedThing {
   url: url;
   properties: url[];
   accessModes: Record<url, Permission[]>;
-}[]
+}
+[];
 
 export interface Post {
   text: string;
