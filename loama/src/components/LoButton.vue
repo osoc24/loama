@@ -1,8 +1,10 @@
 <template>
     <button :class="classList">
-        <component :v-if="leftIcon" :is="leftIcon" :size="24"/>
-        <span><slot></slot></span>
-        <component :v-if="rightIcon" :is="rightIcon" :size="24"/>
+        <component :v-if="leftIcon" :is="leftIcon" :size="24" />
+        <span>
+            <slot></slot>
+        </span>
+        <component :v-if="rightIcon" :is="rightIcon" :size="24" />
     </button>
 </template>
 
@@ -48,16 +50,25 @@ button {
     border-radius: var(--base-corner);
     height: fit-content;
     border: none;
+    cursor: pointer;
+    border: 0.25rem solid;
+}
+
+button:hover {
+    background-color: var(--off-black);
+    border-color: var(--off-black);
+    color: var(--off-white);
 }
 
 .primary {
     background-color: var(--solid-purple);
+    border-color: var(--solid-purple);
     color: var(--off-white);
 }
 
 .secondary {
     background-color: var(--solid-white);
     color: var(--off-black);
-    border: 0.25rem solid var(--solid-purple);
+    border-color: var(--solid-purple);
 }
 </style>
