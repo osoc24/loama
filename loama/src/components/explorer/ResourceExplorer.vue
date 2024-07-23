@@ -9,14 +9,15 @@
             </ExplorerEntry>
         </div>
         <div class="right-panel">
-            <div v-if="!selectedEntry">
-                <Vault class="side-image" />
-                <strong>No folder or file selected!</strong>
-                <i>Select one to get started</i>
+            <div class="default-panel-container" v-if="!selectedEntry">
+                <div class="default-panel">
+                    <Vault class="side-image" />
+                    <p><strong>No folder or file selected!</strong></p>
+                    <i>Select one to get started</i>
+                </div>
             </div>
-            <div v-else class="selectedEntry">
-                {{ selectedEntry }}
-            </div>
+            <SelectedEntry v-else :name="selectedEntry.name" :isContainer="selectedEntry.isContainer"
+                :agents="selectedEntry.accessModes" @close="selectedEntry = null" />
         </div>
     </div>
 </template>
@@ -32,13 +33,15 @@ import ExplorerEntry from "./ExplorerEntry.vue";
 import type { FormattedThing } from "loama-controller/dist/types";
 import { useRoute } from "vue-router";
 import ExplorerBreadcrumbs from "./ExplorerBreadcrumbs.vue";
+import SelectedEntry from "./SelectedEntry.vue";
+import type { Entry } from "@/utils/types";
 
 const data = ref(await getThingsAtLevel(store.usedPod));
 const route = useRoute();
 
-const selectedEntry = ref<FormattedThing | null>(null)
+const selectedEntry = ref<Entry | null>(null)
 
-const changeSelectedEntry = (thing: FormattedThing) => selectedEntry.value = thing;
+const changeSelectedEntry = (thing: Entry) => selectedEntry.value = thing;
 
 const fileUrl = (path: string | string[]) => `${store.usedPod}${path}`
 
@@ -49,6 +52,7 @@ const uriToName = (uri: string, isContainer: boolean) => {
 }
 
 watch(() => route.params.filePath, async (path) => {
+    selectedEntry.value = null;
     data.value = await getThingsAtLevel(fileUrl(path)), { immediate: true }
 })
 
@@ -124,17 +128,22 @@ i {
 }
 
 .right-panel {
-    padding-left: 0.5rem;
     flex: 2;
-    background-color: var(--lama-gray);
-    position: relative;
-    justify-content: center;
-    align-items: center;
 }
 
-.selectedEntry {
-    background-color: var(--off-white);
-    height: 100%;
+.default-panel-container {
+    padding-left: 0.5rem;
     width: 100%;
+    height: 100%;
+    background-color: var(--lama-gray);
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+.default-panel {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
 }
 </style>

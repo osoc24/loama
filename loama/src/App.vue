@@ -22,7 +22,7 @@ h1 {
 }
 
 h2 {
-  color: var(--Solid-Purple);
+  color: var(--solid-purple);
   font-weight: 700;
 }
 
