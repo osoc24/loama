@@ -19,6 +19,9 @@
                     @update:checked="updatePermissions(option.name, $event)">
                     {{ option.label }}
                 </LoSwitch>
+                <output v-if="updateStatus" name="result" :for="permissionOptions.map((o) => o.name).join(' ')">
+                    {{ updateStatus }}
+                </output>
             </form>
         </article>
     </div>
@@ -27,24 +30,28 @@
 <script setup lang="ts">
 import ExplorerEntity from './ExplorerEntity.vue';
 import { PhXCircle } from '@phosphor-icons/vue';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 import LoSwitch from '../LoSwitch.vue';
-import { type url, Permission } from 'loama-controller/dist/types';
-import { editPermissions, getOrCreateIndex } from 'loama-controller';
+import { Permission, Type } from 'loama-controller/dist/types';
+import { editPermissions, getOrCreateIndex, addPermissions, getItemId } from 'loama-controller';
 import { store } from '@/store';
 import type { Session } from '@inrupt/solid-client-authn-browser';
+import type { Result } from '@/utils/types';
 
-const props = defineProps<{ name: string; isContainer: boolean; agents: Record<url, Permission[]> }>();
+const props = defineProps<{ name: string; url: string; isContainer: boolean; agents: Record<string, Permission[]> }>();
 
 const selectedAgent = ref(Object.keys(props.agents)[0]);
+const updateStatus = ref<Result | null>(null)
 
-const permissionOptions = ref([
+watch(props, () => updateStatus.value = null);
+
+const permissionOptions = [
     { name: 'Read', label: "Able to read data" },
     { name: 'Write', label: "Able to add new data" },
     { name: 'Append', label: 'Able to modify existing data' },
     { name: 'Control', label: 'Able to manage access & permissions' }
-])
+];
 
 // @ts-ignore If you cast the permission to a Permissions the comparison no longer works.
 const isByDefaultSelected = (permission: string) => props.agents[selectedAgent.value].includes(permission)
@@ -60,13 +67,23 @@ const updatePermissions = async (type: string, newValue: boolean) => {
         permissions = permissions.filter((p) => p !== type)
     }
 
-    // TODO: Maybe map selectedAgent to the one from the index file
-    await editPermissions(store.session as Session, indexFile, selectedAgent.value, permissions);
+    const itemId = getItemId(indexFile, props.url, selectedAgent.value);
 
-    // TODO: Make sure the changed index file is shown here
-    // props.agents[selectedAgent.value] = permissions;
+    try {
+        if (itemId) {
+            await editPermissions(store.session as Session, indexFile, itemId, permissions)
+        } else {
+            // NOTE: This should be more fleshed out, e.g. username support
+            const userType = { type: Type.WebID, url: selectedAgent.value };
+            await addPermissions(store.session as Session, indexFile, [props.url], userType, permissions);
+        }
 
-    // TODO: Some kind of notification?
+        // TODO: invalidate the data and refresh it
+
+        updateStatus.value = { ok: true, value: 'The change is successfully performed!' }
+    } catch (e) {
+        updateStatus.value = { ok: false, error: e }
+    }
 }
 </script>
 

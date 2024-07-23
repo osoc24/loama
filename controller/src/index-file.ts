@@ -6,7 +6,14 @@ import {
   saveFileInContainer,
 } from "@inrupt/solid-client";
 import { Session } from "@inrupt/solid-client-authn-browser";
-import { Index, IndexItem, Permission, url, UserTypeObject } from "./types";
+import {
+  Index,
+  IndexItem,
+  Permission,
+  Type,
+  url,
+  UserTypeObject,
+} from "./types";
 import {
   setAgentAccess,
   setPublicAccess,
@@ -102,7 +109,7 @@ export async function editPermissions(
   const itemIndex = index.items.findIndex(({ id }) => id === itemId);
 
   if (itemIndex === -1) {
-    throw new Error("Element not found");
+    throw new Error("Item is not found, is it present in the index file?");
   }
 
   const item = index.items[itemIndex];
@@ -128,6 +135,16 @@ export async function editPermissions(
   await updateRemoteIndex(session, index);
 
   return index;
+}
+
+export function getItemId(index: Index, resource: url, user: url) {
+  return index.items.find(
+    (indexItem) =>
+      indexItem.resources.includes(resource) &&
+      indexItem.userType &&
+      indexItem.userType.type === Type.WebID &&
+      indexItem.userType.url === user
+  )?.id;
 }
 
 async function updateACL(

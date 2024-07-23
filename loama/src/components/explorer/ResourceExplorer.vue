@@ -17,7 +17,7 @@
                 </div>
             </div>
             <SelectedEntry v-else :name="selectedEntry.name" :isContainer="selectedEntry.isContainer"
-                :agents="selectedEntry.accessModes" @close="selectedEntry = null" />
+                :url="selectedEntry.url" :agents="selectedEntry.accessModes" @close="selectedEntry = null" />
         </div>
     </div>
 </template>
