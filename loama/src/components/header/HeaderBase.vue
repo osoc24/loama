@@ -87,6 +87,7 @@ nav {
     margin-left: auto;
 }
 
+img,
 svg {
     width: calc(var(--base-unit)*8);
     height: calc(var(--base-unit)*8);
@@ -94,7 +95,7 @@ svg {
 
 img {
     border-radius: 100%;
-    width: calc(var(--base-unit)*8);
+    object-fit: cover;
 }
 
 img:hover {
