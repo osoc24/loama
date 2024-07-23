@@ -24,10 +24,12 @@ import Loama from '../../assets/loama.svg'
 import LoButton from '../LoButton.vue'
 import HeaderContextMenu from './HeaderContextMenu.vue'
 import { PhShareFat } from '@phosphor-icons/vue';
-defineProps<{
-    pfpSrc: string,
-}>()
 
+import { getProfileInfo } from "loama-controller";
+import { store } from '@/store';
+import type { Session } from '@inrupt/solid-client-authn-browser';
+
+const pfpSrc = (await getProfileInfo(store.session as Session, store.usedPod.replace(/\/$/, ''))).img;
 const isContextMenuHidden = ref(true)
 
 
@@ -85,6 +87,7 @@ nav {
     margin-left: auto;
 }
 
+img,
 svg {
     width: calc(var(--base-unit)*8);
     height: calc(var(--base-unit)*8);
@@ -92,7 +95,7 @@ svg {
 
 img {
     border-radius: 100%;
-    width: calc(var(--base-unit)*8);
+    object-fit: cover;
 }
 
 img:hover {
