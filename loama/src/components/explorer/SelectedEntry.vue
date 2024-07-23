@@ -19,7 +19,10 @@
                     @update:checked="updatePermissions(option.name, $event)">
                     {{ option.label }}
                 </LoSwitch>
-                <Notification v-if="updateStatus" :type="updateStatus.ok ? 'success' : 'error'" :message="updateStatus.value || updateStatus.error || ''" />
+                <Notification 
+                    v-if="updateStatus" 
+                    :type="updateStatus.ok ? 'success' : 'error'" 
+                    :message="updateStatus.value || updateStatus.error || 'No message available'" />
             </form>
         </article>
     </div>
@@ -36,7 +39,7 @@ import { editPermissions, getOrCreateIndex, addPermissions, getItemId } from 'lo
 import { store } from '@/store';
 import type { Session } from '@inrupt/solid-client-authn-browser';
 import type { Result } from '@/utils/types';
-import Notification from './notification.vue';
+import Notification from './Notification.vue';
 
 const props = defineProps<{ name: string; url: string; isContainer: boolean; agents: Record<string, Permission[]> }>();
 
@@ -44,6 +47,11 @@ const selectedAgent = ref(Object.keys(props.agents)[0]);
 const updateStatus = ref<{ ok: boolean, value?: string, error?: string } | null>(null);
 
 watch(props, () => updateStatus.value = null);
+
+watch(() => props.url, async () => {
+    await refetchData();
+});
+
 
 const permissionOptions = [
     { name: 'Read', label: "Able to read data" },
@@ -54,6 +62,29 @@ const permissionOptions = [
 
 // @ts-ignore If you cast the permission to a Permissions the comparison no longer works.
 const isByDefaultSelected = (permission: string) => props.agents[selectedAgent.value].includes(permission);
+
+const refetchData = async () => {
+    try {
+        // Fetch the updated index file
+        const indexFile = await getOrCreateIndex(store.session as Session, store.usedPod);
+
+        // Get the updated itemId for the selected agent
+        const itemId = getItemId(indexFile, props.url, selectedAgent.value);
+
+        if (itemId) {
+            // Fetch the updated permissions for the selected agent
+            const updatedPermissions = indexFile.items.find(item => item.id === itemId)?.permissions || [];
+
+            // Update the local permissions data
+            props.agents[selectedAgent.value] = updatedPermissions;
+        } else {
+            console.warn('Item ID is not available for refetching permissions');
+        }
+    } catch (error) {
+        console.error('Error refetching data:', error);
+    }
+};
+
 
 const updatePermissions = async (type: string, newValue: boolean) => {
     const indexFile = await getOrCreateIndex(store.session as Session, store.usedPod);
@@ -77,7 +108,7 @@ const updatePermissions = async (type: string, newValue: boolean) => {
             await addPermissions(store.session as Session, indexFile, [props.url], userType, permissions);
         }
 
-        // TODO: invalidate the data and refresh it
+        await refetchData();
 
         updateStatus.value = { ok: true, value: 'The permissions were successfully updated!' };
     } catch (e) {
