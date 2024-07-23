@@ -41,11 +41,7 @@ const route = useRoute();
 
 const selectedEntry = ref<Entry | null>(null)
 
-// const changeSelectedEntry = (thing: Entry) => selectedEntry.value = thing;
-const changeSelectedEntry = (thing: Entry) => {
-    console.log('Selected entry:', thing);
-    selectedEntry.value = thing;
-};
+const changeSelectedEntry = (thing: Entry) => selectedEntry.value = thing;
 
 const fileUrl = (path: string | string[]) => `${store.usedPod}${path}`
 
