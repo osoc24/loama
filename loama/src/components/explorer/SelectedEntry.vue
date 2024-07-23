@@ -19,9 +19,7 @@
                     @update:checked="updatePermissions(option.name, $event)">
                     {{ option.label }}
                 </LoSwitch>
-                <output v-if="updateStatus" name="result" :for="permissionOptions.map((o) => o.name).join(' ')">
-                    {{ updateStatus }}
-                </output>
+                <Notification v-if="updateStatus" :type="updateStatus.ok ? 'success' : 'error'" :message="updateStatus.value || updateStatus.error || ''" />
             </form>
         </article>
     </div>
@@ -38,11 +36,12 @@ import { editPermissions, getOrCreateIndex, addPermissions, getItemId } from 'lo
 import { store } from '@/store';
 import type { Session } from '@inrupt/solid-client-authn-browser';
 import type { Result } from '@/utils/types';
+import Notification from './notification.vue';
 
 const props = defineProps<{ name: string; url: string; isContainer: boolean; agents: Record<string, Permission[]> }>();
 
 const selectedAgent = ref(Object.keys(props.agents)[0]);
-const updateStatus = ref<Result | null>(null)
+const updateStatus = ref<{ ok: boolean, value?: string, error?: string } | null>(null);
 
 watch(props, () => updateStatus.value = null);
 
@@ -54,7 +53,7 @@ const permissionOptions = [
 ];
 
 // @ts-ignore If you cast the permission to a Permissions the comparison no longer works.
-const isByDefaultSelected = (permission: string) => props.agents[selectedAgent.value].includes(permission)
+const isByDefaultSelected = (permission: string) => props.agents[selectedAgent.value].includes(permission);
 
 const updatePermissions = async (type: string, newValue: boolean) => {
     const indexFile = await getOrCreateIndex(store.session as Session, store.usedPod);
@@ -62,16 +61,16 @@ const updatePermissions = async (type: string, newValue: boolean) => {
     let permissions = props.agents[selectedAgent.value];
 
     if (newValue) {
-        permissions.push(type as Permission)
+        permissions.push(type as Permission);
     } else {
-        permissions = permissions.filter((p) => p !== type)
+        permissions = permissions.filter((p) => p !== type);
     }
 
     const itemId = getItemId(indexFile, props.url, selectedAgent.value);
 
     try {
         if (itemId) {
-            await editPermissions(store.session as Session, indexFile, itemId, permissions)
+            await editPermissions(store.session as Session, indexFile, itemId, permissions);
         } else {
             // NOTE: This should be more fleshed out, e.g. username support
             const userType = { type: Type.WebID, url: selectedAgent.value };
@@ -80,16 +79,16 @@ const updatePermissions = async (type: string, newValue: boolean) => {
 
         // TODO: invalidate the data and refresh it
 
-        updateStatus.value = { ok: true, value: 'The change is successfully performed!' }
+        updateStatus.value = { ok: true, value: 'The permissions were successfully updated!' };
     } catch (e) {
-        updateStatus.value = { ok: false, error: e }
+        updateStatus.value = { ok: false, error: 'An error occurred while updating the permissions. Please try again.' };
     }
 }
 </script>
 
 <style scoped>
 form {
-    margin-top: calc(var(--base-unit)*2)
+    margin-top: calc(var(--base-unit) * 2);
 }
 
 article {
@@ -107,7 +106,7 @@ header {
 }
 
 h3 {
-    font-size: calc(var(--base-unit)*2);
+    font-size: calc(var(--base-unit) * 2);
 }
 
 .clickable {
