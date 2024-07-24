@@ -7,7 +7,7 @@
             </ExplorerEntry>
         </div>
         <div class="right-panel">
-            <Vault class="side-image" />
+            <img class="side-image" src="/vault.svg" />
             <strong>No folder or file selected!</strong>
             <i>Select one to get started</i>
         </div>
@@ -15,7 +15,6 @@
 </template>
 
 <script setup lang="ts">
-import Vault from "@/assets/vault.svg"
 import { store } from "@/store";
 import type { Session } from "@inrupt/solid-client-authn-browser";
 import { getPod } from "loama-controller";
