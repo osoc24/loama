@@ -45,6 +45,10 @@ p {
   --off-black: #170D33;
   --lama-gray: #DADADA;
   --lama-red: #DE4C59;
+  --success-green: #d4edda;
+  --success-green-text: #155724;
+  --error-red: #f8d7da;
+  --error-red-text: #721c24;
   --base-unit: 0.5rem;
   --base-corner: 0.5rem;
 }

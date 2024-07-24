@@ -22,7 +22,8 @@
                 <Notification 
                     v-if="updateStatus" 
                     :type="updateStatus.ok ? 'success' : 'error'" 
-                    :message="updateStatus.value || updateStatus.error || 'No message available'" />
+                    :message="updateStatus.ok ? updateStatus.value : String(updateStatus.error) || 'No message available'"  
+                    />
             </form>
         </article>
     </div>
@@ -39,12 +40,13 @@ import { editPermissions, getOrCreateIndex, addPermissions, getItemId } from 'lo
 import { store } from '@/store';
 import type { Session } from '@inrupt/solid-client-authn-browser';
 import type { Result } from '@/utils/types';
-import Notification from './Notification.vue';
+import Notification from './LoNotification.vue';
 
 const props = defineProps<{ name: string; url: string; isContainer: boolean; agents: Record<string, Permission[]> }>();
 
 const selectedAgent = ref(Object.keys(props.agents)[0]);
-const updateStatus = ref<{ ok: boolean, value?: string, error?: string } | null>(null);
+
+const updateStatus = ref<Result | null>(null);
 
 watch(props, () => updateStatus.value = null);
 
@@ -65,17 +67,12 @@ const isByDefaultSelected = (permission: string) => props.agents[selectedAgent.v
 
 const refetchData = async () => {
     try {
-        // Fetch the updated index file
         const indexFile = await getOrCreateIndex(store.session as Session, store.usedPod);
 
-        // Get the updated itemId for the selected agent
         const itemId = getItemId(indexFile, props.url, selectedAgent.value);
 
         if (itemId) {
-            // Fetch the updated permissions for the selected agent
             const updatedPermissions = indexFile.items.find(item => item.id === itemId)?.permissions || [];
-
-            // Update the local permissions data
             props.agents[selectedAgent.value] = updatedPermissions;
         } else {
             console.warn('Item ID is not available for refetching permissions');
