@@ -138,16 +138,7 @@ export async function editPermissions(
 }
 
 export function getItemId(index: Index, resource: url, user: string) {
-  console.log(user);
-  console.log(user === "public");
   if (user === "public") {
-    console.log(
-      index.items.find(
-        (indexItem) =>
-          indexItem.resources.includes(resource) &&
-          indexItem.userType === undefined
-      )
-    );
     return index.items.find(
       (indexItem) =>
         indexItem.resources.includes(resource) &&
