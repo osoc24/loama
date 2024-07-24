@@ -6,7 +6,7 @@
         </div>
         <nav>
             <slot></slot>
-            <LoButton :rightIcon="PhShareFat" class="share">Share access</LoButton>
+            <LoButton :rightIcon="PhShareFat" class="share" disabled>Share access</LoButton>
         </nav>
         <img :src="pfpSrc" alt="User profile picture" @click="toggleContextMenu" />
         <Suspense>
