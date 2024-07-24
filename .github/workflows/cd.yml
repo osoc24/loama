@@ -1,48 +1,24 @@
-name: Loama CI
+name: Loama CD
 
 on:
   push:
     branches: [ "root" ]
   pull_request:
     branches: [ "root" ]
+  
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
 
 jobs:
-  eslint:
-    name: 'ESLint'
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: loama
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-      - uses: pnpm/action-setup@v4
-        name: Install PNPM
-        with:
-          version: latest
-          run_install: false
-      - name: Get pnpm store directory
-        shell: bash
-        id: cache
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@v4
-        name: Setup PNPM cache
-        env:
-          STORE_PATH: ${{ steps.cache.outputs.STORE_PATH }}
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-      - name: Insall dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Run Eslint
-        run: pnpm run lint:ci >> $GITHUB_STEP_SUMMARY
-  controller-tsc:
-    name: 'TSC (Controller)'
+  controller-build:
+    name: 'Controller Build'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -81,50 +57,10 @@ jobs:
           name: controller-dist
           path: ${{github.workspace}}/controller/dist
   
-  vue-tsc:
-    name: 'TSC (Loama)'
-    runs-on: ubuntu-latest
-    needs: controller-tsc
-    defaults:
-      run:
-        working-directory: loama
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Download controller dist
-        uses: actions/download-artifact@v4
-        with:
-          name: controller-dist
-          path: ${{github.workspace}}/controller/dist
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-      - uses: pnpm/action-setup@v4
-        name: Install PNPM
-        with:
-          version: latest
-          run_install: false
-      - name: Get pnpm store directory
-        shell: bash
-        id: cache
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@v4
-        name: Setup PNPM cache
-        env:
-          STORE_PATH: ${{ steps.cache.outputs.STORE_PATH }}
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-      - name: Insall dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Run Typescript Check
-        run: pnpm run type-check >> $GITHUB_STEP_SUMMARY
   build:
-    name: 'Build (Loama)'
+    name: 'Deploy App'
     runs-on: ubuntu-latest
-    needs: controller-tsc
+    needs: controller-build
     defaults:
       run:
         working-directory: loama
@@ -162,5 +98,15 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Install dependencies of loama
         run: pnpm install --frozen-lockfile
-      - name: Run Typescript Check
-        run: pnpm run build-only >> $GITHUB_STEP_SUMMARY
+      - name: Build applicaion
+        run: pnpm run build
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload dist folder
+          path: ${{github.workspace}}/loama/dist
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
