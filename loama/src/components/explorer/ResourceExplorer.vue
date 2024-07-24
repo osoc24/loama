@@ -3,13 +3,22 @@
         <div class="left-panel">
             <ExplorerBreadcrumbs />
             <ExplorerEntry v-for="thing in getViewFormattedThings(data)" :key="thing.url"
-                :isContainer="thing.isContainer" :authProtected="false" :url="thing.name + '/'">{{ thing.name }}
+                @click="changeSelectedEntry(thing)" :isContainer="thing.isContainer" :authProtected="false"
+                :url="thing.name + '/'">{{ thing.name }}
+
             </ExplorerEntry>
         </div>
         <div class="right-panel">
-            <img class="side-image" src="/vault.svg" />
-            <strong>No folder or file selected!</strong>
-            <i>Select one to get started</i>
+            <div class="default-panel-container" v-if="!selectedEntry">
+                <div class="default-panel">
+                    <img class="side-image" src="/vault.svg" />
+                    <p><strong>No folder or file selected!</strong></p>
+                    <i>Select one to get started</i>
+                </div>
+            </div>
+            <SelectedEntry v-else :name="selectedEntry.name" :isContainer="selectedEntry.isContainer"
+                :url="selectedEntry.url" :agents="selectedEntry.accessModes" @close="selectedEntry = null"
+                @update-permissions="updateAgent" />
         </div>
     </div>
 </template>
@@ -21,12 +30,18 @@ import { getPod } from "loama-controller";
 import { ref, watch } from "vue";
 import { PhLock, PhLockOpen } from "@phosphor-icons/vue";
 import ExplorerEntry from "./ExplorerEntry.vue";
-import type { FormattedThing } from "loama-controller/dist/types";
+import type { FormattedThing, Permission } from "loama-controller/dist/types";
 import { useRoute } from "vue-router";
 import ExplorerBreadcrumbs from "./ExplorerBreadcrumbs.vue";
+import SelectedEntry from "./SelectedEntry.vue";
+import type { Entry } from "@/utils/types";
 
 const data = ref(await getThingsAtLevel(store.usedPod));
 const route = useRoute();
+
+const selectedEntry = ref<Entry | null>(null)
+
+const changeSelectedEntry = (thing: Entry) => selectedEntry.value = thing;
 
 const fileUrl = (path: string | string[]) => `${store.usedPod}${path}`
 
@@ -36,7 +51,10 @@ const uriToName = (uri: string, isContainer: boolean) => {
     return isContainer ? splitted[splitted.length - 2] : splitted[splitted.length - 1];
 }
 
+const updateAgent = (selectedAgent: string, newPermissions: Permission[]) => selectedEntry.value!.accessModes[selectedAgent] = newPermissions;
+
 watch(() => route.params.filePath, async (path) => {
+    selectedEntry.value = null;
     data.value = await getThingsAtLevel(fileUrl(path)), { immediate: true }
 })
 
@@ -71,13 +89,6 @@ function getViewFormattedThings(data: FormattedThing[]) {
 </script>
 
 <style scoped>
-/* div {
-    display: flex;
-    flex-flow: column nowrap;
-    align-items: center;
-    gap: var(--base-unit);
-    margin: calc(var(--base-unit)*2); */
-/* } */
 .side-image {
     margin-bottom: calc(var(--base-unit)*2);
 }
@@ -111,17 +122,30 @@ i {
 }
 
 .left-panel {
-    gap: 2rem;
+    gap: 1.5rem;
     flex: 3;
-    padding: 2rem 2rem 0 2rem;
+    padding: 2rem 1.5rem 0 2rem;
     background-color: var(--off-white);
+    border-right: 0.25rem solid var(--solid-purple);
 }
 
 .right-panel {
     flex: 2;
+}
+
+.default-panel-container {
+    padding-left: 0.5rem;
+    width: 100%;
+    height: 100%;
     background-color: var(--lama-gray);
-    position: relative;
     justify-content: center;
     align-items: center;
+    display: flex;
+}
+
+.default-panel {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
 }
 </style>

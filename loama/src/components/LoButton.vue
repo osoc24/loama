@@ -1,5 +1,5 @@
 <template>
-    <button :class="classList">
+    <button :class="classList" :disabled="disabled">
         <component :v-if="leftIcon" :is="leftIcon" :size="24" />
         <span>
             <slot></slot>
@@ -23,7 +23,11 @@ const props = withDefaults(defineProps<{
     /**
      * The variant of the button; defaults to primary.
      */
-    variant?: "primary" | "secondary"
+    variant?: "primary" | "secondary",
+    /**
+     * If the button is disabled or not.
+     */
+    disabled?: boolean
 }>(), {
     variant: "primary"
 })
@@ -58,6 +62,13 @@ button:hover {
     background-color: var(--off-black);
     border-color: var(--off-black);
     color: var(--off-white);
+}
+
+button:disabled {
+    background-color: color-mix(in srgb, var(--off-black) 60%, transparent);
+    border: none;
+    color: var(--off-white);
+    cursor: not-allowed;
 }
 
 .primary {

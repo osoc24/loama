@@ -46,11 +46,14 @@ async function listThings(
 ): Promise<FormattedThing[]> {
   const dataset = await getSolidDataset(url, { fetch: session.fetch });
   return Promise.all(
-    getThingAll(dataset).map(async (t) => ({
-      url: t.url,
-      properties: getPropertyAll(t),
-      accessModes: await getAccessModes(session, t.url),
-    }))
+    getThingAll(dataset)
+      // For some reason the appointments container is utterly borked permissions-wise
+      .filter((t) => !t.url.includes("appointments"))
+      .map(async (t) => ({
+        url: t.url,
+        properties: getPropertyAll(t),
+        accessModes: await getAccessModes(session, t.url),
+      }))
   );
 }
 
@@ -80,8 +83,8 @@ async function getAccessModes(
 function accessModesToPermissions(
   record: Record<url, AccessModes>
 ): Record<url, Permission[]> {
-  const result: { 
-    [agent: string]: Permission[]
+  const result: {
+    [agent: string]: Permission[];
   } = {};
   // List -> Set -> List is done to filter out possible duplicate Permission.Control's
   const mapToPermission = (accessModes: [string, boolean][]) => [
@@ -210,5 +213,6 @@ export async function getAppointments(
     };
   };
 
-  return fetchResources(session, `${url}/appointments/`, mapAppointment);
+  // As the appointments folder is borked, cooltoinments is used as a back-up.
+  return fetchResources(session, `${url}/cooltoinments/`, mapAppointment);
 }
