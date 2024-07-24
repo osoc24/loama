@@ -7,7 +7,7 @@
     </div>
     <div class="right-panel">
       <InfoPopup v-show="showPopup" />
-      <img src="../assets/loama.svg" />
+      <img src="/loama.svg" />
     </div>
   </div>
 </template>

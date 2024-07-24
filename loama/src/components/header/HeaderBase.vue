@@ -1,7 +1,7 @@
 <template>
     <header>
         <div class="wordmark">
-            <Loama />
+            <img src="/loama.svg" />
             <span>Loama</span>
         </div>
         <nav>
@@ -20,7 +20,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import Loama from '../../assets/loama.svg'
 import LoButton from '../LoButton.vue'
 import HeaderContextMenu from './HeaderContextMenu.vue'
 import { PhShareFat } from '@phosphor-icons/vue';
