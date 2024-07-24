@@ -166,7 +166,7 @@ async function fetchResources<T>(
 
   const result: T[] = [];
 
-  await Promise.all(
+  await Promise.any(
     resources.map(async (resource) => {
       const resourceDataset = await getSolidDataset(resource, {
         fetch: session.fetch,
