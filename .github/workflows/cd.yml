@@ -3,9 +3,6 @@ name: Loama CD
 on:
   push:
     branches: [ "root" ]
-  pull_request:
-    branches: [ "root" ]
-  
 
 permissions:
   contents: read
