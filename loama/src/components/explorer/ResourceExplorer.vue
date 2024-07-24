@@ -11,7 +11,7 @@
         <div class="right-panel">
             <div class="default-panel-container" v-if="!selectedEntry">
                 <div class="default-panel">
-                    <Vault class="side-image" />
+                    <img class="side-image" src="/vault.svg" />
                     <p><strong>No folder or file selected!</strong></p>
                     <i>Select one to get started</i>
                 </div>
@@ -24,7 +24,6 @@
 </template>
 
 <script setup lang="ts">
-import Vault from "@/assets/vault.svg"
 import { store } from "@/store";
 import type { Session } from "@inrupt/solid-client-authn-browser";
 import { getPod } from "loama-controller";
