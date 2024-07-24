@@ -17,7 +17,8 @@
                 </div>
             </div>
             <SelectedEntry v-else :name="selectedEntry.name" :isContainer="selectedEntry.isContainer"
-                :url="selectedEntry.url" :agents="selectedEntry.accessModes" @close="selectedEntry = null" />
+                :url="selectedEntry.url" :agents="selectedEntry.accessModes" @close="selectedEntry = null"
+                @update-permissions="updateAgent" />
         </div>
     </div>
 </template>
@@ -30,7 +31,7 @@ import { getPod } from "loama-controller";
 import { ref, watch } from "vue";
 import { PhLock, PhLockOpen } from "@phosphor-icons/vue";
 import ExplorerEntry from "./ExplorerEntry.vue";
-import type { FormattedThing } from "loama-controller/dist/types";
+import type { FormattedThing, Permission } from "loama-controller/dist/types";
 import { useRoute } from "vue-router";
 import ExplorerBreadcrumbs from "./ExplorerBreadcrumbs.vue";
 import SelectedEntry from "./SelectedEntry.vue";
@@ -50,6 +51,8 @@ const uriToName = (uri: string, isContainer: boolean) => {
 
     return isContainer ? splitted[splitted.length - 2] : splitted[splitted.length - 1];
 }
+
+const updateAgent = (selectedAgent: string, newPermissions: Permission[]) => selectedEntry.value!.accessModes[selectedAgent] = newPermissions;
 
 watch(() => route.params.filePath, async (path) => {
     selectedEntry.value = null;

@@ -7,7 +7,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 
-const props = defineProps<{ type: 'success' | 'error', message: string }>();
+defineProps<{ type: 'success' | 'error', message: string }>();
 const visible = ref(true);
 
 const timeoutDuration = 2000;

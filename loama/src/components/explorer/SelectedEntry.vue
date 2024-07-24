@@ -19,11 +19,8 @@
                     @update:checked="updatePermissions(option.name, $event)">
                     {{ option.label }}
                 </LoSwitch>
-                <Notification 
-                    v-if="updateStatus" 
-                    :type="updateStatus.ok ? 'success' : 'error'" 
-                    :message="updateStatus.ok ? updateStatus.value : String(updateStatus.error) || 'No message available'"  
-                    />
+                <Notification v-if="updateStatus" :type="updateStatus.ok ? 'success' : 'error'"
+                    :message="updateStatus.ok ? updateStatus.value : String(updateStatus.error) || 'No message available'" />
             </form>
         </article>
     </div>
@@ -40,8 +37,9 @@ import { editPermissions, getOrCreateIndex, addPermissions, getItemId } from 'lo
 import { store } from '@/store';
 import type { Session } from '@inrupt/solid-client-authn-browser';
 import type { Result } from '@/utils/types';
-import Notification from './LoNotification.vue';
+import Notification from '../LoNotification.vue';
 
+const emits = defineEmits<{ updatePermissions: [selectedAgent: string, newPermissions: Permission[]], close: [] }>()
 const props = defineProps<{ name: string; url: string; isContainer: boolean; agents: Record<string, Permission[]> }>();
 
 const selectedAgent = ref(Object.keys(props.agents)[0]);
@@ -73,7 +71,7 @@ const refetchData = async () => {
 
         if (itemId) {
             const updatedPermissions = indexFile.items.find(item => item.id === itemId)?.permissions || [];
-            props.agents[selectedAgent.value] = updatedPermissions;
+            emits('updatePermissions', selectedAgent.value, updatedPermissions);
         } else {
             console.warn('Item ID is not available for refetching permissions');
         }
@@ -101,7 +99,7 @@ const updatePermissions = async (type: string, newValue: boolean) => {
             await editPermissions(store.session as Session, indexFile, itemId, permissions);
         } else {
             // NOTE: This should be more fleshed out, e.g. username support
-            const userType = { type: Type.WebID, url: selectedAgent.value };
+            const userType = selectedAgent.value === "public" ? undefined : { type: Type.WebID, url: selectedAgent.value };
             await addPermissions(store.session as Session, indexFile, [props.url], userType, permissions);
         }
 
