@@ -6,4 +6,4 @@ The intent of this library is to provide a wrapper around the `@inrupt/solid-cli
 
 ## How to run
 
-Currently, the build (`dist/`) files of the controller are symlinked with LOAMA. Thus, `pnpm run dev` should be run before running LOAMA.
+Currently, the build (`dist/`) files of the controller are symlinked with LOAMA. Thus, `npm run build` (or `npm run watch`) should be run before running LOAMA.

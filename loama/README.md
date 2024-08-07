@@ -12,12 +12,12 @@ Make sure to **first build the controller!**
 
 ```sh
 # Install dependencies
-pnpm install
+npm install
 
 # Compile and Hot-Reload for Development
-pnpm dev
+npm run dev
 
 # Build for production
-pnpm build
+npm run build
 
 ```
