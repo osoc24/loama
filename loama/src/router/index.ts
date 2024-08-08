@@ -3,7 +3,6 @@ import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
 import { store } from '@/store'
 import { listPods } from 'loama-controller'
-import type { Session } from '@inrupt/solid-client-authn-browser'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,7 +25,7 @@ router.beforeEach(async (to) => {
     await store.session.handleIncomingRedirect()
     if (store.session.info.isLoggedIn) {
       // Default to the first pod
-      store.setUsedPod((await listPods(store.session as Session))[0])
+      store.setUsedPod((await listPods(store.session))[0])
     }
     if (!store.session.info.isLoggedIn && to.name !== 'login') {
       return { name: 'login' }

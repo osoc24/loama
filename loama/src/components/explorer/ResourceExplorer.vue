@@ -25,7 +25,6 @@
 
 <script setup lang="ts">
 import { store } from "@/store";
-import type { Session } from "@inrupt/solid-client-authn-browser";
 import { getPod } from "loama-controller";
 import { ref, watch } from "vue";
 import { PhLock, PhLockOpen } from "@phosphor-icons/vue";
@@ -59,7 +58,7 @@ watch(() => route.params.filePath, async (path) => {
 })
 
 async function getThingsAtLevel(url: string) {
-    return (await getPod(store.session as Session, url)).things
+    return (await getPod(store.session, url)).things
         // Filter out the current resource
         .filter(thing => thing.url !== url)
         // Filter out the things that are nested (?)

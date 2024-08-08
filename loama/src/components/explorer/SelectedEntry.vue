@@ -35,7 +35,6 @@ import LoSwitch from '../LoSwitch.vue';
 import { Permission, Type } from 'loama-controller/dist/types';
 import { editPermissions, getOrCreateIndex, addPermissions, getItemId } from 'loama-controller';
 import { store } from '@/store';
-import type { Session } from '@inrupt/solid-client-authn-browser';
 import type { Result } from '@/utils/types';
 import Notification from '../LoNotification.vue';
 
@@ -65,7 +64,7 @@ const isByDefaultSelected = (permission: string) => props.agents[selectedAgent.v
 
 const refetchData = async () => {
     try {
-        const indexFile = await getOrCreateIndex(store.session as Session, store.usedPod);
+        const indexFile = await getOrCreateIndex(store.session, store.usedPod);
 
         const itemId = getItemId(indexFile, props.url, selectedAgent.value);
 
@@ -82,7 +81,7 @@ const refetchData = async () => {
 
 
 const updatePermissions = async (type: string, newValue: boolean) => {
-    const indexFile = await getOrCreateIndex(store.session as Session, store.usedPod);
+    const indexFile = await getOrCreateIndex(store.session, store.usedPod);
 
     let permissions = props.agents[selectedAgent.value];
 
@@ -96,11 +95,11 @@ const updatePermissions = async (type: string, newValue: boolean) => {
 
     try {
         if (itemId) {
-            await editPermissions(store.session as Session, indexFile, itemId, permissions);
+            await editPermissions(store.session, indexFile, itemId, permissions);
         } else {
             // NOTE: This should be more fleshed out, e.g. username support
             const userType = selectedAgent.value === "public" ? undefined : { type: Type.WebID, url: selectedAgent.value };
-            await addPermissions(store.session as Session, indexFile, [props.url], userType, permissions);
+            await addPermissions(store.session, indexFile, [props.url], userType, permissions);
         }
 
         await refetchData();

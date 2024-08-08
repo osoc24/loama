@@ -17,10 +17,9 @@
 <script setup lang="ts">
 import router from '@/router';
 import { store } from '@/store';
-import type { Session } from '@inrupt/solid-client-authn-browser';
 import { PhSignOut } from '@phosphor-icons/vue';
 import { listPods } from 'loama-controller';
-const pods = await listPods(store.session as Session);
+const pods = await listPods(store.session);
 
 async function logout() {
     store.session.logout();

@@ -26,9 +26,8 @@ import { PhShareFat } from '@phosphor-icons/vue';
 
 import { getProfileInfo } from "loama-controller";
 import { store } from '@/store';
-import type { Session } from '@inrupt/solid-client-authn-browser';
 
-const pfpSrc = (await getProfileInfo(store.session as Session, store.usedPod.replace(/\/$/, ''))).img;
+const pfpSrc = (await getProfileInfo(store.session, store.usedPod.replace(/\/$/, ''))).img;
 const isContextMenuHidden = ref(true)
 
 
