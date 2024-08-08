@@ -1,0 +1,31 @@
+{
+  "name": "loama-common",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "keywords": [],
+  "author": "Open Summer of Code",
+  "contributors": [
+    "BT-Creator",
+    "Vicba",
+    "Zelzahn"
+  ],
+  "license": "ISC",
+  "files": [
+    "/dist"
+  ],
+  "engines": {
+    "node": ">= 20"
+  },
+  "dependencies": {
+    "@inrupt/solid-client": "^2.0.1",
+    "@inrupt/solid-client-authn-browser": "^2.2.4",
+    "@inrupt/vocab-common-rdf": "^1.0.5",
+    "loama-common": "file:"
+  }
+}

@@ -29,8 +29,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { store } from '@/store';
-import { PhArrowRight, PhLink, PhQuestion } from '@phosphor-icons/vue';
+import { store } from 'loama-app'
 import LoButton from './LoButton.vue';
 
 defineProps<{ title: string, subtitle?: string }>();

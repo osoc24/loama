@@ -1,3 +1,5 @@
+import { url } from "loama-common";
+
 /**
  * The json schema for the index configuration file inside a Solid data pod.
  * Generated from `schema.json`.
@@ -37,25 +39,9 @@ export enum Type {
   WebID = "WebId",
 }
 
-export type url = string;
-
 export interface FormattedThing {
   url: url;
   properties: url[];
   accessModes: Record<url, Permission[]>;
 }
 [];
-
-export interface Post {
-  text: string;
-  video?: string;
-  image?: string;
-}
-
-export interface Appointment {
-  type?: string;
-  location?: string;
-  provider?: string;
-  date?: string;
-  time?: string;
-}

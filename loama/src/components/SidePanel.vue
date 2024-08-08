@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import podList from '@/utils/podlist.json';
+import { podList } from 'loama-app';
 import LoButton from './LoButton.vue';
 import { PhX } from '@phosphor-icons/vue';
 
@@ -27,7 +27,7 @@ const emit = defineEmits<{
   toggleProvider: []
 }>()
 
-const podListData = (podList as { podList: Array<{ name: string; url: string }> }).podList;
+const podListData = (podList as Array<{ name: string; url: string }>);
 
 const openPodUrl = (pod: { name: string; url: string }) => {
   if (pod && pod.url) {

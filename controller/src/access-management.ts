@@ -11,27 +11,24 @@ import {
   IndexItem,
   Permission,
   Type,
-  url,
   UserTypeObject,
 } from "./types";
 import {
   setAgentAccess,
   setPublicAccess,
 } from "@inrupt/solid-client/universal";
+import { url } from "loama-common";
 
 /**
  * Get the index file for a given pod. If it can't be found create an empty one.
  */
-export async function getOrCreateIndex(
-  session: Session,
-  pod: url
-): Promise<Index> {
-  const indexUrl = `${pod}index.json`;
+export async function getOrCreateIndex(session: Session, podUrl: url): Promise<Index> {
+  const indexUrl = `${podUrl}index.json`;
   return getFile(indexUrl, { fetch: session.fetch })
     .catch((error: FetchError) => {
       if (error.statusCode === 404) {
         return saveFileInContainer(
-          pod,
+          podUrl,
           indexToIndexFile({ id: indexUrl, items: [] } as Index),
           { fetch: session.fetch }
         );

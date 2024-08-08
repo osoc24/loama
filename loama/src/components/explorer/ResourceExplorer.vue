@@ -24,8 +24,8 @@
 </template>
 
 <script setup lang="ts">
-import { store } from "@/store";
-import { getPod } from "loama-controller";
+import { store } from 'loama-app'
+import { getPodThings } from "loama-controller";
 import { ref, watch } from "vue";
 import { PhLock, PhLockOpen } from "@phosphor-icons/vue";
 import ExplorerEntry from "./ExplorerEntry.vue";
@@ -58,7 +58,7 @@ watch(() => route.params.filePath, async (path) => {
 })
 
 async function getThingsAtLevel(url: string) {
-    return (await getPod(store.session, url)).things
+    return (await getPodThings(store.session, url)).things
         // Filter out the current resource
         .filter(thing => thing.url !== url)
         // Filter out the things that are nested (?)

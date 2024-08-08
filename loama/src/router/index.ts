@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
-import { store } from '@/store'
-import { listPods } from 'loama-controller'
+import { store } from 'loama-app'
+import { listPodUrls } from 'loama-common'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,7 +25,7 @@ router.beforeEach(async (to) => {
     await store.session.handleIncomingRedirect()
     if (store.session.info.isLoggedIn) {
       // Default to the first pod
-      store.setUsedPod((await listPods(store.session))[0])
+      store.setUsedPod((await listPodUrls(store.session))[0])
     }
     if (!store.session.info.isLoggedIn && to.name !== 'login') {
       return { name: 'login' }

@@ -34,7 +34,7 @@ import { ref, watch } from 'vue';
 import LoSwitch from '../LoSwitch.vue';
 import { Permission, Type } from 'loama-controller/dist/types';
 import { editPermissions, getOrCreateIndex, addPermissions, getItemId } from 'loama-controller';
-import { store } from '@/store';
+import { store } from 'loama-app'
 import type { Result } from '@/utils/types';
 import Notification from '../LoNotification.vue';
 

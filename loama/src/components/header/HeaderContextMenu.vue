@@ -16,10 +16,10 @@
 
 <script setup lang="ts">
 import router from '@/router';
-import { store } from '@/store';
+import { store } from 'loama-app'
 import { PhSignOut } from '@phosphor-icons/vue';
-import { listPods } from 'loama-controller';
-const pods = await listPods(store.session);
+import { listPodUrls } from 'loama-common';
+const pods = await listPodUrls(store.session);
 
 async function logout() {
     store.session.logout();
