@@ -18,7 +18,7 @@
             </div>
             <SelectedEntry v-else :name="selectedEntry.name" :isContainer="selectedEntry.isContainer"
                 :url="selectedEntry.resourceUrl" :agents="selectedEntry.permissions" @close="selectedEntry = null"
-                @update-permissions="updateAgent" />
+                @update-permissions="updatePermissions" />
         </div>
     </div>
 </template>
@@ -50,7 +50,9 @@ const uriToName = (uri: string, isContainer: boolean) => {
     return isContainer ? splitted[splitted.length - 2] : splitted[splitted.length - 1];
 }
 
-const updateAgent = (selectedAgent: string, newPermissions: Permission[]) => selectedEntry.value!.permissions[selectedAgent] = newPermissions;
+const updatePermissions = (selectedAgent: string, newPermissions: Permission[]) => {
+    selectedEntry.value!.permissions[selectedAgent] = newPermissions;
+}
 
 watch(() => route.params.filePath, async (path) => {
     selectedEntry.value = null;

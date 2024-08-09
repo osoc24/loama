@@ -14,13 +14,10 @@
                 <option v-for="agent in Object.keys(agents)" :key="agent" :value="agent">{{ agent }}</option>
             </select>
             <form>
-                <LoSwitch v-for="option in permissionOptions" :key="option.name" :id="option.name"
-                    :default-value="isByDefaultSelected(option.name)"
-                    @update:checked="updatePermissions(option.name, $event)">
+                <LoSwitch v-for="option in permissionOptions" :key="option.name" :id="option.name" :default-value="isByDefaultSelected(option.name)" @update:checked="updatePermission(option.name, $event)">
                     {{ option.label }}
                 </LoSwitch>
-                <Notification v-if="updateStatus" :type="updateStatus.ok ? 'success' : 'error'"
-                    :message="updateStatus.ok ? updateStatus.value : String(updateStatus.error) || 'No message available'" />
+                <Notification v-if="updateStatus" :type="updateStatus.ok ? 'success' : 'error'" :message="updateStatus.ok ? updateStatus.value : String(updateStatus.error) || 'No message available'" />
             </form>
         </article>
     </div>
@@ -32,8 +29,8 @@ import { PhXCircle } from '@phosphor-icons/vue';
 import { ref, watch } from 'vue';
 
 import LoSwitch from '../LoSwitch.vue';
-import { Permission, Type } from 'loama-controller/dist/types';
-import { editPermissions, getOrCreateIndex, createPermissions, getItemId } from 'loama-controller';
+import { Permission } from 'loama-controller/dist/types';
+import { addPermission, removePermission } from 'loama-controller';
 import { store } from 'loama-app'
 import type { Result } from '@/utils/types';
 import Notification from '../LoNotification.vue';
@@ -47,11 +44,6 @@ const updateStatus = ref<Result | null>(null);
 
 watch(props, () => updateStatus.value = null);
 
-watch(() => props.url, async () => {
-    await refetchData();
-});
-
-
 const permissionOptions = [
     { name: 'Read', label: "Able to read data" },
     { name: 'Write', label: "Able to add new data" },
@@ -62,50 +54,24 @@ const permissionOptions = [
 // @ts-ignore If you cast the permission to a Permissions the comparison no longer works.
 const isByDefaultSelected = (permission: string) => props.agents[selectedAgent.value].includes(permission);
 
-const refetchData = async () => {
+const updatePermission = async (permissionString: string, newValue: boolean) => {
+    const updatedPermission = permissionString as Permission;
+    let success = true;
     try {
-        const indexFile = await getOrCreateIndex(store.session, store.usedPod);
-
-        const itemId = getItemId(indexFile, props.url, selectedAgent.value);
-
-        if (itemId) {
-            const updatedPermissions = indexFile.items.find(item => item.id === itemId)?.permissions || [];
-            emits('updatePermissions', selectedAgent.value, updatedPermissions);
+        let updatedPermissions = [];
+        if (newValue) {
+            updatedPermissions = await addPermission(store.session, props.url, selectedAgent.value, updatedPermission);
         } else {
-            console.warn('Item ID is not available for refetching permissions');
+            updatedPermissions = await removePermission(store.session, props.url, selectedAgent.value, updatedPermission)
         }
-    } catch (error) {
-        console.error('Error refetching data:', error);
-    }
-};
-
-
-const updatePermissions = async (type: string, newValue: boolean) => {
-    const indexFile = await getOrCreateIndex(store.session, store.usedPod);
-
-    let permissions = props.agents[selectedAgent.value];
-
-    if (newValue) {
-        permissions.push(type as Permission);
-    } else {
-        permissions = permissions.filter((p) => p !== type);
-    }
-
-    const itemId = getItemId(indexFile, props.url, selectedAgent.value);
-
-    try {
-        if (itemId) {
-            await editPermissions(store.session, indexFile, itemId, permissions);
-        } else {
-            // NOTE: This should be more fleshed out, e.g. username support
-            const subject = selectedAgent.value === "public" ? undefined : { type: Type.WebID, url: selectedAgent.value };
-            await createPermissions(store.session, indexFile, [props.url], subject, permissions);
-        }
-
-        await refetchData();
-
-        updateStatus.value = { ok: true, value: 'The permissions were successfully updated!' };
+        emits('updatePermissions', selectedAgent.value, updatedPermissions);
     } catch (e) {
+        success = false;
+    }
+
+    if (success) {
+        updateStatus.value = { ok: true, value: 'The permissions were successfully updated!' };
+    } else {
         updateStatus.value = { ok: false, error: 'An error occurred while updating the permissions. Please try again.' };
     }
 }

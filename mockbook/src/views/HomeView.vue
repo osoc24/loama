@@ -15,7 +15,6 @@ import Posts from '@/components/home/Posts.vue';
 import { getPosts } from 'loama-app';
 import { getProfileInfo } from 'loama-common';
 import { store } from 'loama-app'
-import type { Session } from '@inrupt/solid-client-authn-browser';
 
 const session = store.session;
 const userProfile = ref({

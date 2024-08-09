@@ -30,7 +30,7 @@ async function getResourcePermissionsList(
       getThingAll(dataset)
           .map(async (resource) => ({
               resourceUrl: resource.url,
-              permissions: await getPermissions(session, resource.url),
+              permissions: await getRemotePermissions(session, resource.url),
           }))
   );
 }
@@ -41,7 +41,7 @@ async function getResourcePermissionsList(
  * @param resourceUrl The URL to a resource
  * @returns The access modes with their agents
  */
-async function getPermissions(
+export async function getRemotePermissions(
   session: Session,
   resourceUrl: url
 ): Promise<Record<url, Permission[]>> {

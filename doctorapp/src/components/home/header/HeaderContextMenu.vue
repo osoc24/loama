@@ -20,7 +20,6 @@
 <script setup lang="ts">
 import router from '@/router';
 import { store } from 'loama-app'
-import type { Session } from '@inrupt/solid-client-authn-browser';
 import { PhSignOut } from '@phosphor-icons/vue';
 import { listPodUrls } from 'loama-common';
 const pods = await listPodUrls(store.session);
