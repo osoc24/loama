@@ -11,7 +11,7 @@ import {
   IndexItem,
   Permission,
   Type,
-  UserTypeObject,
+  Subject,
 } from "./types";
 import {
   setAgentAccess,
@@ -19,11 +19,15 @@ import {
 } from "@inrupt/solid-client/universal";
 import { url } from "loama-common";
 
+// TODO this should be a more resilient path: be.ugent.idlab.knows.solid.loama.index.js or smth
+const indexPath = 'index.json';
+
 /**
  * Get the index file for a given pod. If it can't be found create an empty one.
  */
 export async function getOrCreateIndex(session: Session, podUrl: url): Promise<Index> {
-  const indexUrl = `${podUrl}index.json`;
+  // async/await?
+  const indexUrl = `${podUrl}${indexPath}`;
   return getFile(indexUrl, { fetch: session.fetch })
     .catch((error: FetchError) => {
       if (error.statusCode === 404) {
@@ -45,31 +49,32 @@ export async function getOrCreateIndex(session: Session, podUrl: url): Promise<I
  * - The remote ACL is updated
  * - The remote index file is synced
  */
-export async function addPermissions(
+export async function createPermissions(
   session: Session,
   index: Index,
-  resources: url[],
-  user: UserTypeObject | undefined,
+  resource: url,
+  subject: Subject | undefined,
   permissions: Permission[]
 ): Promise<Index> {
   const newItem: IndexItem = {
     id: crypto.randomUUID(),
     isEnabled: true,
     permissions: permissions,
-    resources: resources,
-    userType: user,
+    resource: resource,
+    subject: subject,
   };
 
-  // NOTE: No checks are performed to see if the item isn't already present
+  // TODO check to see if the item isn't already present
   index.items.push(newItem);
 
-  await updateACL(session, resources, user, permissions);
+  await updateACL(session, resource, subject, permissions);
   await updateRemoteIndex(session, index);
 
   return index;
 }
 
-export async function removePermissions(
+// TODO currently not used
+async function disablePermissions(
   session: Session,
   index: Index,
   itemId: string
@@ -84,10 +89,10 @@ export async function removePermissions(
 
   await updateACL(
     session,
-    item.resources,
-    item.userType,
-    item.permissions,
-    true
+    item.resource,
+    item.subject,
+    undefined,
+    item.permissions
   );
 
   index.items[itemIndex].isEnabled = false;
@@ -103,82 +108,95 @@ export async function editPermissions(
   itemId: string,
   permissions: Permission[]
 ) {
+  // 1. make diff with index to see what to create/update/delete, per resource
   const itemIndex = index.items.findIndex(({ id }) => id === itemId);
-
   if (itemIndex === -1) {
     throw new Error("Item is not found, is it present in the index file?");
   }
-
   const item = index.items[itemIndex];
-
+  
   const oldPermissionsSet = new Set(item.permissions);
-  const newPermissionsSet = new Set(item.permissions);
+  const newPermissionsSet = new Set(permissions);
   const addedPermissions = newPermissionsSet.difference(oldPermissionsSet);
   const removedPermissions = oldPermissionsSet.difference(newPermissionsSet);
-
-  await updateACL(session, item.resources, item.userType, [
+  
+  // 2. update external auth
+  await updateACL(session, item.resource, item.subject, [
     ...addedPermissions,
-  ]);
-  await updateACL(
-    session,
-    item.resources,
-    item.userType,
-    [...removedPermissions],
-    true
-  );
+  ], [...removedPermissions]);
 
+  // 3. check latest updated result
+  // TODO should check online status
+  
+  // 4. update index
   index.items[itemIndex].permissions = permissions;
-
   await updateRemoteIndex(session, index);
 
   return index;
 }
 
-export function getItemId(index: Index, resource: url, user: string) {
-  if (user === "public") {
+export function getItemId(index: Index, resource: url, subjectUrl: string) {
+  if (subjectUrl === "public") {
     return index.items.find(
       (indexItem) =>
-        indexItem.resources.includes(resource) &&
-        indexItem.userType === undefined
+        indexItem.resource === resource &&
+        indexItem.subject === undefined
     )?.id;
   }
 
   return index.items.find(
     (indexItem) =>
-      indexItem.resources.includes(resource) &&
-      indexItem.userType &&
-      indexItem.userType.type === Type.WebID &&
-      indexItem.userType.url === user
+      indexItem.resource === resource &&
+      indexItem.subject &&
+      indexItem.subject.type === Type.WebID &&
+      indexItem.subject.url === subjectUrl
   )?.id;
 }
 
 async function updateACL(
   session: Session,
-  resources: url[],
-  user: UserTypeObject | undefined,
-  permissions: Permission[],
-  removePermission?: boolean
+  resource: url,
+  subject: Subject | undefined,
+  addedPermissions: Permission[] = [],
+  removedPermissions: Permission[] = []
 ) {
-  return await Promise.all(
-    resources.map(async (resource) => {
-      if (user === undefined) {
-        return await setPublicAccess(
-          resource,
-          permissionsToAccessModes(permissions, removePermission),
-          { fetch: session.fetch }
-        );
-      } else {
-        return await setAgentAccess(
-          resource,
-          user.url,
-          permissionsToAccessModes(permissions, removePermission),
-          {
-            fetch: session.fetch,
-          }
-        );
-      }
-    })
-  );
+  if (subject === undefined) {
+    if (addedPermissions.length > 0) {
+      await setPublicAccess(
+        resource,
+        permissionsToAccessModes(addedPermissions, false),
+        { fetch: session.fetch }
+      );
+    }
+    if (removedPermissions.length > 0) {
+      await setPublicAccess(
+        resource,
+        permissionsToAccessModes(removedPermissions, true),
+        { fetch: session.fetch }
+      );
+    }
+  } else {
+    if (addedPermissions.length > 0) {
+      await setAgentAccess(
+        resource,
+        subject.url,
+        permissionsToAccessModes(addedPermissions, false),
+        {
+          fetch: session.fetch,
+        }
+      );
+    }
+    if (removedPermissions.length > 0) {
+      await setAgentAccess(
+        resource,
+        subject.url,
+        permissionsToAccessModes(addedPermissions, true),
+        {
+          fetch: session.fetch,
+        }
+      );
+    }
+  }
 }
 
 /**
@@ -192,7 +210,7 @@ async function updateRemoteIndex(session: Session, index: Index) {
 }
 
 function indexToIndexFile(index: Index): File {
-  return new File([JSON.stringify(index)], "index.json", {
+  return new File([JSON.stringify(index)], indexPath, {
     type: "application/json",
   });
 }

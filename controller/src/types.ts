@@ -14,9 +14,9 @@ export interface IndexItem {
   id: string;
   isEnabled: boolean;
   permissions: Permission[];
-  resources: string[];
+  resource: string;
   // `undefined` means that this item applies for the public access
-  userType?: UserTypeObject;
+  subject?: Subject;
   [property: string]: any;
 }
 
@@ -27,7 +27,7 @@ export enum Permission {
   Write = "Write",
 }
 
-export interface UserTypeObject {
+export interface Subject {
   name?: string;
   type: Type;
   url: string;
@@ -39,9 +39,21 @@ export enum Type {
   WebID = "WebId",
 }
 
-export interface FormattedThing {
-  url: url;
-  properties: url[];
-  accessModes: Record<url, Permission[]>;
+export interface ResourcePermissions {
+  resourceUrl: url;
+  permissions: Record<url, Permission[]>; // webid -> permissions
 }
-[];
+
+// TODO replace above with below
+export interface ResourcePermissionsNew {
+  resourceUrl: url;
+  permissionsPerSubject: {
+    subject: {
+      type: Type,
+      selector?: {
+        url?: url // will be extended depending on more Types, now webIds or groupUrls
+      }
+    },
+    permissions: Permission[]
+  }[]
+}

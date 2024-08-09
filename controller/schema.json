@@ -16,14 +16,10 @@
           "id": {
             "type": "string"
           },
-          "resources": {
-            "type": "array",
-            "items": {
-              "$ref": "#/$defs/url"
-            },
-            "minItems": 1
+          "resource": {
+            "$ref": "#/$defs/url"
           },
-          "userType": {
+          "subject": {
             "oneOf": [
               {
                 "type": "object",
@@ -70,8 +66,8 @@
         },
         "required": [
           "id",
-          "resources",
-          "userType",
+          "resource",
+          "subject",
           "permissions",
           "isEnabled"
         ]

@@ -15,6 +15,7 @@ export async function listPodUrls(session: Session): Promise<url[]> {
         fetch: session.fetch,
     });
     if (urls.length === 0) {
+        // TODO this is a guess and should be much more resilient
         urls.push((new URL('../', session.info.webId!)).toString())
     }
     return urls;

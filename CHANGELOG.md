@@ -11,5 +11,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - removed pnpm dependency
 - works for Node 20 LTS
-- typings cleanup
+- general API cleanup
 - separated into more targeted modules

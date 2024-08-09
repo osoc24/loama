@@ -1,5 +1,6 @@
-![Crest](https://github.com/user-attachments/assets/b083b4d0-f655-4385-9a6e-08c632b860b7)
 # Loama
+
+![Crest](https://github.com/user-attachments/assets/b083b4d0-f655-4385-9a6e-08c632b860b7)
 
 This repository contains multiple projects. To get them running, go through them individually
 
@@ -22,7 +23,7 @@ MockBook is a social network that allows users to view their posts and friends.
 - posts: text, image, video
 - friends: list of friends
 
-## Doctorapp `./doctorapp` 
+## Doctorapp `./doctorapp`
 
 A second demo application to showcase Loama.
 DoctorApp is a medical app that allows you to view your doctor appointments.

@@ -33,7 +33,7 @@ import { ref, watch } from 'vue';
 
 import LoSwitch from '../LoSwitch.vue';
 import { Permission, Type } from 'loama-controller/dist/types';
-import { editPermissions, getOrCreateIndex, addPermissions, getItemId } from 'loama-controller';
+import { editPermissions, getOrCreateIndex, createPermissions, getItemId } from 'loama-controller';
 import { store } from 'loama-app'
 import type { Result } from '@/utils/types';
 import Notification from '../LoNotification.vue';
@@ -98,8 +98,8 @@ const updatePermissions = async (type: string, newValue: boolean) => {
             await editPermissions(store.session, indexFile, itemId, permissions);
         } else {
             // NOTE: This should be more fleshed out, e.g. username support
-            const userType = selectedAgent.value === "public" ? undefined : { type: Type.WebID, url: selectedAgent.value };
-            await addPermissions(store.session, indexFile, [props.url], userType, permissions);
+            const subject = selectedAgent.value === "public" ? undefined : { type: Type.WebID, url: selectedAgent.value };
+            await createPermissions(store.session, indexFile, [props.url], subject, permissions);
         }
 
         await refetchData();

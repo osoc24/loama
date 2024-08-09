@@ -2,7 +2,7 @@
     <div class="panel-container">
         <div class="left-panel">
             <ExplorerBreadcrumbs />
-            <ExplorerEntry v-for="thing in getViewFormattedThings(data)" :key="thing.url"
+            <ExplorerEntry v-for="thing in getViewFormattedThings(data)" :key="thing.resourceUrl"
                 @click="changeSelectedEntry(thing)" :isContainer="thing.isContainer" :authProtected="false"
                 :url="thing.name + '/'">{{ thing.name }}
 
@@ -17,7 +17,7 @@
                 </div>
             </div>
             <SelectedEntry v-else :name="selectedEntry.name" :isContainer="selectedEntry.isContainer"
-                :url="selectedEntry.url" :agents="selectedEntry.accessModes" @close="selectedEntry = null"
+                :url="selectedEntry.resourceUrl" :agents="selectedEntry.permissions" @close="selectedEntry = null"
                 @update-permissions="updateAgent" />
         </div>
     </div>
@@ -25,11 +25,11 @@
 
 <script setup lang="ts">
 import { store } from 'loama-app'
-import { getPodThings } from "loama-controller";
+import { getContainerResources } from "loama-controller";
 import { ref, watch } from "vue";
 import { PhLock, PhLockOpen } from "@phosphor-icons/vue";
 import ExplorerEntry from "./ExplorerEntry.vue";
-import type { FormattedThing, Permission } from "loama-controller/dist/types";
+import type { ResourcePermissions, Permission } from "loama-controller/dist/types";
 import { useRoute } from "vue-router";
 import ExplorerBreadcrumbs from "./ExplorerBreadcrumbs.vue";
 import SelectedEntry from "./SelectedEntry.vue";
@@ -50,7 +50,7 @@ const uriToName = (uri: string, isContainer: boolean) => {
     return isContainer ? splitted[splitted.length - 2] : splitted[splitted.length - 1];
 }
 
-const updateAgent = (selectedAgent: string, newPermissions: Permission[]) => selectedEntry.value!.accessModes[selectedAgent] = newPermissions;
+const updateAgent = (selectedAgent: string, newPermissions: Permission[]) => selectedEntry.value!.permissions[selectedAgent] = newPermissions;
 
 watch(() => route.params.filePath, async (path) => {
     selectedEntry.value = null;
@@ -58,22 +58,22 @@ watch(() => route.params.filePath, async (path) => {
 })
 
 async function getThingsAtLevel(url: string) {
-    return (await getPodThings(store.session, url)).things
+    return (await getContainerResources(store.session, url))
         // Filter out the current resource
-        .filter(thing => thing.url !== url)
+        .filter(thing => thing.resourceUrl !== url)
         // Filter out the things that are nested (?)
         .filter(thing => {
-            const depth = thing.url.replace(store.usedPod, '').split('/');
+            const depth = thing.resourceUrl.replace(store.usedPod, '').split('/');
             return depth.length <= 2;
         })
 }
 
-function getViewFormattedThings(data: FormattedThing[]) {
-    return data.map(thing => {
-        const uri = thing.url.replace(store.usedPod, '');
+function getViewFormattedThings(resourcePermissionsList: ResourcePermissions[]) {
+    return resourcePermissionsList.map(resourcePermissions => {
+        const uri = resourcePermissions.resourceUrl.replace(store.usedPod, '');
         const isContainer = uri.charAt(uri.length - 1) === '/'
         const name = uriToName(uri, isContainer);
-        const publicAccess = thing.accessModes.public.length > 0;
+        const publicAccess = resourcePermissions.permissions.public.length > 0;
         return {
             isContainer,
             name,
@@ -81,7 +81,7 @@ function getViewFormattedThings(data: FormattedThing[]) {
                 access: publicAccess,
                 icon: (publicAccess) ? PhLockOpen : PhLock
             },
-            ...thing
+            ...resourcePermissions
         }
     })
 }

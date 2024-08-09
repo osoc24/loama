@@ -10,33 +10,34 @@ Currently, the build (`dist/`) files of the controller are symlinked with LOAMA.
 
 ## API - now
 
-- [x] getPod
+- [x] createPermissions
 - [x] editPermissions
-- [x] getOrCreateIndex
-- [x] addPermissions
 - getItemId (from Index) ?
-- [x] getProfileInfo
-- [x] listPods
 - [x] types
-  - [x] FormattedThing
+  - [x] ResourcePermissions
   - [x] Permission (enum)
   - [x] Type (enum)
 
 ## API - then
 
 ### Controller
-- getOrCreateIndex(session, podUrl)
-  - resources[]: FormattedThing
-    - permissions[]
-      - type: Type
-      - permission: Permission
-      - CRUD()
+
+- [x] getOrCreateIndex(session, podUrl)
+  - [x] getContainerResources(session, containerUrl)[]: ResourcePermissions
+    - [ ] resourcePermissions[] // TODO
+      - subject
+        - type: Type
+        - selector.url: WebID
+      - permissions[]
+    - [ ] add/edit/remove to/from resource // TODO
+
+- WAC/ACP manager API // TODO
 
 ### SolidAppLib
 
-- user
-  - profile
+- 
 
 ### SolidCommonLib
 
 - listPodUrls(session): urls[]
+- getProfileInfo
