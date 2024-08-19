@@ -1,0 +1,18 @@
+{
+  "private": true,
+  "workspaces": [
+    "controller",
+    "solid-app-lib",
+    "solid-common-lib",
+    "loama",
+    "doctorapp",
+    "mockbook"
+  ],
+  "scripts": {
+    "build": "nx run-many -t build",
+    "dev": "nx run-many --parallel=5 --exclude=doctorapp,mockbook -t dev"
+  },
+  "devDependencies": {
+    "nx": "19.6.0"
+  }
+}

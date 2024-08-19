@@ -13,10 +13,9 @@
     "@inrupt/solid-client-authn-browser": "^2.2.4",
     "@inrupt/vocab-common-rdf": "^1.0.5",
     "@phosphor-icons/vue": "^2.2.1",
-    "loama-app": "file:../solid-app-lib",
-    "loama-common": "file:../solid-common-lib",
-    "loama-controller": "file:../controller",
-    "mockbook": "file:",
+    "loama-app": "^1.0.0",
+    "loama-common": "^1.0.0",
+    "loama-controller": "^1.0.0",
     "vue": "^3.4.29",
     "vue-router": "^4.4.0"
   },
@@ -30,11 +29,13 @@
     "@vue/tsconfig": "0.5.1",
     "eslint": "8.57.0",
     "eslint-plugin-vue": "9.23.0",
-    "npm-run-all2": "6.2.0",
     "prettier": "3.2.5",
     "typescript": "^5.4.5",
     "vite": "^5.3.1",
     "vite-plugin-vue-devtools": "^7.3.1",
     "vue-tsc": "^2.0.21"
+  },
+  "nx": {
+    "projectType": "application"
   }
 }

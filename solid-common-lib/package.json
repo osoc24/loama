@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "tsc",
-    "watch": "tsc --watch"
+    "dev": "tsc --watch"
   },
   "description": "",
   "main": "dist/index.js",
@@ -25,7 +25,9 @@
   "dependencies": {
     "@inrupt/solid-client": "^2.0.1",
     "@inrupt/solid-client-authn-browser": "^2.2.4",
-    "@inrupt/vocab-common-rdf": "^1.0.5",
-    "loama-common": "file:"
+    "@inrupt/vocab-common-rdf": "^1.0.5"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
   }
 }
