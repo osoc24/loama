@@ -1,43 +1,44 @@
 <template>
-  <header>
-    <h1>{{ title }}</h1>
-    <p class="tagline" v-if="subtitle">{{ subtitle }}</p>
-  </header>
-  <form @submit.prevent="login">
-    <fieldset>
-      <legend>
-        <span>Solid Pod URL</span>
-        <PhQuestion :size="24" @mouseover="showPopup = true;" @mouseleave="showPopup = false" />
-      </legend>
-      <label for="solid-pod-url">
-        <PhLink :size="24" class="icon" />
-        <input type="url" id="solid-pod-url" v-model="solidPodUrl" :placeholder="defaultSolidPodUrl" />
-      </label>
-      <p v-if="showWarning" class="warning">Invalid Solid Pod URL. Please check and try again.</p>
-    </fieldset>
-    <fieldset>
-      <LoButton @click.prevent="noPod" :disabled="isLoading" variant="secondary" :left-icon="PhQuestion">
-        No Pod?
-      </LoButton>
-      <LoButton type="submit" :disabled="isLoading" :right-icon="PhArrowRight">
-        <span v-if="isLoading">Loading...</span>
-        <span v-else>Login</span>
-      </LoButton>
-    </fieldset>
-  </form>
+    <header>
+        <h1>{{ title }}</h1>
+        <p class="tagline" v-if="subtitle">{{ subtitle }}</p>
+    </header>
+    <form @submit.prevent="login">
+        <fieldset>
+            <legend>
+                <span>Solid Pod URL</span>
+                <PhQuestion :size="24" @mouseover="showPopup = true;" @mouseleave="showPopup = false" />
+            </legend>
+            <label for="solid-pod-url">
+                <PhLink :size="24" class="icon" />
+                <input type="url" id="solid-pod-url" v-model="solidPodUrl" :placeholder="defaultSolidPodUrl" />
+            </label>
+            <p v-if="showWarning" class="warning">Invalid Solid Pod URL. Please check and try again.</p>
+        </fieldset>
+        <fieldset>
+            <LoButton @click.prevent="noPod" :disabled="isLoading" variant="secondary" :left-icon="PhQuestion">
+                No Pod?
+            </LoButton>
+            <LoButton type="submit" :disabled="isLoading" :right-icon="PhArrowRight">
+                <span v-if="isLoading">Loading...</span>
+                <span v-else>Login</span>
+            </LoButton>
+        </fieldset>
+    </form>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 import { store } from 'loama-app'
 import LoButton from './LoButton.vue';
+import { PhArrowRight, PhLink, PhQuestion } from '@phosphor-icons/vue';
 
 defineProps<{ title: string, subtitle?: string }>();
 
 const showPopup = defineModel<boolean>('showPopup');
 
 const emit = defineEmits<{
-  toggleProvider: []
+    toggleProvider: []
 }>()
 
 const solidPodUrl = ref<string>('');
@@ -46,106 +47,106 @@ const showWarning = ref<boolean>(false);
 const isLoading = ref<boolean>(false);
 
 const login = () => {
-  isLoading.value = true;
-  const issuer = solidPodUrl.value.trim() || defaultSolidPodUrl;
+    isLoading.value = true;
+    const issuer = solidPodUrl.value.trim() || defaultSolidPodUrl;
 
-  store.session.login({
-    oidcIssuer: issuer,
-    redirectUrl: new URL(`${import.meta.env.BASE_URL}home/`, window.location.href).toString(),
-    clientName: 'LOAMA',
-  })
-    .then(() => {
-      showWarning.value = false;
-      isLoading.value = false;
+    store.session.login({
+        oidcIssuer: issuer,
+        redirectUrl: new URL(`${import.meta.env.BASE_URL}home/`, window.location.href).toString(),
+        clientName: 'LOAMA',
     })
-    .catch(() => {
-      showWarning.value = true;
-      isLoading.value = false;
-    });
+        .then(() => {
+            showWarning.value = false;
+            isLoading.value = false;
+        })
+        .catch(() => {
+            showWarning.value = true;
+            isLoading.value = false;
+        });
 };
 
 const noPod = () => {
-  emit('toggleProvider');
+    emit('toggleProvider');
 };
 </script>
 
 <style scoped>
 .tagline {
-  color: var(--off-black);
-  font-size: calc(var(--base-unit)*4);
-  font-style: normal;
-  font-weight: 600;
-  line-height: normal;
+    color: var(--off-black);
+    font-size: calc(var(--base-unit)*4);
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
 }
 
 legend {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
 }
 
 span {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  font-weight: 700;
-  gap: var(--base-unit);
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    font-weight: 700;
+    gap: var(--base-unit);
 }
 
 label {
-  display: flex;
-  position: relative;
-  flex-grow: 1;
+    display: flex;
+    position: relative;
+    flex-grow: 1;
 }
 
 .icon {
-  position: absolute;
-  left: var(--base-unit);
-  top: 50%;
-  margin-top: calc(-1 * var(--base-unit));
+    position: absolute;
+    left: var(--base-unit);
+    top: 50%;
+    margin-top: calc(-1 * var(--base-unit));
 }
 
 input[type="url"] {
-  padding: 1rem calc(var(--base-unit) + 24px);
-  width: 100%;
-  border-color: var(--off-black);
-  border-radius: var(--base-corner);
+    padding: 1rem calc(var(--base-unit) + 24px);
+    width: 100%;
+    border-color: var(--off-black);
+    border-radius: var(--base-corner);
 }
 
 .warning {
-  color: var(--lama-red);
+    color: var(--lama-red);
 }
 
 label,
 p,
 input {
-  color: var(--off-black, #170D33);
+    color: var(--off-black, #170D33);
 }
 
 h1,
 h2 {
-  text-align: center;
+    text-align: center;
 }
 
 form {
-  width: 100%;
+    width: 100%;
 }
 
 form div {
-  margin-bottom: 4rem;
+    margin-bottom: 4rem;
 }
 
 fieldset {
-  border: none;
+    border: none;
 }
 
 fieldset:has(button) {
-  display: flex;
-  justify-content: space-between;
+    display: flex;
+    justify-content: space-between;
 }
 
 button {
-  width: 45%;
-  justify-content: center;
+    width: 45%;
+    justify-content: center;
 }
 </style>
