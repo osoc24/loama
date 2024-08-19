@@ -13,3 +13,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - works for Node 20 LTS
 - general API cleanup
 - separated into more targeted modules
+- clone index item permission array to remove references
