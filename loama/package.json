@@ -18,6 +18,7 @@
   "dependencies": {
     "@inrupt/solid-client-authn-browser": "^2.2.4",
     "@phosphor-icons/vue": "^2.2.1",
+    "@vueform/multiselect": "^2.6.9",
     "loama-app": "^1.0.0",
     "loama-common": "^1.0.0",
     "loama-controller": "^1.0.0",
