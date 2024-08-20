@@ -15,10 +15,12 @@ Currently, the build (`dist/`) files of the controller are symlinked with LOAMA.
 > top-level is the public API
 
 - setPodUrl / unsetPodUrl
+- getOrCreateIndex
+- getItem
 - addPermission / removePermission // TODO this should later be update index: resource / type / permissions / extensible properties (eg the webid)
-  - getOrCreateIndex(session, podUrl)
-  - createPermissions / editPermissions
-  - getItem
+- createPermissions / editPermissions
+
+// pod
 - getContainerResources(session, containerUrl)[]: ResourcePermissions // TODO this currently only takes remote into account, not the index.json
       - [ ] resourcePermissions[] // TODO, right now it's {[webid: string]: Permissions[]}
         - subject
@@ -59,12 +61,13 @@ Currently, the build (`dist/`) files of the controller are symlinked with LOAMA.
         },
         {
             "id": "uuid",
-            "requestId?": "uuid", // for later
+            "requestId?": "uuid", // for later (currently use random v4's)
             "resource": "",
-            "subject": {
-                "type": "group|webid|public",
+            "subject": { // The controller implementation should be defined based on which subject is used for the entry
+                "type": "group|webid|public|qualifier",
                 "selector?": {
-                    "url": "for group/webid"
+                    "url": "for group/webid",
+                    "qualifierType": "personnelName" // For qualifier
                 }
             },
             "permissions": [], // TODO?
