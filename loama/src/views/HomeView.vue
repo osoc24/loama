@@ -1,17 +1,17 @@
 <template>
-  <Suspense>
-    <HeaderBase>
-      <HeaderTab href="/home" active>Files</HeaderTab>
-    </HeaderBase>
-  </Suspense>
-  <main>
     <Suspense>
-      <ResourceExplorer />
-      <template #fallback>
-        <FallbackExplorer>Loading resource explorer...</FallbackExplorer>
-      </template>
+        <HeaderBase>
+            <HeaderTab href="/home" active>Resources</HeaderTab>
+        </HeaderBase>
     </Suspense>
-  </main>
+    <main>
+        <Suspense>
+            <ResourceExplorer />
+            <template #fallback>
+                <FallbackExplorer>Loading resource explorer...</FallbackExplorer>
+            </template>
+        </Suspense>
+    </main>
 </template>
 
 <script setup lang="ts">

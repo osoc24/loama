@@ -4,7 +4,7 @@
             <slot></slot>
         </ExplorerEntity>
         <RouterLink :to="props.url">
-            <LoButton v-if="isContainer" :right-icon="PhArrowRight" class="view">View files
+            <LoButton v-if="isContainer" :right-icon="PhArrowRight" class="view">View resources
             </LoButton>
         </RouterLink>
     </div>

@@ -24,6 +24,7 @@ a {
     min-height: calc(var(--base-unit)*8);
     border-radius: var(--base-corner) var(--base-corner) 0 0;
     min-width: calc(var(--base-unit)*15);
+    padding: 0 calc(var(--base-unit)*3);
 }
 
 .active {
