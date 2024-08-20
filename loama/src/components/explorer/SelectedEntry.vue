@@ -28,33 +28,29 @@
 <script setup lang="ts">
 import ExplorerEntity from './ExplorerEntity.vue';
 import { PhXCircle } from '@phosphor-icons/vue';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import MultiSelect from '@vueform/multiselect'
 
 import LoSwitch from '../LoSwitch.vue';
-import { Permission } from 'loama-controller/dist/types';
+import { Permission, Type, type ResourcePermissions } from 'loama-controller/dist/types';
 import { addPermission, removePermission } from 'loama-controller';
 import { store } from 'loama-app'
 import type { Result } from '@/utils/types';
 import Notification from '../LoNotification.vue';
 
 const emits = defineEmits<{ updatePermissions: [selectedAgent: string, newPermissions: Permission[]], close: [] }>()
-const props = defineProps<{ name: string; url: string; isContainer: boolean; agents: Record<string, Permission[]> }>();
+const props = defineProps<{ name: string; url: string; isContainer: boolean; agents: ResourcePermissions["permissionsPerSubject"] }>();
 
 const agentSelect = ref<MultiSelect | null>(null);
 
-const selectedAgent = ref(Object.keys(props.agents)[0]);
+// NOTE: Will be refactored/removed when controller is refactored
+const agentOptions = computed(() => props.agents.map(e => e.subject.type === "public" ? "public" : e.subject.selector.url));
+const selectedAgent = ref(agentOptions.value[0]);
 
 const updateStatus = ref<Result | null>(null);
 
-const agentOptions = ref(Object.keys(props.agents));
-
-watch(props, (_, oldProp) => {
+watch(props, () => {
     updateStatus.value = null
-    agentOptions.value = Object.keys(props.agents);
-    if (oldProp.url !== props.url) {
-        selectedAgent.value = agentOptions.value[0];
-    }
 });
 
 const permissionOptions: { name: Permission, label: string }[] = [
@@ -65,8 +61,9 @@ const permissionOptions: { name: Permission, label: string }[] = [
 ];
 
 const isByDefaultSelected = (permission: Permission) => {
-    if (!props.agents[selectedAgent.value]) return false;
-    return props.agents[selectedAgent.value].includes(permission)
+    const agent = props.agents.find(e => e.subject.type === "public" ? selectedAgent.value === "public" : e.subject.type === Type.WebID && e.subject.selector?.url === selectedAgent.value);
+    if (!agent) return false;
+    return agent.permissions.includes(permission)
 };
 
 const updatePermission = async (permissionString: string, newValue: boolean) => {

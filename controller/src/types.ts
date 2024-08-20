@@ -6,54 +6,53 @@ import { url } from "loama-common";
  */
 
 export interface Index {
-  id: url;
-  items: IndexItem[];
+    id: url;
+    items: IndexItem[];
 }
 
-export interface IndexItem {
-  id: string;
-  isEnabled: boolean;
-  permissions: Permission[];
-  resource: string;
-  // `undefined` means that this item applies for the public access
-  subject?: Subject;
-  [property: string]: any;
+export interface IndexItem<T extends BaseSubject = BaseSubject> {
+    id: string; // UUID
+    requestId: string; // UUID
+    isEnabled: boolean;
+    permissions: Permission[];
+    resource: string;
+    subject: T;
 }
 
 export enum Permission {
-  Append = "Append",
-  Control = "Control",
-  Read = "Read",
-  Write = "Write",
+    Append = "Append",
+    Control = "Control",
+    Read = "Read",
+    Write = "Write",
 }
 
-export interface Subject {
-  name?: string;
-  type: Type;
-  url: string;
-  [property: string]: any;
+export interface BaseSubject {
+    type: string;
+    selector?: {
+        [key: string]: any;
+    }
+}
+
+export interface PublicSubject {
+    type: "public"
+}
+
+export interface UrlSubject {
+    type: Type;
+    selector: {
+        url: string;
+    }
 }
 
 export enum Type {
-  Group = "Group",
-  WebID = "WebId",
+    Group = "Group",
+    WebID = "WebId",
 }
 
-export interface ResourcePermissions {
-  resourceUrl: url;
-  permissions: Record<url, Permission[]>; // webid -> permissions
-}
-
-// TODO replace above with below
-export interface ResourcePermissionsNew {
-  resourceUrl: url;
-  permissionsPerSubject: {
-    subject: {
-      type: Type,
-      selector?: {
-        url?: url // will be extended depending on more Types, now webIds or groupUrls
-      }
-    },
-    permissions: Permission[]
-  }[]
+export interface ResourcePermissions<T extends BaseSubject = (UrlSubject | PublicSubject)> {
+    resourceUrl: url;
+    permissionsPerSubject: {
+        subject: T,
+        permissions: Permission[]
+    }[]
 }

@@ -1,48 +1,23 @@
 import {
     AccessModes,
-    FetchError,
-    getFile,
-    overwriteFile,
-    saveFileInContainer,
 } from "@inrupt/solid-client";
 import { Session } from "@inrupt/solid-client-authn-browser";
+import {
+    setAgentAccess,
+    setPublicAccess,
+} from "@inrupt/solid-client/universal";
 import {
     Index,
     IndexItem,
     Permission,
     Type,
-    Subject,
+    UrlSubject,
+    PublicSubject,
+    BaseSubject,
 } from "./types";
-import {
-    setAgentAccess,
-    setPublicAccess,
-} from "@inrupt/solid-client/universal";
 import { url } from "loama-common";
-// TODO this interdependency is weird
 import { getRemotePermissions } from "./pod";
-
-// TODO this should be a more resilient path: be.ugent.idlab.knows.solid.loama.index.js or smth
-const indexPath = 'index.json';
-let currentPodUrl: url | undefined = undefined;
-let currentIndex: Index | undefined = undefined;
-
-export function setPodUrl(podUrl: url) {
-    currentPodUrl = podUrl;
-}
-
-export function unsetPodUrl() {
-    currentPodUrl = undefined;
-}
-
-async function getCurrentIndex(session: Session) {
-    if (!currentIndex) {
-        if (!currentPodUrl) {
-            throw new Error('Cannot get current index file: is the user logged in?')
-        }
-        currentIndex = await getOrCreateIndex(session, currentPodUrl);
-    }
-    return currentIndex;
-}
+import { getCurrentIndex, getItem, updateRemoteIndex } from "./store";
 
 // TODO this should later be update index: resource / type / permissions / extensible properties (eg the webid)
 async function getExistingPermissions(session: Session, resourceUrl: url, webIdUrl: url): Promise<Permission[]> {
@@ -73,8 +48,7 @@ export async function addPermission(session: Session, resourceUrl: url, subjectU
     if (item) {
         await editPermissions(session, index, item, permissions);
     } else {
-        // NOTE: This should be more fleshed out, e.g. username support
-        const subject = subjectUrl === "public" ? undefined : { type: Type.WebID, url: subjectUrl };
+        const subject: (UrlSubject | PublicSubject) = subjectUrl === "public" ? { type: "public" } : { type: Type.WebID, selector: { url: subjectUrl } };
         await createPermissions(session, index, resourceUrl, subject, permissions);
     }
     return permissions;
@@ -93,30 +67,10 @@ export async function removePermission(session: Session, resourceUrl: url, subje
         await editPermissions(session, index, item, permissions);
     } else {
         // NOTE: This should be more fleshed out, e.g. username support
-        const subject = subjectUrl === "public" ? undefined : { type: Type.WebID, url: subjectUrl };
+        const subject: (UrlSubject | PublicSubject) = subjectUrl === "public" ? { type: "public" } : { type: Type.WebID, selector: { url: subjectUrl } };
         await createPermissions(session, index, resourceUrl, subject, permissions);
     }
     return permissions;
-}
-
-/**
- * Get the index file for a given pod. If it can't be found create an empty one.
- */
-async function getOrCreateIndex(session: Session, podUrl: url): Promise<Index> {
-    // async/await?
-    const indexUrl = `${podUrl}${indexPath}`;
-    return getFile(indexUrl, { fetch: session.fetch })
-        .catch((error: FetchError) => {
-            if (error.statusCode === 404) {
-                return saveFileInContainer(
-                    podUrl,
-                    indexToIndexFile({ id: indexUrl, items: [] } as Index),
-                    { fetch: session.fetch }
-                );
-            }
-        })
-        .then((res) => res?.text())
-        .then((text) => JSON.parse(text ?? "{}"));
 }
 
 /**
@@ -126,15 +80,17 @@ async function getOrCreateIndex(session: Session, podUrl: url): Promise<Index> {
  * - The remote ACL is updated
  * - The remote index file is synced
  */
-async function createPermissions(
+async function createPermissions<T extends BaseSubject>(
     session: Session,
     index: Index,
     resource: url,
-    subject: Subject | undefined,
+    // TODO: Do not use type of IndexItem, maybe? Depending on how classes are created
+    subject: T,
     permissions: Permission[]
 ): Promise<Index> {
     const newItem: IndexItem = {
         id: crypto.randomUUID(),
+        requestId: crypto.randomUUID(),
         isEnabled: true,
         permissions: permissions,
         resource: resource,
@@ -213,32 +169,14 @@ async function editPermissions(
     return index;
 }
 
-function getItem(index: Index, resource: url, subjectUrl: string) {
-    if (subjectUrl === "public") {
-        return index.items.find(
-            (indexItem) =>
-                indexItem.resource === resource &&
-                indexItem.subject === undefined
-        );
-    }
-
-    return index.items.find(
-        (indexItem) =>
-            indexItem.resource === resource &&
-            indexItem.subject &&
-            indexItem.subject.type === Type.WebID &&
-            indexItem.subject.url === subjectUrl
-    );
-}
-
-async function updateACL(
+async function updateACL<T extends BaseSubject>(
     session: Session,
     resource: url,
-    subject: Subject | undefined,
+    subject: T,
     addedPermissions: Permission[] = [],
     removedPermissions: Permission[] = []
 ) {
-    if (subject === undefined) {
+    if (subject.type === "public") {
         if (addedPermissions.length > 0) {
             await setPublicAccess(
                 resource,
@@ -253,11 +191,11 @@ async function updateACL(
                 { fetch: session.fetch }
             );
         }
-    } else {
+    } else if (subject.type === Type.WebID && subject.selector) {
         if (addedPermissions.length > 0) {
             await setAgentAccess(
                 resource,
-                subject.url,
+                subject.selector.url,
                 permissionsToAccessModes(addedPermissions, false),
                 {
                     fetch: session.fetch,
@@ -267,30 +205,16 @@ async function updateACL(
         if (removedPermissions.length > 0) {
             await setAgentAccess(
                 resource,
-                subject.url,
+                subject.selector.url,
                 permissionsToAccessModes(addedPermissions, true),
                 {
                     fetch: session.fetch,
                 }
             );
         }
+    } else {
+        throw new Error("Unsupported subject type");
     }
-}
-
-/**
- * Overwrite the index file in the pod with the given `index`.
- * This disregards any potential changes in the remote that aren't reflected here.
- */
-async function updateRemoteIndex(session: Session, index: Index) {
-    return overwriteFile(index.id, indexToIndexFile(index), {
-        fetch: session.fetch,
-    });
-}
-
-function indexToIndexFile(index: Index): File {
-    return new File([JSON.stringify(index)], indexPath, {
-        type: "application/json",
-    });
 }
 
 /**

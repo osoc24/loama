@@ -1,14 +1,14 @@
 import {
-  AccessModes,
-  getSolidDataset,
-  getThingAll
+    AccessModes,
+    getSolidDataset,
+    getThingAll
 } from "@inrupt/solid-client";
 import {
-  getAgentAccessAll,
-  getPublicAccess,
+    getAgentAccessAll,
+    getPublicAccess,
 } from "@inrupt/solid-client/universal";
 import { Session } from "@inrupt/solid-client-authn-browser";
-import { Permission, ResourcePermissions, ResourcePermissionsNew } from "./types";
+import { Permission, ResourcePermissions, Type } from "./types";
 import { url } from "loama-common";
 
 /**
@@ -17,22 +17,26 @@ import { url } from "loama-common";
  * @param containerUrl URL to the container
  * @returns The access modes list per resource
  */
-export async function getContainerResources(session: Session, containerUrl: url) {
-  return await getResourcePermissionsList(session, containerUrl);
+export async function getContainerResources(session: Session, containerUrl: url): Promise<ResourcePermissions[]> {
+    // Inrupt SDK depending
+    return await getResourcePermissionsList(session, containerUrl);
 }
 
 async function getResourcePermissionsList(
-  session: Session,
-  containerUrl: url
+    session: Session,
+    containerUrl: url
 ): Promise<ResourcePermissions[]> {
-  const dataset = await getSolidDataset(containerUrl, { fetch: session.fetch });
-  return Promise.all(
-      getThingAll(dataset)
-          .map(async (resource) => ({
-              resourceUrl: resource.url,
-              permissions: await getRemotePermissions(session, resource.url),
-          }))
-  );
+    const dataset = await getSolidDataset(containerUrl, { fetch: session.fetch });
+    return Promise.all(
+        getThingAll(dataset)
+            .map(async (resource) => ({
+                resourceUrl: resource.url,
+                permissionsPerSubject: Object.entries(await getRemotePermissions(session, resource.url)).map((entry) => ({
+                    subject: entry[0] == "public" ? { type: "public" } : { type: Type.WebID, selector: { url: entry[0] } },
+                    permissions: entry[1],
+                })),
+            }))
+    );
 }
 
 /**
@@ -42,61 +46,61 @@ async function getResourcePermissionsList(
  * @returns The access modes with their agents
  */
 export async function getRemotePermissions(
-  session: Session,
-  resourceUrl: url
+    session: Session,
+    resourceUrl: url
 ): Promise<Record<url, Permission[]>> {
-  // check remote
-  // TODO this piece of code depends on WAC/ACP, should be a module
-  const list = await Promise.all([
-    getAgentAccessAll(resourceUrl, { fetch: session.fetch }) as Promise<
-      Record<url, AccessModes>
-    >,
-    { public: await getPublicAccess(resourceUrl, { fetch: session.fetch })! } as Record<
-      url,
-      AccessModes
-    >,
-  ])
-  const records = Object.assign({}, ...list);
-  const remotePermissions = accessModesToPermissions(records);
-  // check with index
-  // TODO
-  // update index where needed
-  // TODO
-  return remotePermissions;
+    // check remote
+    // TODO this piece of code depends on WAC/ACP, should be a module
+    const list = await Promise.all([
+        getAgentAccessAll(resourceUrl, { fetch: session.fetch }) as Promise<
+            Record<url, AccessModes>
+        >,
+        { public: await getPublicAccess(resourceUrl, { fetch: session.fetch })! } as Record<
+            url,
+            AccessModes
+        >,
+    ])
+    const records = Object.assign({}, ...list);
+    const remotePermissions = accessModesToPermissions(records);
+    // check with index
+    // TODO
+    // update index where needed
+    // TODO
+    return remotePermissions;
 }
 
 function accessModesToPermissions(
-  record: Record<url, AccessModes>
+    record: Record<url, AccessModes>
 ): Record<url, Permission[]> {
-  const result: {
-    [agent: string]: Permission[];
-  } = {};
-  // List -> Set -> List is done to filter out possible duplicate Permission.Control's
-  const mapToPermission = (accessModes: [string, boolean][]) => [
-    ...new Set(
-      accessModes
-        .map(([mode, isActive]) => {
-          if (isActive) {
-            switch (mode) {
-              case "read":
-                return Permission.Read;
-              case "write":
-                return Permission.Write;
-              case "append":
-                return Permission.Append;
-              case "controlRead":
-              case "controlWrite":
-                return Permission.Control;
-            }
-          }
-        })
-        .filter((p) => p !== undefined)
-    ),
-  ];
+    const result: {
+        [agent: string]: Permission[];
+    } = {};
+    // List -> Set -> List is done to filter out possible duplicate Permission.Control's
+    const mapToPermission = (accessModes: [string, boolean][]) => [
+        ...new Set(
+            accessModes
+                .map(([mode, isActive]) => {
+                    if (isActive) {
+                        switch (mode) {
+                            case "read":
+                                return Permission.Read;
+                            case "write":
+                                return Permission.Write;
+                            case "append":
+                                return Permission.Append;
+                            case "controlRead":
+                            case "controlWrite":
+                                return Permission.Control;
+                        }
+                    }
+                })
+                .filter((p) => p !== undefined)
+        ),
+    ];
 
-  Object.entries(record).forEach(([agent, accessModes]) => {
-    result[agent] = mapToPermission(Object.entries(accessModes));
-  });
+    Object.entries(record).forEach(([agent, accessModes]) => {
+        result[agent] = mapToPermission(Object.entries(accessModes));
+    });
 
-  return result;
+    return result;
 }

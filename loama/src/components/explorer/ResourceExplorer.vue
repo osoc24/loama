@@ -17,8 +17,8 @@
                 </div>
             </div>
             <SelectedEntry v-else :name="selectedEntry.name" :isContainer="selectedEntry.isContainer"
-                :url="selectedEntry.resourceUrl" :agents="selectedEntry.permissions" @close="selectedEntry = null"
-                @update-permissions="updatePermissions" />
+                :url="selectedEntry.resourceUrl" :agents="selectedEntry.permissionsPerSubject"
+                @close="selectedEntry = null" @update-permissions="updatePermissions" />
         </div>
     </div>
 </template>
@@ -29,7 +29,7 @@ import { getContainerResources } from "loama-controller";
 import { ref, watch } from "vue";
 import { PhLock, PhLockOpen } from "@phosphor-icons/vue";
 import ExplorerEntry from "./ExplorerEntry.vue";
-import type { ResourcePermissions, Permission } from "loama-controller/dist/types";
+import { type ResourcePermissions, type Permission, Type } from "loama-controller/dist/types";
 import { useRoute } from "vue-router";
 import ExplorerBreadcrumbs from "./ExplorerBreadcrumbs.vue";
 import SelectedEntry from "./SelectedEntry.vue";
@@ -51,7 +51,12 @@ const uriToName = (uri: string, isContainer: boolean) => {
 }
 
 const updatePermissions = (selectedAgent: string, newPermissions: Permission[]) => {
-    selectedEntry.value!.permissions[selectedAgent] = newPermissions;
+    // NOTE: will be refactored when the refactor of the controller is finished
+    let permissionObject = selectedEntry.value!.permissionsPerSubject.find(e => e.subject.type === "public" ? selectedAgent === "public" : (e.subject.type === Type.WebID && e.subject.selector?.url === selectedAgent));
+    if (!permissionObject) {
+        throw new Error(`Permission object not found for ${selectedAgent}`);
+    }
+    permissionObject.permissions = newPermissions;
 }
 
 watch(() => route.params.filePath, async (path) => {
@@ -75,7 +80,7 @@ function getViewFormattedThings(resourcePermissionsList: ResourcePermissions[]) 
         const uri = resourcePermissions.resourceUrl.replace(store.usedPod, '');
         const isContainer = uri.charAt(uri.length - 1) === '/'
         const name = uriToName(uri, isContainer);
-        const publicAccess = resourcePermissions.permissions.public.length > 0;
+        const publicAccess = resourcePermissions.permissionsPerSubject.find(s => s.subject.type === "public")?.permissions.length;
         return {
             isContainer,
             name,
