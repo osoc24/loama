@@ -1,9 +1,9 @@
-import { Index, IndexItem, Type, UrlSubject } from "../../types";
-import { ISubjectResolver } from "../types";
+import { Index, IndexItem, WebIdSubject } from "../../types";
+import { ISubjectResolver } from "../../types/modules";
 
-export class WedIdResolver implements ISubjectResolver<UrlSubject> {
-    checkMatch(subjectA: UrlSubject, subjectB: UrlSubject): boolean {
-        if (subjectA.type !== Type.WebID || subjectB.type !== Type.WebID) {
+export class WebIdResolver implements ISubjectResolver<"webId", WebIdSubject> {
+    checkMatch(subjectA: WebIdSubject, subjectB: WebIdSubject): boolean {
+        if (subjectA.type !== "webId" || subjectB.type !== "webId") {
             return false;
         }
         return subjectA.selector.url === subjectB.selector.url;
@@ -11,7 +11,7 @@ export class WedIdResolver implements ISubjectResolver<UrlSubject> {
 
     getItem(index: Index, resourceUrl: string, subjectSelector?: unknown): IndexItem | undefined {
         return index.items.find(item => {
-            return item.resource == resourceUrl && item.subject.type === Type.WebID && item.subject.selector && item.subject.selector.url === subjectSelector
+            return item.resource == resourceUrl && item.subject.type === "webId" && item.subject.selector && item.subject.selector.url === subjectSelector
         })
     };
 }

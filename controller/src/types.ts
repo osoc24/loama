@@ -10,7 +10,8 @@ export interface Index {
     items: IndexItem[];
 }
 
-export interface IndexItem<T extends BaseSubject = BaseSubject> {
+// NOTE: Take another look at the K generic, Will be a pity if we just use "string" here
+export interface IndexItem<K extends string = string, T extends BaseSubject<K> = BaseSubject<K>> {
     id: string; // UUID
     requestId: string; // UUID
     isEnabled: boolean;
@@ -26,30 +27,28 @@ export enum Permission {
     Write = "Write",
 }
 
-export interface BaseSubject {
-    type: string;
+export interface BaseSubject<T extends string> {
+    type: T;
     selector?: {
         [key: string]: any;
     }
 }
 
 export interface PublicSubject {
-    type: "public"
+    type: "public";
 }
 
-export interface UrlSubject {
-    type: Type;
+export interface UrlSubject<T = "webId" | "group"> {
+    type: T;
     selector: {
         url: string;
     }
 }
 
-export enum Type {
-    Group = "Group",
-    WebID = "WebId",
-}
+export type WebIdSubject = UrlSubject<"webId">;
 
-export interface ResourcePermissions<T extends BaseSubject = (UrlSubject | PublicSubject)> {
+// NOTE: Same note about K as above
+export interface ResourcePermissions<T extends BaseSubject<string>> {
     resourceUrl: url;
     permissionsPerSubject: {
         subject: T,

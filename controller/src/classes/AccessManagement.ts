@@ -1,19 +1,18 @@
 import { BaseSubject, Permission } from "../types";
-import { IAccessManagement, IPermissionManager, IStore, ISubjectResolver } from "./types";
+import { IAccessManagement, IPermissionManager, IStore, ISubjectResolver, SubjectKey, SubjectType } from "../types/modules";
 
-export class AccessManagement implements IAccessManagement {
+export class AccessManagement<T extends Record<keyof T, BaseSubject<keyof T & string>>> implements IAccessManagement<T> {
     private store: IStore
-    // NOTE: useing BaseSubject will possibly block me in the builder
-    private subjectResolvers: Record<string, ISubjectResolver<BaseSubject>>;
-    private permissionManager: IPermissionManager
+    private subjectResolvers: Record<keyof T, ISubjectResolver<keyof T & string>>;
+    private permissionManager: IPermissionManager<T>
 
-    constructor(store: IStore, pm: IPermissionManager, subjectResolvers: Record<string, ISubjectResolver<BaseSubject>>) {
+    constructor(store: IStore, pm: IPermissionManager<T>, subjectResolvers: Record<keyof T, ISubjectResolver<keyof T & string>>) {
         this.store = store;
         this.permissionManager = pm;
         this.subjectResolvers = subjectResolvers;
     }
 
-    private async getExistingPermissions<T extends BaseSubject>(resourceUrl: string, subject: T): Promise<Permission[]> {
+    private async getExistingPermissions<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>): Promise<Permission[]> {
         const item = await this.getItem(resourceUrl, subject);
         if (item) {
             // Makeing sure the array is not a reference to the one stored in the index
@@ -42,7 +41,7 @@ export class AccessManagement implements IAccessManagement {
         return this.store.getOrCreateIndex();
     }
 
-    async getItem<T extends BaseSubject>(resourceUrl: string, subject: T) {
+    async getItem<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>) {
         const resolver = this.subjectResolvers[subject.type];
         if (!resolver) {
             throw new Error(`No resolver found for subject type ${subject.type}`);
@@ -53,15 +52,15 @@ export class AccessManagement implements IAccessManagement {
     }
 
     // NOTE: to self: Do not forget to also push changes tot the stored index, this is not a responsibilty from the PermissionManager
-    async addPermission<T extends BaseSubject>(resourceUrl: string, addedPermission: Permission, subject: T) {
+    async addPermission<K extends SubjectKey<T>>(resourceUrl: string, addedPermission: Permission, subject: SubjectType<T, K>) {
         return []
     }
 
-    async removePermission<T extends BaseSubject>(resourceUrl: string, addedPermission: Permission, subject: T) {
+    async removePermission<K extends SubjectKey<T>>(resourceUrl: string, addedPermission: Permission, subject: SubjectType<T, K>) {
         return []
     }
 
-    async enablePermissions<T extends BaseSubject>(resource: string, subject: T) { }
+    async enablePermissions<K extends SubjectKey<T>>(resource: string, subject: SubjectType<T, K>) { }
 
-    async disablePermissions<T extends BaseSubject>(resource: string, subject: T) { }
+    async disablePermissions<K extends SubjectKey<T>>(resource: string, subject: SubjectType<T, K>) { }
 }

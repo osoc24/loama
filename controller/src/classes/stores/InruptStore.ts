@@ -1,6 +1,6 @@
 import { FetchError, getFile, overwriteFile, saveFileInContainer, WithResourceInfo } from "@inrupt/solid-client";
 import { Index } from "../../types";
-import { IStore } from "../types";
+import { IStore } from "../../types/modules";
 import { BaseStore } from "./BaseStore";
 import { getDefaultSession, Session } from "@inrupt/solid-client-authn-browser";
 
