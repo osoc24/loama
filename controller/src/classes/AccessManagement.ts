@@ -1,12 +1,12 @@
 import { BaseSubject, Permission } from "../types";
 import { IAccessManagement, IPermissionManager, IStore, ISubjectResolver, SubjectKey, SubjectType } from "../types/modules";
 
-export class AccessManagement<T extends Record<keyof T, BaseSubject<keyof T & string>>> implements IAccessManagement<T> {
+export class AccessManagement<T extends Record<keyof T, S>, S extends BaseSubject<keyof T & string> = BaseSubject<keyof T & string>> implements IAccessManagement<T> {
     private store: IStore
     private subjectResolvers: Record<keyof T, ISubjectResolver<keyof T & string>>;
-    private permissionManager: IPermissionManager<T>
+    private permissionManager: IPermissionManager<S>
 
-    constructor(store: IStore, pm: IPermissionManager<T>, subjectResolvers: Record<keyof T, ISubjectResolver<keyof T & string>>) {
+    constructor(store: IStore, pm: IPermissionManager<S>, subjectResolvers: Record<keyof T, ISubjectResolver<keyof T & string>>) {
         this.store = store;
         this.permissionManager = pm;
         this.subjectResolvers = subjectResolvers;

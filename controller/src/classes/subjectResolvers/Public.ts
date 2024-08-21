@@ -1,5 +1,6 @@
-import { Index, IndexItem, PublicSubject } from "../../types";
-import { ISubjectResolver } from "../../types/modules";
+import { Index, IndexItem } from "../../types";
+import { PublicSubject } from "../../types/subjects";
+import { ISubjectResolver } from "../../types/modules";   
 
 export class PublicResolver implements ISubjectResolver<"public", PublicSubject> {
     checkMatch(subjectA: PublicSubject, subjectB: PublicSubject): boolean {

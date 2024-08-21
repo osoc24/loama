@@ -34,19 +34,6 @@ export interface BaseSubject<T extends string> {
     }
 }
 
-export interface PublicSubject {
-    type: "public";
-}
-
-export interface UrlSubject<T = "webId" | "group"> {
-    type: T;
-    selector: {
-        url: string;
-    }
-}
-
-export type WebIdSubject = UrlSubject<"webId">;
-
 // NOTE: Same note about K as above
 export interface ResourcePermissions<T extends BaseSubject<string>> {
     resourceUrl: url;

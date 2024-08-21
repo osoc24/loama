@@ -17,7 +17,7 @@ export interface IAccessManagement<T extends Record<keyof T, BaseSubject<keyof T
 export interface IAccessManagementBuilder<AllSubjectTypes extends Record<string, BaseSubject<keyof AllSubjectTypes & string>> = {}> {
     setStore(store: IStore): IAccessManagementBuilder;
     addSubjectResolver<SubjectType extends string>(subjectType: string, subjectResolver: ISubjectResolver<SubjectType, BaseSubject<SubjectType>>): IAccessManagementBuilder<AllSubjectTypes & { [key in SubjectType]: BaseSubject<SubjectType> }>;
-    setPermissionManager(permissionManager: IPermissionManager<AllSubjectTypes>): IAccessManagementBuilder;
+    setPermissionManager(permissionManager: IPermissionManager<BaseSubject<keyof AllSubjectTypes & string>>): IAccessManagementBuilder;
     build(): IAccessManagement<AllSubjectTypes>;
 }
 
@@ -41,10 +41,10 @@ export interface ISubjectResolver<K extends string, T extends BaseSubject<K> = B
     getItem(index: Index, resourceUrl: string, subjectSelector?: unknown): IndexItem | undefined
 }
 
-export interface IPermissionManager<T extends Record<keyof T, BaseSubject<keyof T & string>>> {
+export interface IPermissionManager<T extends BaseSubject<string>> {
     // Does not update the index file
-    createPermissions<K extends SubjectKey<T>>(resource: string, subject: SubjectType<T, K>, permissions: Permission[]): Promise<void>
+    createPermissions(resource: string, subject: T, permissions: Permission[]): Promise<void>
     // Does not update the index file
-    editPermissions<K extends SubjectKey<T>>(resource: string, item: IndexItem, subject: SubjectType<T, K>, permissions: Permission[]): Promise<void>
-    getRemotePermissions<K extends SubjectKey<T>>(resourceUrl: string): Promise<ResourcePermissions<SubjectType<T, K>>>
+    editPermissions(resource: string, item: IndexItem, subject: T, permissions: Permission[]): Promise<void>
+    getRemotePermissions(resourceUrl: string): Promise<ResourcePermissions<T>>
 }
