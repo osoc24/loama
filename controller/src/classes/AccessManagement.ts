@@ -29,6 +29,17 @@ export class AccessManagement<T extends Record<keyof T, S>, S extends BaseSubjec
         return [...subjectPermission?.permissions ?? []]
     }
 
+    // TODO: Add index updating (+ pushing to remote)
+    private async updateItem<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>, permissions: Permission[]) {
+        const item = await this.getItem(resourceUrl, subject);
+
+        if (item) {
+            await this.permissionManager.editPermissions(resourceUrl, item, subject, permissions);
+        } else {
+            await this.permissionManager.createPermissions(resourceUrl, subject, permissions);
+        }
+    }
+
     setPodUrl(podUrl: string) {
         this.store.setPodUrl(podUrl);
     }
@@ -51,13 +62,29 @@ export class AccessManagement<T extends Record<keyof T, S>, S extends BaseSubjec
         return resolver.getItem(index, resourceUrl, subject.selector)
     }
 
-    // NOTE: to self: Do not forget to also push changes tot the stored index, this is not a responsibilty from the PermissionManager
     async addPermission<K extends SubjectKey<T>>(resourceUrl: string, addedPermission: Permission, subject: SubjectType<T, K>) {
-        return []
+        let permissions = await this.getExistingPermissions(resourceUrl, subject);
+
+        if (permissions.indexOf(addedPermission) !== -1) {
+            return permissions;
+        }
+
+        permissions.push(addedPermission)
+
+        await this.updateItem(resourceUrl, subject, permissions)
+        return permissions;
     }
 
-    async removePermission<K extends SubjectKey<T>>(resourceUrl: string, addedPermission: Permission, subject: SubjectType<T, K>) {
-        return []
+    async removePermission<K extends SubjectKey<T>>(resourceUrl: string, removedPermission: Permission, subject: SubjectType<T, K>) {
+        let oldPermissions = await this.getExistingPermissions(resourceUrl, subject);
+        let newPermissions = oldPermissions.filter((p) => p !== removedPermission);
+
+        if (newPermissions.length === oldPermissions.length) {
+            return oldPermissions;
+        }
+
+        await this.updateItem(resourceUrl, subject, newPermissions)
+        return newPermissions;
     }
 
     async enablePermissions<K extends SubjectKey<T>>(resource: string, subject: SubjectType<T, K>) { }
