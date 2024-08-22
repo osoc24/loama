@@ -10,34 +10,51 @@ export interface IAccessManagement<T extends Record<keyof T, BaseSubject<keyof T
     getItem<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>): Promise<IndexItem | undefined>;
     addPermission<K extends SubjectKey<T>>(resourceUrl: string, addedPermission: Permission, subject: SubjectType<T, K>): Promise<Permission[]>
     removePermission<K extends SubjectKey<T>>(resourceUrl: string, addedPermission: Permission, subject: SubjectType<T, K>): Promise<Permission[]>
+    /**
+    * Enables a the permissions for an existing subject
+    * @throws Error if the item does not exist for the given subject
+    */
     enablePermissions<K extends SubjectKey<T>>(resource: string, subject: SubjectType<T, K>): Promise<void>
     disablePermissions<K extends SubjectKey<T>>(resource: string, subject: SubjectType<T, K>): Promise<void>
 }
 
-export interface IAccessManagementBuilder<AllSubjectTypes extends Record<string, BaseSubject<keyof AllSubjectTypes & string>> = {}> {
-    setStore(store: IStore): IAccessManagementBuilder;
-    addSubjectResolver<SubjectType extends string>(subjectType: string, subjectResolver: ISubjectResolver<SubjectType, BaseSubject<SubjectType>>): IAccessManagementBuilder<AllSubjectTypes & { [key in SubjectType]: BaseSubject<SubjectType> }>;
-    setPermissionManager(permissionManager: IPermissionManager<BaseSubject<keyof AllSubjectTypes & string>>): IAccessManagementBuilder;
+export interface IAccessManagementBuilder<AllSubjectTypes extends Record<string, BaseSubject<keyof AllSubjectTypes & string>>> {
+    setStore(store: IStore): IAccessManagementBuilder<AllSubjectTypes>;
+    addSubjectResolver<SubjectType extends keyof AllSubjectTypes & string>(subjectType: SubjectType, subjectResolver: ISubjectResolver<SubjectType>): IAccessManagementBuilder<AllSubjectTypes & { [key in SubjectType]: BaseSubject<SubjectType> }>;
+    setPermissionManager(permissionManager: IPermissionManager<BaseSubject<string>>): IAccessManagementBuilder<AllSubjectTypes>;
     build(): IAccessManagement<AllSubjectTypes>;
 }
 
 export interface IStore {
-    // Implemented by BaseStore
-    // Will set the protected pod url property
+    /**
+    * Implemented by BaseStore
+    * Will set the protected pod url property
+    */
     setPodUrl(url: string): void;
-    // Removes the pod url property value
+    /**
+    * Removes the pod url property value
+    */
     unsetPodUrl(): void;
-    // Returns the currently stored index or calls getOrCreateIndex if the index is not set
+    /**
+    * Returns the currently stored index or calls getOrCreateIndex if the index is not set
+    */
     getCurrentIndex(): Promise<Index>;
 
-    // Tries to retrieve the stored index.json from the pod. If it doesn't exist, it creates an empty one.
+    /**
+    * Tries to retrieve the stored index.json from the pod. If it doesn't exist, it creates an empty one.
+    */
     getOrCreateIndex(): Promise<Index>;
-    // Saves the index to the pod
+    /**
+    * Saves the index to the pod
+    */
     saveToRemoteIndex(): Promise<void>;
 }
 
 export interface ISubjectResolver<K extends string, T extends BaseSubject<K> = BaseSubject<K>> {
     checkMatch(subjectA: T, subjectB: T): boolean;
+    /**
+    * @returns a reference to index item for the given resource and subject
+    */
     getItem(index: Index, resourceUrl: string, subjectSelector?: unknown): IndexItem | undefined
 }
 

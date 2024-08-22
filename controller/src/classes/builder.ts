@@ -2,23 +2,23 @@ import { BaseSubject } from "../types";
 import { AccessManagement } from "./AccessManagement";
 import { IAccessManagementBuilder, IPermissionManager, IStore, ISubjectResolver } from "../types/modules";
 
-export class AccessManagementBuilder<T extends Record<string, BaseSubject<keyof T & string>>> implements IAccessManagementBuilder<T> {
+export class AccessManagementBuilder<T extends Record<keyof T, S>, S extends BaseSubject<keyof T & string> = T[keyof T]> implements IAccessManagementBuilder<T> {
     private store: IStore | null = null;
     // @ts-expect-error we cannot fill this record at this point
     private subjectResolvers: Record<keyof T, ISubjectResolver<keyof T & string>> = {};
-    private permissionManager: IPermissionManager<T> | null = null;
+    private permissionManager: IPermissionManager<S> | null = null;
 
-    setStore(store: IStore): IAccessManagementBuilder {
+    setStore(store: IStore) {
         this.store = store;
         return this;
     }
 
-    addSubjectResolver<SubjectType extends (keyof T & string)>(subjectType: string, subjectResolver: ISubjectResolver<SubjectType, BaseSubject<SubjectType>>): IAccessManagementBuilder<T & { [key in SubjectType]: BaseSubject<SubjectType>; }> {
-        this.subjectResolvers[subjectType] = subjectResolver
+    addSubjectResolver<SubjectType extends (keyof T & string)>(subjectType: SubjectType, subjectResolver: ISubjectResolver<SubjectType, BaseSubject<SubjectType>>): IAccessManagementBuilder<T & { [key in SubjectType]: BaseSubject<SubjectType>; }> {
+        this.subjectResolvers[subjectType as keyof T] = subjectResolver
         return this;
     }
 
-    setPermissionManager(permissionManager: IPermissionManager<T>) {
+    setPermissionManager(permissionManager: IPermissionManager<S>) {
         this.permissionManager = permissionManager;
         return this;
     }
