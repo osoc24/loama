@@ -1,7 +1,7 @@
-import { BaseSubject, Permission } from "../types";
+import { BaseSubject, Permission, ResourcePermissions } from "../types";
 import { IAccessManagement, IPermissionManager, IStore, ISubjectResolver, SubjectKey, SubjectType } from "../types/modules";
 
-export class AccessManagement<T extends Record<keyof T, S>, S extends BaseSubject<keyof T & string> = BaseSubject<keyof T & string>> implements IAccessManagement<T> {
+export class AccessManagement<T extends Record<keyof T, S>, S extends BaseSubject<keyof T & string>> implements IAccessManagement<T> {
     private store: IStore
     private subjectResolvers: Record<keyof T, ISubjectResolver<keyof T & string>>;
     private permissionManager: IPermissionManager<S>
@@ -29,7 +29,6 @@ export class AccessManagement<T extends Record<keyof T, S>, S extends BaseSubjec
         return [...subjectPermission?.permissions ?? []]
     }
 
-    // TODO: Add index updating (+ pushing to remote)
     private async updateItem<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>, permissions: Permission[]) {
         let item = await this.getItem(resourceUrl, subject);
 
@@ -129,5 +128,9 @@ export class AccessManagement<T extends Record<keyof T, S>, S extends BaseSubjec
         item.isEnabled = false;
 
         await this.store.saveToRemoteIndex()
+    }
+
+    getContainerPermissionList<K extends SubjectKey<T>>(containerUrl: string): Promise<ResourcePermissions<SubjectType<T, K>>[]> {
+        return this.permissionManager.getContainerPermissionList(containerUrl);
     }
 }

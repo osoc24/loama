@@ -16,6 +16,11 @@ export interface IAccessManagement<T extends Record<keyof T, BaseSubject<keyof T
     */
     enablePermissions<K extends SubjectKey<T>>(resource: string, subject: SubjectType<T, K>): Promise<void>
     disablePermissions<K extends SubjectKey<T>>(resource: string, subject: SubjectType<T, K>): Promise<void>
+    /**
+    * Retrieve the permissions of the resources in this container.
+    * Will probably work for a resource, but not guaranteed. Use getItem for that
+    */
+    getContainerPermissionList<K extends SubjectKey<T>>(containerUrl: string): Promise<ResourcePermissions<SubjectType<T, K>>[]>
 }
 
 export interface IAccessManagementBuilder<AllSubjectTypes extends Record<string, BaseSubject<keyof AllSubjectTypes & string>>> {
@@ -64,4 +69,9 @@ export interface IPermissionManager<T extends BaseSubject<string>> {
     // Does not update the index file
     editPermissions(resource: string, item: IndexItem, subject: T, permissions: Permission[]): Promise<void>
     getRemotePermissions(resourceUrl: string): Promise<ResourcePermissions<T>>
+    /**
+    * Retrieve the permissions of  e resources  i n th i s  container.
+    * Will probably work for a resource, but not guaranteed. Use getRemotePermissions for that
+    */
+    getContainerPermissionList(containerUrl: string): Promise<ResourcePermissions<T>[]>
 }

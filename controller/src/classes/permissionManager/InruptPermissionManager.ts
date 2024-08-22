@@ -1,4 +1,4 @@
-import { Access, AccessModes, getGroupAccessAll, getResourceInfoWithAcl } from "@inrupt/solid-client";
+import { Access, AccessModes, getGroupAccessAll, getResourceInfoWithAcl, getSolidDataset, getThingAll } from "@inrupt/solid-client";
 import { IndexItem, Permission, ResourcePermissions } from "../../types";
 import { IPermissionManager } from "../../types/modules";
 import { getAgentAccessAll, getPublicAccess, setAgentAccess, setPublicAccess } from "@inrupt/solid-client/universal";
@@ -161,5 +161,15 @@ export class InruptPermissionManager<S extends UrlSubject | PublicSubject> imple
         }
 
         return remotePermissions;
+    }
+
+    async getContainerPermissionList(containerUrl: string) {
+        const session = getDefaultSession();
+        const dataset = await getSolidDataset(containerUrl, { fetch: session.fetch });
+        // NOTE: can probably be optimized
+        return Promise.all(
+            getThingAll(dataset)
+                .map(async (resource) => (await this.getRemotePermissions(resource.url)))
+        )
     }
 }
