@@ -40,8 +40,14 @@ export class InruptStore extends BaseStore implements IStore {
                 );
             }
         }
+
         const fileText = await file?.text();
-        return JSON.parse(fileText ?? "{}");
+        this.index = JSON.parse(fileText ?? "{}");
+        if (!this.index) {
+            throw new Error("Index not found or invalid");
+        }
+
+        return this.index;
     }
 
     async saveToRemoteIndex() {

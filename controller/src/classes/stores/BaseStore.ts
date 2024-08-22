@@ -16,7 +16,7 @@ export abstract class BaseStore {
 
     async getCurrentIndex(): Promise<Index> {
         if (!this.index) {
-            return this.getOrCreateIndex();
+            this.index = await this.getOrCreateIndex();
         }
         return this.index;
     }
