@@ -5,7 +5,7 @@ declare type EnforceKeyMatchResolver<T extends Record<string, BaseSubject<string
     [K in keyof T]: T[K] extends BaseSubject<K & string> ? ISubjectResolver<T[K]> : never;
 }
 
-export class AccessManagement<T extends Record<keyof T, BaseSubject<keyof T & string>>> { // implements IAccessManagement<T> {
+export class AccessManagement<T extends Record<keyof T, BaseSubject<keyof T & string>>> implements IAccessManagement<T> {
     private store: IStore
     private subjectResolvers: EnforceKeyMatchResolver<T>
     private permissionManager: IPermissionManager<T>
@@ -134,7 +134,7 @@ export class AccessManagement<T extends Record<keyof T, BaseSubject<keyof T & st
         await this.store.saveToRemoteIndex()
     }
 
-    getContainerPermissionList<K extends SubjectKey<T>>(containerUrl: string): Promise<ResourcePermissions<SubjectType<T, K>>[]> {
+    getContainerPermissionList(containerUrl: string): Promise<ResourcePermissions<T[keyof T]>[]> {
         return this.permissionManager.getContainerPermissionList(containerUrl);
     }
 }

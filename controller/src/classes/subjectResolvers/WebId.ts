@@ -2,7 +2,7 @@ import { Index, IndexItem } from "../../types";
 import { ISubjectResolver } from "../../types/modules";
 import { WebIdSubject } from "../../types/subjects";
 
-export class WebIdResolver implements ISubjectResolver<"webId", WebIdSubject> {
+export class WebIdResolver implements ISubjectResolver<WebIdSubject> {
     checkMatch(subjectA: WebIdSubject, subjectB: WebIdSubject): boolean {
         if (subjectA.type !== "webId" || subjectB.type !== "webId") {
             return false;

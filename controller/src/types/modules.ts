@@ -20,7 +20,7 @@ export interface IAccessManagement<T extends Record<keyof T, BaseSubject<keyof T
     * Retrieve the permissions of the resources in this container.
     * Will probably work for a resource, but not guaranteed. Use getItem for that
     */
-    getContainerPermissionList<K extends SubjectKey<T>>(containerUrl: string): Promise<ResourcePermissions<SubjectType<T, K>>[]>
+    getContainerPermissionList(containerUrl: string): Promise<ResourcePermissions<T[keyof T]>[]>
 }
 
 // export interface IAccessManagementBuilder<T extends BaseSubject<string>> {
@@ -73,5 +73,5 @@ export interface IPermissionManager<T = Record<string, BaseSubject<string>>> {
     * Retrieve the permissions of  e resources  i n th i s  container.
     * Will probably work for a resource, but not guaranteed. Use getRemotePermissions for that
     */
-    getContainerPermissionList<K extends keyof T>(containerUrl: string): Promise<ResourcePermissions<T[K]>[]>
+    getContainerPermissionList(containerUrl: string): Promise<ResourcePermissions<T[keyof T]>[]>
 }

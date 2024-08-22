@@ -1,8 +1,8 @@
 import { Index, IndexItem } from "../../types";
 import { PublicSubject } from "../../types/subjects";
-import { ISubjectResolver } from "../../types/modules";   
+import { ISubjectResolver } from "../../types/modules";
 
-export class PublicResolver implements ISubjectResolver<"public", PublicSubject> {
+export class PublicResolver implements ISubjectResolver<PublicSubject> {
     checkMatch(subjectA: PublicSubject, subjectB: PublicSubject): boolean {
         if (subjectA.type !== "public" || subjectB.type !== "public") {
             return false;

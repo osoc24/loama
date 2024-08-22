@@ -1,6 +1,6 @@
 import { Access, AccessModes, getGroupAccessAll, getResourceInfoWithAcl, getSolidDataset, getThingAll } from "@inrupt/solid-client";
 import { BaseSubject, IndexItem, Permission, ResourcePermissions } from "../../types";
-import { IPermissionManager } from "../../types/modules";
+import { IPermissionManager, SubjectKey } from "../../types/modules";
 import { getAgentAccessAll, getPublicAccess, setAgentAccess, setPublicAccess } from "@inrupt/solid-client/universal";
 import { getDefaultSession } from "@inrupt/solid-client-authn-browser";
 import "core-js/proposals/set-methods-v2"
@@ -14,7 +14,7 @@ const ACCESS_MODES_TO_PERMISSION_MAPPING: Record<keyof (AccessModes & Access), P
     controlWrite: Permission.Control,
 }
 
-export class InruptPermissionManager<T extends Record<keyof T, BaseSubject<keyof T>>> implements IPermissionManager<T> {
+export class InruptPermissionManager<T extends Record<keyof T, BaseSubject<keyof T & string>>> implements IPermissionManager<T> {
     // This is a replacement for https://github.com/inrupt/solid-client-js/blob/eb8e86f61458ec76fa2244f7b38b7d7983bbd810/src/access/wac.ts#L262 because it is not exposed in the inrupt library
     private async getGroupAccessAll(resource: string): Promise<Record<string, Access> | null> {
         const session = getDefaultSession();
@@ -24,7 +24,7 @@ export class InruptPermissionManager<T extends Record<keyof T, BaseSubject<keyof
         return getGroupAccessAll(resourceInfo)
     }
 
-    private async updateACL(resource: string, subject: S, accessModes: Partial<AccessModes>) {
+    private async updateACL<K extends SubjectKey<T>>(resource: string, subject: T[K], accessModes: Partial<AccessModes>) {
         const session = getDefaultSession();
         switch (subject.type) {
             case "public": {
@@ -100,12 +100,12 @@ export class InruptPermissionManager<T extends Record<keyof T, BaseSubject<keyof
     }
 
     //. NOTE: Currently, it doesn't do any recursive permission setting on containers
-    async createPermissions(resource: string, subject: S, permissions: Permission[]): Promise<void> {
+    async createPermissions<K extends SubjectKey<T>>(resource: string, subject: T[K], permissions: Permission[]): Promise<void> {
         const accessModes = this.permissionsToAccessModes(permissions, []);
         await this.updateACL(resource, subject, accessModes);
     }
 
-    async editPermissions(resource: string, item: IndexItem, subject: S, permissions: Permission[]): Promise<void> {
+    async editPermissions<K extends SubjectKey<T>>(resource: string, item: IndexItem, subject: T[K], permissions: Permission[]): Promise<void> {
         // 1. make diff with index to see what to create/update/delete, per resource
         const oldPermissionsSet = new Set(item.permissions);
         const newPermissionsSet = new Set(permissions);
@@ -116,13 +116,13 @@ export class InruptPermissionManager<T extends Record<keyof T, BaseSubject<keyof
         await this.updateACL(resource, subject, accessModes);
     }
 
-    async getRemotePermissions(resourceUrl: string): Promise<ResourcePermissions<S>> {
+    async getRemotePermissions<K extends SubjectKey<T>>(resourceUrl: string): Promise<ResourcePermissions<T[K]>> {
         const session = getDefaultSession();
         const agentAccess = await getAgentAccessAll(resourceUrl, { fetch: session.fetch });
         const publicAccess = await getPublicAccess(resourceUrl, { fetch: session.fetch })
         const groupAccess = await this.getGroupAccessAll(resourceUrl)
 
-        const remotePermissions: ResourcePermissions<S> = {
+        const remotePermissions: ResourcePermissions<T[K]> = {
             resourceUrl,
             permissionsPerSubject: []
         }
@@ -131,17 +131,18 @@ export class InruptPermissionManager<T extends Record<keyof T, BaseSubject<keyof
             remotePermissions.permissionsPerSubject.push({
                 subject: {
                     type: "public"
-                } as S,
+                } as T[K],
                 permissions: this.AccessModesToPermissions(publicAccess)
             })
         };
         if (agentAccess) {
             Object.entries(agentAccess).forEach(([url, access]) => {
                 remotePermissions.permissionsPerSubject.push({
+                    // @ts-expect-error selector is required for webId
                     subject: {
                         type: "webId",
                         selector: { url },
-                    } as S,
+                    } as T[K],
                     permissions: this.AccessModesToPermissions(access)
                 })
             })
@@ -149,10 +150,11 @@ export class InruptPermissionManager<T extends Record<keyof T, BaseSubject<keyof
         if (groupAccess) {
             Object.entries(groupAccess).forEach(([url, access]) => {
                 remotePermissions.permissionsPerSubject.push({
+                    // @ts-expect-error selector is required for group
                     subject: {
                         type: "group",
                         selector: { url }
-                    } as S,
+                    } as T[K],
                     permissions: this.AccessModesToPermissions(access)
                 })
             })
