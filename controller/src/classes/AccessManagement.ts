@@ -1,18 +1,22 @@
 import { BaseSubject, Permission, ResourcePermissions } from "../types";
 import { IAccessManagement, IPermissionManager, IStore, ISubjectResolver, SubjectKey, SubjectType } from "../types/modules";
 
-export class AccessManagement<T extends Record<keyof T, S>, S extends BaseSubject<keyof T & string>> implements IAccessManagement<T> {
-    private store: IStore
-    private subjectResolvers: Record<keyof T, ISubjectResolver<keyof T & string>>;
-    private permissionManager: IPermissionManager<S>
+declare type EnforceKeyMatchResolver<T extends Record<string, BaseSubject<string>>> = {
+    [K in keyof T]: T[K] extends BaseSubject<K & string> ? ISubjectResolver<T[K]> : never;
+}
 
-    constructor(store: IStore, pm: IPermissionManager<S>, subjectResolvers: Record<keyof T, ISubjectResolver<keyof T & string>>) {
+export class AccessManagement<T extends Record<keyof T, BaseSubject<keyof T & string>>> { // implements IAccessManagement<T> {
+    private store: IStore
+    private subjectResolvers: EnforceKeyMatchResolver<T>
+    private permissionManager: IPermissionManager<T>
+
+    constructor(store: IStore, subjectResolvers: EnforceKeyMatchResolver<T>, pm: IPermissionManager<T>) {
         this.store = store;
         this.permissionManager = pm;
         this.subjectResolvers = subjectResolvers;
     }
 
-    private async getExistingPermissions<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>): Promise<Permission[]> {
+    private async getExistingPermissions<K extends SubjectKey<T>>(resourceUrl: string, subject: T[K]): Promise<Permission[]> {
         const item = await this.getItem(resourceUrl, subject);
         if (item) {
             // Makeing sure the array is not a reference to the one stored in the index

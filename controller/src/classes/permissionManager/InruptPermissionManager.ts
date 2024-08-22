@@ -1,9 +1,8 @@
 import { Access, AccessModes, getGroupAccessAll, getResourceInfoWithAcl, getSolidDataset, getThingAll } from "@inrupt/solid-client";
-import { IndexItem, Permission, ResourcePermissions } from "../../types";
+import { BaseSubject, IndexItem, Permission, ResourcePermissions } from "../../types";
 import { IPermissionManager } from "../../types/modules";
 import { getAgentAccessAll, getPublicAccess, setAgentAccess, setPublicAccess } from "@inrupt/solid-client/universal";
 import { getDefaultSession } from "@inrupt/solid-client-authn-browser";
-import { PublicSubject, UrlSubject } from "../../types/subjects";
 import "core-js/proposals/set-methods-v2"
 
 const ACCESS_MODES_TO_PERMISSION_MAPPING: Record<keyof (AccessModes & Access), Permission> = {
@@ -15,7 +14,7 @@ const ACCESS_MODES_TO_PERMISSION_MAPPING: Record<keyof (AccessModes & Access), P
     controlWrite: Permission.Control,
 }
 
-export class InruptPermissionManager<S extends UrlSubject | PublicSubject> implements IPermissionManager<S> {
+export class InruptPermissionManager<T extends Record<keyof T, BaseSubject<keyof T>>> implements IPermissionManager<T> {
     // This is a replacement for https://github.com/inrupt/solid-client-js/blob/eb8e86f61458ec76fa2244f7b38b7d7983bbd810/src/access/wac.ts#L262 because it is not exposed in the inrupt library
     private async getGroupAccessAll(resource: string): Promise<Record<string, Access> | null> {
         const session = getDefaultSession();
@@ -53,7 +52,6 @@ export class InruptPermissionManager<S extends UrlSubject | PublicSubject> imple
                 break;
             }
             default: {
-                // @ts-expect-error we should never reach this point
                 throw new Error(`Unsupported subject type ${subject.type}`);
             }
         }

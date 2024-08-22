@@ -23,12 +23,12 @@ export interface IAccessManagement<T extends Record<keyof T, BaseSubject<keyof T
     getContainerPermissionList<K extends SubjectKey<T>>(containerUrl: string): Promise<ResourcePermissions<SubjectType<T, K>>[]>
 }
 
-export interface IAccessManagementBuilder<AllSubjectTypes extends Record<string, BaseSubject<keyof AllSubjectTypes & string>>> {
-    setStore(store: IStore): IAccessManagementBuilder<AllSubjectTypes>;
-    addSubjectResolver<SubjectType extends keyof AllSubjectTypes & string>(subjectType: SubjectType, subjectResolver: ISubjectResolver<SubjectType>): IAccessManagementBuilder<AllSubjectTypes & { [key in SubjectType]: BaseSubject<SubjectType> }>;
-    setPermissionManager(permissionManager: IPermissionManager<BaseSubject<string>>): IAccessManagementBuilder<AllSubjectTypes>;
-    build(): IAccessManagement<AllSubjectTypes>;
-}
+// export interface IAccessManagementBuilder<T extends BaseSubject<string>> {
+//     setStore(store: IStore): IAccessManagementBuilder<AllSubjectTypes>;
+//     addSubjectResolver<SubjectType extends keyof AllSubjectTypes & string>(subjectType: SubjectType, subjectResolver: ISubjectResolver<SubjectType>): IAccessManagementBuilder<AllSubjectTypes & { [key in SubjectType]: BaseSubject<SubjectType> }>;
+//     setPermissionManager(permissionManager: IPermissionManager<BaseSubject<string>>): IAccessManagementBuilder<AllSubjectTypes>;
+//     build(): IAccessManagement<T>;
+// }
 
 export interface IStore {
     /**
@@ -55,7 +55,7 @@ export interface IStore {
     saveToRemoteIndex(): Promise<void>;
 }
 
-export interface ISubjectResolver<K extends string, T extends BaseSubject<K> = BaseSubject<K>> {
+export interface ISubjectResolver<T extends BaseSubject<string>> {
     checkMatch(subjectA: T, subjectB: T): boolean;
     /**
     * @returns a reference to index item for the given resource and subject
@@ -63,15 +63,15 @@ export interface ISubjectResolver<K extends string, T extends BaseSubject<K> = B
     getItem(index: Index, resourceUrl: string, subjectSelector?: unknown): IndexItem | undefined
 }
 
-export interface IPermissionManager<T extends BaseSubject<string>> {
+export interface IPermissionManager<T = Record<string, BaseSubject<string>>> {
     // Does not update the index file
-    createPermissions(resource: string, subject: T, permissions: Permission[]): Promise<void>
+    createPermissions<K extends SubjectKey<T>>(resource: string, subject: T[K], permissions: Permission[]): Promise<void>
     // Does not update the index file
-    editPermissions(resource: string, item: IndexItem, subject: T, permissions: Permission[]): Promise<void>
-    getRemotePermissions(resourceUrl: string): Promise<ResourcePermissions<T>>
+    editPermissions<K extends SubjectKey<T>>(resource: string, item: IndexItem, subject: T[K], permissions: Permission[]): Promise<void>
+    getRemotePermissions<K extends SubjectKey<T>>(resourceUrl: string): Promise<ResourcePermissions<T[K]>>
     /**
     * Retrieve the permissions of  e resources  i n th i s  container.
     * Will probably work for a resource, but not guaranteed. Use getRemotePermissions for that
     */
-    getContainerPermissionList(containerUrl: string): Promise<ResourcePermissions<T>[]>
+    getContainerPermissionList<K extends keyof T>(containerUrl: string): Promise<ResourcePermissions<T[K]>[]>
 }
