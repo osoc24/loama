@@ -35,7 +35,7 @@ export interface BaseSubject<T extends string> {
 }
 
 // NOTE: Same note about K as above
-export interface ResourcePermissions<T extends BaseSubject<string>> {
+export interface ResourcePermissions<T = BaseSubject<string>> {
     resourceUrl: url;
     permissionsPerSubject: {
         subject: T,
