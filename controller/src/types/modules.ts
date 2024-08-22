@@ -2,6 +2,9 @@ import { BaseSubject, Index, IndexItem, Permission, ResourcePermissions } from "
 
 export type SubjectKey<T> = keyof T & string;
 export type SubjectType<T, K extends SubjectKey<T>> = T[K];
+export type EnforceKeyMatchResolver<T extends Record<string, BaseSubject<string>>> = {
+    [K in keyof T]: T[K] extends BaseSubject<K & string> ? ISubjectResolver<T[K]> : never;
+}
 
 export interface IAccessManagement<T extends Record<keyof T, BaseSubject<keyof T & string>>> {
     setPodUrl(podUrl: string): void;
@@ -22,13 +25,6 @@ export interface IAccessManagement<T extends Record<keyof T, BaseSubject<keyof T
     */
     getContainerPermissionList(containerUrl: string): Promise<ResourcePermissions<T[keyof T]>[]>
 }
-
-// export interface IAccessManagementBuilder<T extends BaseSubject<string>> {
-//     setStore(store: IStore): IAccessManagementBuilder<AllSubjectTypes>;
-//     addSubjectResolver<SubjectType extends keyof AllSubjectTypes & string>(subjectType: SubjectType, subjectResolver: ISubjectResolver<SubjectType>): IAccessManagementBuilder<AllSubjectTypes & { [key in SubjectType]: BaseSubject<SubjectType> }>;
-//     setPermissionManager(permissionManager: IPermissionManager<BaseSubject<string>>): IAccessManagementBuilder<AllSubjectTypes>;
-//     build(): IAccessManagement<T>;
-// }
 
 export interface IStore {
     /**

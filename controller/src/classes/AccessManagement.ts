@@ -1,9 +1,5 @@
 import { BaseSubject, Permission, ResourcePermissions } from "../types";
-import { IAccessManagement, IPermissionManager, IStore, ISubjectResolver, SubjectKey, SubjectType } from "../types/modules";
-
-declare type EnforceKeyMatchResolver<T extends Record<string, BaseSubject<string>>> = {
-    [K in keyof T]: T[K] extends BaseSubject<K & string> ? ISubjectResolver<T[K]> : never;
-}
+import { EnforceKeyMatchResolver, IAccessManagement, IPermissionManager, IStore, ISubjectResolver, SubjectKey, SubjectType } from "../types/modules";
 
 export class AccessManagement<T extends Record<keyof T, BaseSubject<keyof T & string>>> implements IAccessManagement<T> {
     private store: IStore
