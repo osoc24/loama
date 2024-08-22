@@ -31,13 +31,30 @@ export class AccessManagement<T extends Record<keyof T, S>, S extends BaseSubjec
 
     // TODO: Add index updating (+ pushing to remote)
     private async updateItem<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>, permissions: Permission[]) {
-        const item = await this.getItem(resourceUrl, subject);
+        let item = await this.getItem(resourceUrl, subject);
 
         if (item) {
             await this.permissionManager.editPermissions(resourceUrl, item, subject, permissions);
         } else {
             await this.permissionManager.createPermissions(resourceUrl, subject, permissions);
+
+            item = {
+                id: crypto.randomUUID(),
+                requestId: crypto.randomUUID(),
+                isEnabled: true,
+                permissions: permissions,
+                resource: resourceUrl,
+                subject: subject,
+            }
+
+            const index = await this.store.getCurrentIndex();
+            index.items.push(item);
         }
+
+        // TODO: Check if this actually works (should be because it's a reference)
+        item.permissions = permissions;
+
+        await this.store.saveToRemoteIndex();
     }
 
     setPodUrl(podUrl: string) {
@@ -87,7 +104,30 @@ export class AccessManagement<T extends Record<keyof T, S>, S extends BaseSubjec
         return newPermissions;
     }
 
-    async enablePermissions<K extends SubjectKey<T>>(resource: string, subject: SubjectType<T, K>) { }
+    async enablePermissions<K extends SubjectKey<T>>(resource: string, subject: SubjectType<T, K>) {
+        const item = await this.getItem(resource, subject);
+        if (!item) {
+            // This point should never be reached
+            throw new Error("Item not found after disabling permissions")
+        }
 
-    async disablePermissions<K extends SubjectKey<T>>(resource: string, subject: SubjectType<T, K>) { }
+        item.isEnabled = true;
+        await this.updateItem(resource, subject, item.permissions)
+
+        await this.store.saveToRemoteIndex()
+    }
+
+    async disablePermissions<K extends SubjectKey<T>>(resource: string, subject: SubjectType<T, K>) {
+        await this.updateItem(resource, subject, [])
+
+        const item = await this.getItem(resource, subject);
+        if (!item) {
+            // This point should never be reached
+            throw new Error("Item not found after disabling permissions")
+        }
+
+        item.isEnabled = false;
+
+        await this.store.saveToRemoteIndex()
+    }
 }
