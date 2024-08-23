@@ -44,6 +44,25 @@ relies on solid-common-lib.
 
 ## Getting started
 
+### prerequisites
+
+- Node >= 20
+- Yarn >= 1.22.x
+
+### Development setup
+
+We use yarn workspaces to manage our dependencies of all the subprojects.
+
+Run `yarn` or `yarn install` to get all the dependencies
+
+Finally we use [nx](nx.dev) to run a job in multiple projects. Simply start the dev servers for loama & its dependencies with:
+
+`yarn dev`
+
+Now you can find loama at http://localhost:5173
+
+### Using your own SOLID pod
+
 1. `mkdir -p css/data`: The CSS uses filesystem-based storage
 2. `docker compose up -d --wait`
 

@@ -14,3 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - general API cleanup
 - separated into more targeted modules
 - Introduced select component which can create new permission subjects
+- clone index item permission array to remove references
+- Replace seperate npm lock files with yarn workspaces
+- Add [nx](nx.dev) as monorepo tool to run multipe jobs at once
+- Removed /loama prefix in url
