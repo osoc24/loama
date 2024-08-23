@@ -1,7 +1,7 @@
 import { BaseSubject, Permission, ResourcePermissions } from "../types";
-import { EnforceKeyMatchResolver, IAccessManagement, IPermissionManager, IStore, ISubjectResolver, SubjectKey, SubjectType } from "../types/modules";
+import { EnforceKeyMatchResolver, IController, IPermissionManager, IStore, SubjectKey, SubjectType } from "../types/modules";
 
-export class AccessManagement<T extends Record<keyof T, BaseSubject<keyof T & string>>> implements IAccessManagement<T> {
+export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>> implements IController<T> {
     private store: IStore
     private subjectResolvers: EnforceKeyMatchResolver<T>
     private permissionManager: IPermissionManager<T>

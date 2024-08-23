@@ -1,4 +1,4 @@
-import { AccessManagement } from "./classes/AccessManagement";
+import { Controller } from "./classes/Controller";
 import { InruptPermissionManager } from "./classes/permissionManager/InruptPermissionManager";
 import { InruptStore } from "./classes/stores/InruptStore";
 import { PublicResolver } from "./classes/subjectResolvers/Public";
@@ -16,7 +16,7 @@ import { WebIdResolver } from "./classes/subjectResolvers/WebId";
 //     new InruptPermissionManager(),
 // )
 
-export const inruptController = new AccessManagement(
+export const inruptController = new Controller(
     new InruptStore(),
     {
         webId: new WebIdResolver(),
