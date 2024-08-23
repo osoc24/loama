@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "tsc",
-    "watch": "tsc --watch"
+    "dev": "tsc --watch"
   },
   "description": "",
   "main": "dist/index.js",
@@ -25,8 +25,9 @@
   "dependencies": {
     "@inrupt/solid-client": "^2.0.1",
     "@inrupt/solid-client-authn-browser": "^2.2.4",
-    "loama-app": "file:",
-    "loama-common": "file:../solid-common-lib",
-    "vue": "^3.4.36"
+    "loama-common": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
   }
 }
