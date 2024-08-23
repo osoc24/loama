@@ -58,11 +58,13 @@ export class InruptPermissionManager<T extends Record<keyof T, BaseSubject<keyof
     }
 
     private AccessModesToPermissions(accessModes: AccessModes | Access): Permission[] {
-        return Object.entries(accessModes).map(([mode, isActive]) => {
+        const permissions = new Set<Permission>();
+        Object.entries(accessModes).forEach(([mode, isActive]) => {
             if (isActive) {
-                return ACCESS_MODES_TO_PERMISSION_MAPPING[mode as keyof (AccessModes & Access)];
+                permissions.add(ACCESS_MODES_TO_PERMISSION_MAPPING[mode as keyof (AccessModes & Access)])
             }
-        }).filter(p => p !== undefined);
+        })
+        return [...permissions];
     }
 
     private permissionsToAccessModes(addedPermissions: Iterable<Permission>, removedPermissions: Iterable<Permission>): Partial<AccessModes> {
