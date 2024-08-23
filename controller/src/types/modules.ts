@@ -9,6 +9,7 @@ export type EnforceKeyMatchResolver<T extends Record<string, BaseSubject<string>
 export interface IAccessManagement<T extends Record<keyof T, BaseSubject<keyof T & string>>> {
     setPodUrl(podUrl: string): void;
     unsetPodUrl(podUrl: string): void;
+    getLabelForSubject<K extends SubjectKey<T>>(subject: T[K]): string;
     getOrCreateIndex(): Promise<Index>;
     getItem<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>): Promise<IndexItem | undefined>;
     addPermission<K extends SubjectKey<T>>(resourceUrl: string, addedPermission: Permission, subject: SubjectType<T, K>): Promise<Permission[]>
@@ -52,6 +53,10 @@ export interface IStore {
 }
 
 export interface ISubjectResolver<T extends BaseSubject<string>> {
+    /**
+    *  @returns a human-readable label for the subject
+    */
+    toLabel(subject: T): string;
     checkMatch(subjectA: T, subjectB: T): boolean;
     /**
     * @returns a reference to index item for the given resource and subject

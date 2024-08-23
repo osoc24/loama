@@ -3,6 +3,10 @@ import { PublicSubject } from "../../types/subjects";
 import { ISubjectResolver } from "../../types/modules";
 
 export class PublicResolver implements ISubjectResolver<PublicSubject> {
+    toLabel(_subject: PublicSubject): string {
+        return "Public"
+    }
+
     checkMatch(subjectA: PublicSubject, subjectB: PublicSubject): boolean {
         if (subjectA.type !== "public" || subjectB.type !== "public") {
             return false;

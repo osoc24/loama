@@ -68,6 +68,13 @@ export class AccessManagement<T extends Record<keyof T, BaseSubject<keyof T & st
         return this.store.getOrCreateIndex();
     }
 
+    getLabelForSubject<K extends SubjectKey<T>>(subject: T[K]): string {
+        if (!this.subjectResolvers[subject.type]) {
+            throw new Error(`No resolver found for subject type ${subject.type}`);
+        }
+        return this.subjectResolvers[subject.type].toLabel(subject);
+    }
+
     async getItem<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>) {
         const resolver = this.subjectResolvers[subject.type];
         if (!resolver) {

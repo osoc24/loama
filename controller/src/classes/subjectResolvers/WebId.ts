@@ -3,6 +3,10 @@ import { ISubjectResolver } from "../../types/modules";
 import { WebIdSubject } from "../../types/subjects";
 
 export class WebIdResolver implements ISubjectResolver<WebIdSubject> {
+    toLabel(subject: WebIdSubject): string {
+        return subject.selector.url
+    }
+
     checkMatch(subjectA: WebIdSubject, subjectB: WebIdSubject): boolean {
         if (subjectA.type !== "webId" || subjectB.type !== "webId") {
             return false;
