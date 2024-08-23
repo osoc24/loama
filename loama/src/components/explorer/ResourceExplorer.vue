@@ -15,25 +15,23 @@
                     <i>Select one to get started</i>
                 </div>
             </div>
-            <SelectedEntry v-else :name="selectedEntry.name" :isContainer="selectedEntry.isContainer"
-                :url="selectedEntry.resourceUrl" :agents="selectedEntry.permissionsPerSubject"
-                @close="selectedEntry = null" @update-permissions="updatePermissions" />
+            <SelectedEntry v-else />
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import { store } from 'loama-app'
-import { inruptController, type ResourcePermissions } from "loama-controller";
+import { inruptController } from "loama-controller";
 import { ref, watch } from "vue";
 import { PhLock, PhLockOpen } from "@phosphor-icons/vue";
 import ExplorerEntry from "./ExplorerEntry.vue";
 import { useRoute } from "vue-router";
 import ExplorerBreadcrumbs from "./ExplorerBreadcrumbs.vue";
-import SubjectPermissionTable from "./SubjectPermissionTable.vue";
 import type { Entry } from "@/lib/types";
 import { selectedEntry } from '@/lib/state';
 import { computed } from 'vue';
+import SelectedEntry from './SelectedEntry.vue';
 
 const data = ref(await getThingsAtLevel(store.usedPod));
 const route = useRoute();
@@ -65,7 +63,7 @@ async function getThingsAtLevel(url: string) {
         })
 }
 
-function getViewFormattedThings(resourcePermissionsList: ResourcePermissions[]) {
+function getViewFormattedThings(resourcePermissionsList: (typeof data)["value"]) {
     return resourcePermissionsList.map(resourcePermissions => {
         const uri = resourcePermissions.resourceUrl.replace(store.usedPod, '');
         const isContainer = uri.charAt(uri.length - 1) === '/'

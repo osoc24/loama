@@ -1,5 +1,6 @@
-import type { ResourcePermissions } from 'loama-controller'
+import type { PublicSubject, ResourcePermissions, WebIdSubject } from 'loama-controller'
 
-export type Entry = ResourcePermissions & { name: string; isContainer: boolean }
+// NOTE: We hardcode the subjects here because we know what subjects the inruptController uses
+export type Entry = ResourcePermissions<WebIdSubject | PublicSubject> & { name: string; isContainer: boolean }
 
 export type Result = { ok: true; value: string } | { ok: false; error: unknown }

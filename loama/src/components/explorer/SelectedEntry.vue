@@ -1,90 +1,43 @@
 <template>
-    <div class="container">
+    <div class="container" v-if="selectedEntry">
         <header>
-            <ExplorerEntity :is-container="isContainer">
-                {{ name }}
+            <ExplorerEntity :is-container="selectedEntry.isContainer">
+                {{ selectedEntry.name }}
             </ExplorerEntity>
             <PhXCircle :size="40" @click="$emit('close')" class="clickable" />
         </header>
-        <article>
-            <label for="agents">
-                <h3>User</h3>
-            </label>
-            <MultiSelect name="agents" ref="agentSelect" v-model="selectedAgent" :options="agentOptions"
-                :can-clear="false" :can-deselect="false" searchable create-option class="multiselect-purple" />
-            <form>
-                <LoSwitch v-for="option in permissionOptions" :key="option.name" :id="option.name"
-                    :default-value="isByDefaultSelected(option.name)"
-                    @update:checked="updatePermission(option.name, $event)">
-                    {{ option.label }}
-                </LoSwitch>
-                <Notification v-if="updateStatus" :type="updateStatus.ok ? 'success' : 'error'"
-                    :message="updateStatus.ok ? updateStatus.value : String(updateStatus.error) || 'No message available'" />
-            </form>
-        </article>
+        <section>
+            <div class="list-header">
+                <h3>Subjects with permissions:</h3>
+                <LoButton :left-icon="PhPencil" @click="() => permissionDrawerVisible = true">Edit</LoButton>
+            </div>
+            <ul>
+                <li :key="inruptController.getLabelForSubject(permission.subject)"
+                    v-for="permission in selectedEntry.permissionsPerSubject">
+                    {{ inruptController.getLabelForSubject(permission.subject) }}
+                </li>
+            </ul>
+        </section>
+        <Drawer v-model:visible="permissionDrawerVisible" header="Edit permissions" position="right"
+            class="permission-drawer">
+            <SubjectPermissionTable />
+        </Drawer>
     </div>
+    <p v-else>No entry selected in the resource explorer, this shouldn't be possible!</p>
 </template>
 
 <script setup lang="ts">
+import { selectedEntry } from '@/lib/state';
 import ExplorerEntity from './ExplorerEntity.vue';
-import { PhXCircle } from '@phosphor-icons/vue';
-import { ref, watch, computed } from 'vue';
-import MultiSelect from '@vueform/multiselect'
+import { PhPencil, PhXCircle } from '@phosphor-icons/vue';
+import { inruptController } from 'loama-controller';
+import LoButton from '../LoButton.vue';
+import { ref } from 'vue';
+import Drawer from 'primevue/drawer';
+import SubjectPermissionTable from './SubjectPermissionTable.vue';
 
-import LoSwitch from '../LoSwitch.vue';
-import { Permission, type ResourcePermissions, inruptController } from 'loama-controller';
-import type { Result } from '@/lib/types';
-import Notification from '../LoNotification.vue';
+const permissionDrawerVisible = ref(false);
 
-const emits = defineEmits<{ updatePermissions: [selectedAgent: string, newPermissions: Permission[]], close: [] }>()
-const props = defineProps<{ name: string; url: string; isContainer: boolean; agents: ResourcePermissions["permissionsPerSubject"] }>();
-
-const agentSelect = ref<MultiSelect | null>(null);
-
-// NOTE: Will be refactored/removed when controller is refactored
-const agentOptions = computed(() => props.agents.map(e => e.subject.type === "public" ? "public" : e.subject.selector.url));
-const selectedAgent = ref(agentOptions.value[0]);
-
-const updateStatus = ref<Result | null>(null);
-
-watch(props, () => {
-    updateStatus.value = null
-});
-
-const permissionOptions: { name: Permission, label: string }[] = [
-    { name: Permission.Read, label: "Able to read data" },
-    { name: Permission.Write, label: "Able to add new data" },
-    { name: Permission.Append, label: 'Able to modify existing data' },
-    { name: Permission.Control, label: 'Able to manage access & permissions' }
-];
-
-const isByDefaultSelected = (permission: Permission) => {
-    const agent = props.agents.find(e => e.subject.type === "public" ? selectedAgent.value === "public" : e.subject.type === Type.WebID && e.subject.selector?.url === selectedAgent.value);
-    if (!agent) return false;
-    return agent.permissions.includes(permission)
-};
-
-const updatePermission = async (permissionString: string, newValue: boolean) => {
-    const updatedPermission = permissionString as Permission;
-    let success = true;
-    try {
-        let updatedPermissions = [];
-        if (newValue) {
-            updatedPermissions = await inruptController.addPermission(props.url, updatedPermission, selectedAgent.value);
-        } else {
-            updatedPermissions = await inruptController.removePermission(props.url, updatedPermission, selectedAgent.value)
-        }
-        emits('updatePermissions', selectedAgent.value, updatedPermissions);
-    } catch (e) {
-        success = false;
-    }
-
-    if (success) {
-        updateStatus.value = { ok: true, value: 'The permissions were successfully updated!' };
-    } else {
-        updateStatus.value = { ok: false, error: 'An error occurred while updating the permissions. Please try again.' };
-    }
-}
 </script>
 
 <style scoped>
@@ -92,7 +45,7 @@ form {
     margin-top: calc(var(--base-unit) * 2);
 }
 
-article {
+section {
     background-color: var(--off-white);
     border-radius: var(--base-corner);
     height: 100%;
@@ -110,6 +63,10 @@ h3 {
     font-size: calc(var(--base-unit) * 2);
 }
 
+a {
+    text-decoration: none;
+}
+
 .clickable {
     cursor: pointer;
 }
@@ -118,12 +75,15 @@ h3 {
     background-color: var(--solid-purple);
 }
 
-.multiselect-purple {
-    --ms-ring-color: #9F7EFF30;
-    --ms-spinner-color: #9F7EFF;
-    --ms-option-bg-selected: #7C4DFF;
-    --ms-option-bg-selected-pointed: #9F7EFF;
-    --ms-option-color-selected-disabled: #6334E6;
+.list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 </style>
 <style src="@vueform/multiselect/themes/default.css"></style>
+<style>
+.permission-drawer {
+    width: 90vw !important;
+}
+</style>

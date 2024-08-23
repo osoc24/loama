@@ -34,11 +34,13 @@ export interface BaseSubject<T extends string> {
     }
 }
 
+export interface SubjectPermissions<T = BaseSubject<string>> {
+    subject: T,
+    permissions: Permission[]
+}
+
 // NOTE: Same note about K as above
 export interface ResourcePermissions<T = BaseSubject<string>> {
     resourceUrl: url;
-    permissionsPerSubject: {
-        subject: T,
-        permissions: Permission[]
-    }[]
+    permissionsPerSubject: SubjectPermissions<T>[]
 }
