@@ -1,16 +1,10 @@
-import { getDefaultSession, Session } from '@inrupt/solid-client-authn-browser'
-import { reactive } from 'vue'
-
-type storeType = {
-  session: Session,
-  usedPod: string,
-  setUsedPod: (url: string) => void
-}
+import { getDefaultSession } from '@inrupt/solid-client-authn-browser'
+import { reactive, markRaw } from 'vue'
 
 export const store = reactive({
-  session: getDefaultSession(),
-  usedPod: '',
-  setUsedPod(url: string) {
-    this.usedPod = url
-  }
-} as storeType)
+    session: markRaw(getDefaultSession()),
+    usedPod: '',
+    setUsedPod(url: string) {
+        this.usedPod = url
+    }
+})

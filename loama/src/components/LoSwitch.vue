@@ -1,6 +1,6 @@
 <template>
     <fieldset>
-        <input type="checkbox" :id="id" v-model="checked" @input="(event) => $emit('update:checked', event.target.checked)">
+        <input type="checkbox" :id="id" v-model="checked" @input="handleInput">
         <label :for="id">
             <slot></slot>
         </label>
@@ -11,8 +11,17 @@
 import { ref, watch } from 'vue';
 
 const props = defineProps<{ id: string; defaultValue: boolean }>();
+const emit = defineEmits<{
+    (e: "update:checked", checked: boolean): void,
+}>()
 
 const checked = ref(props.defaultValue);
+
+const handleInput = (e: Event) => {
+    if (!e.target) return;
+    const checked = (e.target as HTMLInputElement)?.checked ?? false;
+    emit('update:checked', checked)
+};
 
 watch(() => props.defaultValue, (newValue) => {
     checked.value = newValue;
