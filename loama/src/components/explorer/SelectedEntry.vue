@@ -32,10 +32,8 @@ import { ref, watch, computed } from 'vue';
 import MultiSelect from '@vueform/multiselect'
 
 import LoSwitch from '../LoSwitch.vue';
-import { Permission, Type, type ResourcePermissions } from 'loama-controller/dist/types';
-import { addPermission, removePermission } from 'loama-controller';
-import { store } from 'loama-app'
-import type { Result } from '@/utils/types';
+import { Permission, type ResourcePermissions, inruptController } from 'loama-controller';
+import type { Result } from '@/lib/types';
 import Notification from '../LoNotification.vue';
 
 const emits = defineEmits<{ updatePermissions: [selectedAgent: string, newPermissions: Permission[]], close: [] }>()
@@ -72,9 +70,9 @@ const updatePermission = async (permissionString: string, newValue: boolean) => 
     try {
         let updatedPermissions = [];
         if (newValue) {
-            updatedPermissions = await addPermission(store.session, props.url, selectedAgent.value, updatedPermission);
+            updatedPermissions = await inruptController.addPermission(props.url, updatedPermission, selectedAgent.value);
         } else {
-            updatedPermissions = await removePermission(store.session, props.url, selectedAgent.value, updatedPermission)
+            updatedPermissions = await inruptController.removePermission(props.url, updatedPermission, selectedAgent.value)
         }
         emits('updatePermissions', selectedAgent.value, updatedPermissions);
     } catch (e) {

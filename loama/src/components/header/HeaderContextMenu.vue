@@ -19,11 +19,11 @@ import router from '@/router';
 import { store } from 'loama-app'
 import { PhSignOut } from '@phosphor-icons/vue';
 import { listPodUrls } from 'loama-common';
-import { unsetPodUrl } from 'loama-controller';
+import { inruptController } from 'loama-controller';
 const pods = await listPodUrls(store.session);
 
 async function logout() {
-    unsetPodUrl();
+    inruptController.unsetPodUrl();
     store.session.logout();
     router.push('/');
 }

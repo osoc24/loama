@@ -2,9 +2,8 @@
     <div class="panel-container">
         <div class="left-panel">
             <ExplorerBreadcrumbs />
-            <ExplorerEntry v-for="thing in getViewFormattedThings(data)" :key="thing.resourceUrl"
-                @click="changeSelectedEntry(thing)" :isContainer="thing.isContainer" :authProtected="false"
-                :url="thing.name + '/'">{{ thing.name }}
+            <ExplorerEntry v-for="thing in formattedThings" :key="thing.resourceUrl" @click="changeSelectedEntry(thing)"
+                :isContainer="thing.isContainer" :authProtected="false" :url="thing.name + '/'">{{ thing.name }}
 
             </ExplorerEntry>
         </div>
@@ -25,20 +24,20 @@
 
 <script setup lang="ts">
 import { store } from 'loama-app'
-import { getContainerResources } from "loama-controller";
+import { inruptController, type ResourcePermissions } from "loama-controller";
 import { ref, watch } from "vue";
 import { PhLock, PhLockOpen } from "@phosphor-icons/vue";
 import ExplorerEntry from "./ExplorerEntry.vue";
-import { type ResourcePermissions, type Permission, Type } from "loama-controller/dist/types";
 import { useRoute } from "vue-router";
 import ExplorerBreadcrumbs from "./ExplorerBreadcrumbs.vue";
-import SelectedEntry from "./SelectedEntry.vue";
-import type { Entry } from "@/utils/types";
+import SubjectPermissionTable from "./SubjectPermissionTable.vue";
+import type { Entry } from "@/lib/types";
+import { selectedEntry } from '@/lib/state';
+import { computed } from 'vue';
 
 const data = ref(await getThingsAtLevel(store.usedPod));
 const route = useRoute();
-
-const selectedEntry = ref<Entry | null>(null)
+const formattedThings = computed(() => getViewFormattedThings(data.value));
 
 const changeSelectedEntry = (thing: Entry) => selectedEntry.value = thing;
 
@@ -50,22 +49,13 @@ const uriToName = (uri: string, isContainer: boolean) => {
     return isContainer ? splitted[splitted.length - 2] : splitted[splitted.length - 1];
 }
 
-const updatePermissions = (selectedAgent: string, newPermissions: Permission[]) => {
-    // NOTE: will be refactored when the refactor of the controller is finished
-    let permissionObject = selectedEntry.value!.permissionsPerSubject.find(e => e.subject.type === "public" ? selectedAgent === "public" : (e.subject.type === Type.WebID && e.subject.selector?.url === selectedAgent));
-    if (!permissionObject) {
-        throw new Error(`Permission object not found for ${selectedAgent}`);
-    }
-    permissionObject.permissions = newPermissions;
-}
-
 watch(() => route.params.filePath, async (path) => {
     selectedEntry.value = null;
     data.value = await getThingsAtLevel(fileUrl(path)), { immediate: true }
 })
 
 async function getThingsAtLevel(url: string) {
-    return (await getContainerResources(store.session, url))
+    return (await inruptController.getContainerPermissionList(url))
         // Filter out the current resource
         .filter(thing => thing.resourceUrl !== url)
         // Filter out the things that are nested (?)

@@ -1,4 +1,4 @@
-import type { ResourcePermissions } from 'loama-controller/dist/types'
+import type { ResourcePermissions } from 'loama-controller'
 
 export type Entry = ResourcePermissions & { name: string; isContainer: boolean }
 
