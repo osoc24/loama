@@ -137,7 +137,12 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
         await this.store.saveToRemoteIndex()
     }
 
+    // NOTE: Do the following functions need to use the cached index when possible?
     getContainerPermissionList(containerUrl: string): Promise<ResourcePermissions<T[keyof T]>[]> {
         return this.permissionManager.getContainerPermissionList(containerUrl);
+    }
+
+    getResourcePermissionList(resourceUrl: string) {
+        return this.permissionManager.getRemotePermissions(resourceUrl);
     }
 }

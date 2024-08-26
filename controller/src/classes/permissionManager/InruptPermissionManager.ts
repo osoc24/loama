@@ -81,21 +81,20 @@ export class InruptPermissionManager<T extends Record<keyof T, BaseSubject<keyof
                     accessModes.read = hasAccess;
                     break;
                 case Permission.Write:
+                    // Setting Write also enables Append, so we make append inherintly true
+                    // This will also disable append when write is taken away
                     accessModes.write = hasAccess;
-
-                    // Setting Write also enables Append, but removing Write doesn't remove Append
-                    if (hasAccess === false) {
-                        accessModes.append = false;
-                    }
+                    accessModes.append = hasAccess;
                     break;
             }
         }
 
-        for (const permission of addedPermissions) {
-            addToAccessModes(permission, true);
-        }
+        // First the removed ones so we can e.g. remove write and add append
         for (const permission of removedPermissions) {
             addToAccessModes(permission, false);
+        }
+        for (const permission of addedPermissions) {
+            addToAccessModes(permission, true);
         }
 
         return accessModes;

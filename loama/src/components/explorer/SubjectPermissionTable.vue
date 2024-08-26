@@ -43,7 +43,7 @@
                 </template>
             </Column>
         </DataTable>
-        <Drawer :visible="!!selectedSubject" @update:visible="() => selectedSubject = null" header="Edit subject"
+        <Drawer :visible="!!selectedSubject" @update:visible="handleSubjectDrawerClose" header="Edit subject"
             position="right" class="subject-drawer">
             <div v-if="selectedSubject">
                 <p>Editing permissions for: {{ inruptController.getLabelForSubject(selectedSubject.subject) }}</p>
@@ -103,6 +103,15 @@ const handleSubjectPermissionUpdates = async (newValue: boolean, permission: Per
     } finally {
         updating.value = false;
     }
+}
+
+const handleSubjectDrawerClose = async () => {
+    selectedSubject.value = null
+    if (!selectedEntry.value) {
+        throw new Error('No selected entry to update permissions for');
+    }
+    const newResourceInfo = await inruptController.getResourcePermissionList(selectedEntry.value?.resourceUrl);
+    selectedEntry.value.permissionsPerSubject = newResourceInfo.permissionsPerSubject;
 }
 
 </script>

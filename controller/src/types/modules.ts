@@ -25,6 +25,8 @@ export interface IController<T extends Record<keyof T, BaseSubject<keyof T & str
     * Will probably work for a resource, but not guaranteed. Use getItem for that
     */
     getContainerPermissionList(containerUrl: string): Promise<ResourcePermissions<T[keyof T]>[]>
+
+    getResourcePermissionList(resourceUrl: string): Promise<ResourcePermissions<T[keyof T]>>
 }
 
 export interface IStore {
@@ -71,7 +73,7 @@ export interface IPermissionManager<T = Record<string, BaseSubject<string>>> {
     editPermissions<K extends SubjectKey<T>>(resource: string, item: IndexItem, subject: T[K], permissions: Permission[]): Promise<void>
     getRemotePermissions<K extends SubjectKey<T>>(resourceUrl: string): Promise<ResourcePermissions<T[K]>>
     /**
-    * Retrieve the permissions of  e resources  i n th i s  container.
+    * Retrieve the permissions of the resources  in this  container.
     * Will probably work for a resource, but not guaranteed. Use getRemotePermissions for that
     */
     getContainerPermissionList(containerUrl: string): Promise<ResourcePermissions<T[keyof T]>[]>

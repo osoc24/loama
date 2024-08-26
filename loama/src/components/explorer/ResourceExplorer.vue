@@ -68,7 +68,7 @@ function getViewFormattedThings(resourcePermissionsList: (typeof data)["value"])
         const uri = resourcePermissions.resourceUrl.replace(store.usedPod, '');
         const isContainer = uri.charAt(uri.length - 1) === '/'
         const name = uriToName(uri, isContainer);
-        const publicAccess = resourcePermissions.permissionsPerSubject.find(s => s.subject.type === "public")?.permissions.length;
+        const publicAccess = (resourcePermissions.permissionsPerSubject.find(s => s.subject.type === "public")?.permissions.length ?? 0) > 0;
         return {
             isContainer,
             name,
