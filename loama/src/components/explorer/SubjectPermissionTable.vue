@@ -50,7 +50,7 @@
                 <div>
                     <LoSwitch v-for="permission in ALL_PERMISSIONS" :key="permission" :id="permission"
                         :default-value="selectedSubject.permissions.includes(permission)"
-                        @update:checked="(e) => handleSubjectPermissionUpdates(e, permission)">
+                        @update:checked="checked => handleSubjectPermissionUpdates(checked, permission)">
                         {{ permission }}
                     </LoSwitch>
                     <LoSwitch :id="Permission.Control"
@@ -84,8 +84,7 @@ const ALL_PERMISSIONS: Permission[] = [Permission.Read, Permission.Write, Permis
 const selectedSubject = ref<SubjectPermissions<WebIdSubject | PublicSubject> | null>(null);
 const updating = ref(false);
 
-const handleSubjectPermissionUpdates = async (event: Event, permission: Permission) => {
-    const newValue = (event.target as HTMLInputElement)?.checked ?? false;
+const handleSubjectPermissionUpdates = async (newValue: boolean, permission: Permission) => {
     if (!selectedEntry.value) {
         throw new Error('No selected entry to update permissions for');
     }
