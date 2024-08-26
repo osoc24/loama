@@ -1,35 +1,37 @@
 {
-  "name": "loama-controller",
-  "version": "1.0.0",
-  "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch"
-  },
-  "description": "",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "keywords": [],
-  "author": "Open Summer of Code",
-  "contributors": [
-    "BT-Creator",
-    "Vicba",
-    "Zelzahn"
-  ],
-  "license": "ISC",
-  "files": [
-    "/dist"
-  ],
-  "engines": {
-    "node": ">= 20"
-  },
-  "dependencies": {
-    "@inrupt/solid-client": "^2.0.1",
-    "@inrupt/solid-client-authn-browser": "^2.2.4",
-    "@inrupt/vocab-common-rdf": "^1.0.5",
-    "core-js": "^3.38.1",
-    "loama-common": "^1.0.0"
-  },
-  "devDependencies": {
-    "typescript": "^5.5.4"
-  }
+    "name": "loama-controller",
+    "version": "1.0.0",
+    "scripts": {
+        "build": "tsc -b --clean",
+        "predev": "yarn build",
+        "dev": "tsc -w"
+    },
+    "description": "",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "keywords": [],
+    "author": "Open Summer of Code",
+    "contributors": [
+        "BT-Creator",
+        "Vicba",
+        "Zelzahn"
+    ],
+    "license": "ISC",
+    "files": [
+        "/dist"
+    ],
+    "engines": {
+        "node": ">= 20"
+    },
+    "dependencies": {
+        "@inrupt/solid-client": "^2.0.1",
+        "@inrupt/solid-client-authn-browser": "^2.2.4",
+        "@inrupt/vocab-common-rdf": "^1.0.5",
+        "core-js": "^3.38.1",
+        "loama-common": "^1.0.0"
+    },
+    "devDependencies": {
+        "@types/core-js": "^2.5.8",
+        "typescript": "^5.5.4"
+    }
 }
