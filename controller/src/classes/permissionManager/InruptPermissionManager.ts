@@ -4,6 +4,7 @@ import { IPermissionManager, SubjectKey } from "../../types/modules";
 import { getAgentAccessAll, getPublicAccess, setAgentAccess, setPublicAccess } from "@inrupt/solid-client/universal";
 import { getDefaultSession } from "@inrupt/solid-client-authn-browser";
 import "core-js/proposals/set-methods-v2"
+import { cacheBustedFetch } from "../../util";
 
 const ACCESS_MODES_TO_PERMISSION_MAPPING: Record<keyof (AccessModes & Access), Permission> = {
     read: Permission.Read,
@@ -19,7 +20,7 @@ export class InruptPermissionManager<T extends Record<keyof T, BaseSubject<keyof
     private async getGroupAccessAll(resource: string): Promise<Record<string, Access> | null> {
         const session = getDefaultSession();
         const resourceInfo = await getResourceInfoWithAcl(resource, {
-            fetch: session.fetch,
+            fetch: cacheBustedFetch(session),
         });
         return getGroupAccessAll(resourceInfo)
     }
@@ -119,8 +120,8 @@ export class InruptPermissionManager<T extends Record<keyof T, BaseSubject<keyof
 
     async getRemotePermissions<K extends SubjectKey<T>>(resourceUrl: string): Promise<ResourcePermissions<T[K]>> {
         const session = getDefaultSession();
-        const agentAccess = await getAgentAccessAll(resourceUrl, { fetch: session.fetch });
-        const publicAccess = await getPublicAccess(resourceUrl, { fetch: session.fetch })
+        const agentAccess = await getAgentAccessAll(resourceUrl, { fetch: cacheBustedFetch(session) });
+        const publicAccess = await getPublicAccess(resourceUrl, { fetch: cacheBustedFetch(session) })
         const groupAccess = await this.getGroupAccessAll(resourceUrl)
 
         const remotePermissions: ResourcePermissions<T[K]> = {

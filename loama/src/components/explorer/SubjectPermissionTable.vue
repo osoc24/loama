@@ -48,10 +48,21 @@
             <div v-if="selectedSubject">
                 <p>Editing permissions for: {{ inruptController.getLabelForSubject(selectedSubject.subject) }}</p>
                 <div>
-                    <LoSwitch v-for="permission in ALL_PERMISSIONS" :key="permission" :id="permission"
-                        :default-value="selectedSubject.permissions.includes(permission)"
-                        @update:checked="checked => handleSubjectPermissionUpdates(checked, permission)">
-                        {{ permission }}
+                    <LoSwitch :id="Permission.Read"
+                        :default-value="selectedSubject.permissions.includes(Permission.Read)"
+                        @update:checked="checked => handleSubjectPermissionUpdates(checked, Permission.Read)">
+                        {{ Permission.Read }}
+                    </LoSwitch>
+                    <LoSwitch :id="Permission.Write"
+                        :default-value="selectedSubject.permissions.includes(Permission.Write)"
+                        @update:checked="checked => handleSubjectPermissionUpdates(checked, Permission.Write)">
+                        {{ Permission.Write }}
+                    </LoSwitch>
+                    <LoSwitch :id="Permission.Append"
+                        :default-value="selectedSubject.permissions.includes(Permission.Append)"
+                        :disabled="selectedSubject.permissions.includes(Permission.Write)"
+                        @update:checked="checked => handleSubjectPermissionUpdates(checked, Permission.Append)">
+                        {{ Permission.Append }}
                     </LoSwitch>
                     <LoSwitch :id="Permission.Control"
                         :default-value="selectedSubject.permissions.includes(Permission.Control)"

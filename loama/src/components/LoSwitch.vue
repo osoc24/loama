@@ -1,6 +1,6 @@
 <template>
     <fieldset>
-        <input type="checkbox" :id="id" v-model="checked" @input="handleInput">
+        <input type="checkbox" :id="id" v-model="checked" @input="handleInput" :disabled="disabled">
         <label :for="id">
             <slot></slot>
         </label>
@@ -10,7 +10,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 
-const props = defineProps<{ id: string; defaultValue: boolean }>();
+const props = defineProps<{ id: string; defaultValue: boolean; disabled?: boolean; }>();
 const emit = defineEmits<{
     (e: "update:checked", checked: boolean): void,
 }>()
