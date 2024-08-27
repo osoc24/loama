@@ -66,7 +66,7 @@
                     </LoSwitch>
                     <LoSwitch :id="Permission.Control"
                         :default-value="selectedSubject.permissions.includes(Permission.Control)"
-                        @update:checked="() => { }">
+                        @update:checked="checked => handleSubjectPermissionUpdates(checked, Permission.Control)">
                         {{ Permission.Control }}
                     </LoSwitch>
                 </div>
