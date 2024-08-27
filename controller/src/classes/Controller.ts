@@ -50,7 +50,6 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
             index.items.push(item);
         }
 
-        // TODO: Check if this actually works (should be because it's a reference)
         item.permissions = permissions;
 
         await this.store.saveToRemoteIndex();
@@ -81,7 +80,7 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
             throw new Error(`No resolver found for subject type ${subject.type}`);
         }
 
-        const index = await this.store.getOrCreateIndex();
+        const index = await this.store.getCurrentIndex();
         return resolver.getItem(index, resourceUrl, subject.selector)
     }
 
