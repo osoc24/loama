@@ -1,12 +1,14 @@
 import { BaseSubject, Permission, ResourcePermissions } from "../types";
 import { EnforceKeyMatchResolver, IController, IPermissionManager, IStore, SubjectKey, SubjectType } from "../types/modules";
+import { Mutex } from "./utils/Mutex";
 
-export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>> implements IController<T> {
+export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>> extends Mutex implements IController<T> {
     private store: IStore
     private subjectResolvers: EnforceKeyMatchResolver<T>
     private permissionManager: IPermissionManager<T>
 
     constructor(store: IStore, subjectResolvers: EnforceKeyMatchResolver<T>, pm: IPermissionManager<T>) {
+        super();
         this.store = store;
         this.permissionManager = pm;
         this.subjectResolvers = subjectResolvers;
@@ -85,28 +87,45 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
     }
 
     async addPermission<K extends SubjectKey<T>>(resourceUrl: string, addedPermission: Permission, subject: SubjectType<T, K>) {
-        let permissions = await this.getExistingPermissions(resourceUrl, subject);
+        const release = await this.acquire();
+        try {
+            let permissions = await this.getExistingPermissions(resourceUrl, subject);
 
-        if (permissions.indexOf(addedPermission) !== -1) {
+            if (permissions.indexOf(addedPermission) !== -1) {
+                console.error("Permission already granted")
+                return permissions;
+            }
+
+            permissions.push(addedPermission)
+
+            await this.updateItem(resourceUrl, subject, permissions)
             return permissions;
+        } catch (e) {
+            throw e;
+        } finally {
+            release();
         }
-
-        permissions.push(addedPermission)
-
-        await this.updateItem(resourceUrl, subject, permissions)
-        return permissions;
     }
 
     async removePermission<K extends SubjectKey<T>>(resourceUrl: string, removedPermission: Permission, subject: SubjectType<T, K>) {
-        let oldPermissions = await this.getExistingPermissions(resourceUrl, subject);
-        let newPermissions = oldPermissions.filter((p) => p !== removedPermission);
+        const release = await this.acquire();
+        try {
+            let oldPermissions = await this.getExistingPermissions(resourceUrl, subject);
+            let newPermissions = oldPermissions.filter((p) => p !== removedPermission);
+            console.log(oldPermissions, newPermissions, removedPermission)
 
-        if (newPermissions.length === oldPermissions.length) {
-            return oldPermissions;
+            if (newPermissions.length === oldPermissions.length) {
+                console.error("Permission not found")
+                return oldPermissions;
+            }
+
+            await this.updateItem(resourceUrl, subject, newPermissions)
+            return newPermissions;
+        } catch (e) {
+            throw e;
+        } finally {
+            release();
         }
-
-        await this.updateItem(resourceUrl, subject, newPermissions)
-        return newPermissions;
     }
 
     async enablePermissions<K extends SubjectKey<T>>(resource: string, subject: SubjectType<T, K>) {

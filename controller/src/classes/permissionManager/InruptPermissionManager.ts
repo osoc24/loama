@@ -78,6 +78,7 @@ export class InruptPermissionManager<T extends Record<keyof T, BaseSubject<keyof
                 case Permission.Control:
                     accessModes.controlRead = hasAccess;
                     accessModes.controlWrite = hasAccess;
+                    break;
                 case Permission.Read:
                     accessModes.read = hasAccess;
                     break;
