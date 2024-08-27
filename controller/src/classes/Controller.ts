@@ -112,7 +112,6 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
         try {
             let oldPermissions = await this.getExistingPermissions(resourceUrl, subject);
             let newPermissions = oldPermissions.filter((p) => p !== removedPermission);
-            console.log(oldPermissions, newPermissions, removedPermission)
 
             if (newPermissions.length === oldPermissions.length) {
                 console.error("Permission not found")

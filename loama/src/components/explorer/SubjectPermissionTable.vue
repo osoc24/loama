@@ -49,23 +49,23 @@
                 <p>Editing permissions for: {{ inruptController.getLabelForSubject(selectedSubject.subject) }}</p>
                 <div>
                     <LoSwitch :id="Permission.Read"
-                        :default-value="selectedSubject.permissions.includes(Permission.Read)"
+                        :default-value="selectedSubject.permissions.includes(Permission.Read)" :disabled="updating"
                         @update:checked="checked => handleSubjectPermissionUpdates(checked, Permission.Read)">
                         {{ Permission.Read }}
                     </LoSwitch>
                     <LoSwitch :id="Permission.Write"
-                        :default-value="selectedSubject.permissions.includes(Permission.Write)"
+                        :default-value="selectedSubject.permissions.includes(Permission.Write)" :disabled="updating"
                         @update:checked="checked => handleSubjectPermissionUpdates(checked, Permission.Write)">
                         {{ Permission.Write }}
                     </LoSwitch>
                     <LoSwitch :id="Permission.Append"
                         :default-value="selectedSubject.permissions.includes(Permission.Append)"
-                        :disabled="selectedSubject.permissions.includes(Permission.Write)"
+                        :disabled="selectedSubject.permissions.includes(Permission.Write) || updating"
                         @update:checked="checked => handleSubjectPermissionUpdates(checked, Permission.Append)">
                         {{ Permission.Append }}
                     </LoSwitch>
                     <LoSwitch :id="Permission.Control"
-                        :default-value="selectedSubject.permissions.includes(Permission.Control)"
+                        :default-value="selectedSubject.permissions.includes(Permission.Control)" :disabled="updating"
                         @update:checked="checked => handleSubjectPermissionUpdates(checked, Permission.Control)">
                         {{ Permission.Control }}
                     </LoSwitch>
