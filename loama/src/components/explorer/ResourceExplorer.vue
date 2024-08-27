@@ -11,7 +11,7 @@
             <div class="default-panel-container" v-if="!selectedEntry">
                 <div class="default-panel">
                     <img class="side-image" src="/vault.svg" />
-                    <p><strong>No folder or file selected!</strong></p>
+                    <p><strong>No (container) resource selected!</strong></p>
                     <i>Select one to get started</i>
                 </div>
             </div>

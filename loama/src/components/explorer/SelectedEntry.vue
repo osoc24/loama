@@ -37,7 +37,6 @@ import Drawer from 'primevue/drawer';
 import SubjectPermissionTable from './SubjectPermissionTable.vue';
 
 const permissionDrawerVisible = ref(false);
-
 </script>
 
 <style scoped>
@@ -87,3 +86,4 @@ a {
     width: 90vw !important;
 }
 </style>
+<style src="@vueform/multiselect/themes/default.css"></style>

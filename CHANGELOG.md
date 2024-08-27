@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - works for Node 20 LTS
 - general API cleanup
 - separated into more targeted modules
+- Reworded some labels to make loama fit better in the solid ecosystem vocabulary
+- Introduced select component which can create new permission subjects
 - clone index item permission array to remove references
 - Replace seperate npm lock files with yarn workspaces
 - Add [nx](nx.dev) as monorepo tool to run multipe jobs at once
