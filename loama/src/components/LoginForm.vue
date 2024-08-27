@@ -6,14 +6,14 @@
     <form @submit.prevent="login">
         <fieldset>
             <legend>
-                <span>Solid Pod URL</span>
+                <span>Identity Provider URL</span>
                 <PhQuestion :size="24" @mouseover="showPopup = true;" @mouseleave="showPopup = false" />
             </legend>
             <label for="solid-pod-url">
                 <PhLink :size="24" class="icon" />
                 <input type="url" id="solid-pod-url" v-model="solidPodUrl" :placeholder="defaultSolidPodUrl" />
             </label>
-            <p v-if="showWarning" class="warning">Invalid Solid Pod URL. Please check and try again.</p>
+            <p v-if="showWarning" class="warning">Invalid Identity Provider URL. Please check and try again.</p>
         </fieldset>
         <fieldset>
             <LoButton @click.prevent="noPod" :disabled="isLoading" variant="secondary" :left-icon="PhQuestion">

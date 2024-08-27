@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h3>Solid Pod URL</h3>
+        <h3>Identity Provider URL</h3>
         <p>A URL that links to the pod that you want to use.</p>
         <aside>
             <PhQuestion :size="24" />
