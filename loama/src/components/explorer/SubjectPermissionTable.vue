@@ -4,7 +4,7 @@
             <template #header>
                 <div class="table-header">
                     <span class="">Subjects with permissions</span>
-                    <LoButton :left-icon="PhPlus">New subject</LoButton>
+                    <NewSubject />
                 </div>
             </template>
             <template #empty> No subjects with permissions set for this resource</template>
@@ -79,16 +79,17 @@
     </div>
 </template>
 <script setup lang="ts">
-import { selectedEntry } from '@/lib/state';
+import { refreshEntryPermissions, selectedEntry } from '@/lib/state';
 import LoButton from '../LoButton.vue';
 import LoCheck from '../LoCheck.vue';
-import { PhPencil, PhPlus, PhWarning } from '@phosphor-icons/vue';
+import { PhPencil, PhWarning } from '@phosphor-icons/vue';
 import { Permission, inruptController, type PublicSubject, type SubjectPermissions, type WebIdSubject } from 'loama-controller';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { ref } from 'vue';
 import Drawer from 'primevue/drawer';
 import LoSwitch from '../LoSwitch.vue';
+import NewSubject from './NewSubject.vue';
 
 const ALL_PERMISSIONS: Permission[] = [Permission.Read, Permission.Write, Permission.Append];
 
@@ -118,11 +119,7 @@ const handleSubjectPermissionUpdates = async (newValue: boolean, permission: Per
 
 const handleSubjectDrawerClose = async () => {
     selectedSubject.value = null
-    if (!selectedEntry.value) {
-        throw new Error('No selected entry to update permissions for');
-    }
-    const newResourceInfo = await inruptController.getResourcePermissionList(selectedEntry.value?.resourceUrl);
-    selectedEntry.value.permissionsPerSubject = newResourceInfo.permissionsPerSubject;
+    await refreshEntryPermissions();
 }
 
 </script>
