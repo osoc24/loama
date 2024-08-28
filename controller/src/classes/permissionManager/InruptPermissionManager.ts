@@ -15,6 +15,12 @@ const ACCESS_MODES_TO_PERMISSION_MAPPING: Record<keyof (AccessModes & Access), P
     controlWrite: Permission.Control,
 }
 
+
+/**
+ * A permission manager implementation using the inrupt sdk to actually update the ACL
+ * The "Inrupt" prefix is to indicate the usage of the inrupt sdk
+ * This permission manager can be used without the the InruptStore
+*/
 export class InruptPermissionManager<T extends Record<keyof T, BaseSubject<keyof T & string>>> implements IPermissionManager<T> {
     // This is a replacement for https://github.com/inrupt/solid-client-js/blob/eb8e86f61458ec76fa2244f7b38b7d7983bbd810/src/access/wac.ts#L262 because it is not exposed in the inrupt library
     private async getGroupAccessAll(resource: string): Promise<Record<string, Access> | null> {

@@ -4,6 +4,11 @@ import { IStore } from "../../types/modules";
 import { BaseStore } from "./BaseStore";
 import { getDefaultSession, Session } from "@inrupt/solid-client-authn-browser";
 
+/**
+ * A store implementation using the inrupt sdk to actually communicate with the pod
+ * The "Inrupt" prefix is to indicate the usage of the inrupt sdk
+ * This store can be used without the the InruptPermissionManager
+*/
 export class InruptStore extends BaseStore implements IStore {
     // TODO this should be a more resilient path: be.ugent.idlab.knows.solid.loama.index.js or smth
     private indexPath = "index.json";
