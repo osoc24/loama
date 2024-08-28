@@ -1,10 +1,12 @@
-import { BaseSubject, Index, IndexItem, Permission, ResourcePermissions } from "../types";
+import { BaseSubject, Index, IndexItem, Permission, ResourcePermissions, SubjectPermissions } from "../types";
 
 export type SubjectKey<T> = keyof T & string;
 export type SubjectType<T, K extends SubjectKey<T>> = T[K];
 export type EnforceKeyMatchResolver<T extends Record<string, BaseSubject<string>>> = {
     [K in keyof T]: T[K] extends BaseSubject<K & string> ? ISubjectResolver<T[K]> : never;
 }
+export type SubjectConfig<T extends Record<keyof T, BaseSubject<keyof T & string>>> = { resolver: ISubjectResolver<T[keyof T]>, manager: IPermissionManager<T> };
+export type SubjectConfigs<T extends Record<keyof T, BaseSubject<keyof T & string>>> = Record<keyof T, SubjectConfig<T>>;
 
 export interface IController<T extends Record<keyof T, BaseSubject<keyof T & string>>> {
     setPodUrl(podUrl: string): void;
@@ -71,7 +73,7 @@ export interface IPermissionManager<T = Record<string, BaseSubject<string>>> {
     createPermissions<K extends SubjectKey<T>>(resource: string, subject: T[K], permissions: Permission[]): Promise<void>
     // Does not update the index file
     editPermissions<K extends SubjectKey<T>>(resource: string, item: IndexItem, subject: T[K], permissions: Permission[]): Promise<void>
-    getRemotePermissions<K extends SubjectKey<T>>(resourceUrl: string): Promise<ResourcePermissions<T[K]>>
+    getRemotePermissions<K extends SubjectKey<T>>(resourceUrl: string): Promise<SubjectPermissions<T[K]>[]>
     /**
     * Retrieve the permissions of the resources  in this  container.
     * Will probably work for a resource, but not guaranteed. Use getRemotePermissions for that

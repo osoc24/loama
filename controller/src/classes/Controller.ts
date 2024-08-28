@@ -1,17 +1,23 @@
-import { BaseSubject, Permission, ResourcePermissions } from "../types";
-import { EnforceKeyMatchResolver, IController, IPermissionManager, IStore, SubjectKey, SubjectType } from "../types/modules";
+import { BaseSubject, Permission, ResourcePermissions, SubjectPermissions } from "../types";
+import { IController, IStore, SubjectConfig, SubjectConfigs, SubjectKey, SubjectType } from "../types/modules";
 import { Mutex } from "./utils/Mutex";
 
 export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>> extends Mutex implements IController<T> {
     private store: IStore
-    private subjectResolvers: EnforceKeyMatchResolver<T>
-    private permissionManager: IPermissionManager<T>
+    private subjectConfigs: SubjectConfigs<T>
 
-    constructor(store: IStore, subjectResolvers: EnforceKeyMatchResolver<T>, pm: IPermissionManager<T>) {
+    constructor(store: IStore, subjects: SubjectConfigs<T>) {
         super();
         this.store = store;
-        this.permissionManager = pm;
-        this.subjectResolvers = subjectResolvers;
+        this.subjectConfigs = subjects;
+    }
+
+    private getSubjectConfig<K extends SubjectKey<T>>(subject: T[K]): SubjectConfig<T> {
+        const subjectConfig = this.subjectConfigs[subject.type];
+        if (!subjectConfig) {
+            throw new Error(`No config found for subject type ${subject.type}`);
+        }
+        return subjectConfig;
     }
 
     private async getExistingPermissions<K extends SubjectKey<T>>(resourceUrl: string, subject: T[K]): Promise<Permission[]> {
@@ -20,24 +26,22 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
             // Makeing sure the array is not a reference to the one stored in the index
             return [...item.permissions]
         }
+        const subjectConfig = this.getSubjectConfig(subject)
 
-        const { permissionsPerSubject } = await this.permissionManager.getRemotePermissions(resourceUrl);
-        const subjectResolver = this.subjectResolvers[subject.type];
-        if (!subjectResolver) {
-            throw new Error(`No resolver found for subject type ${subject.type}`);
-        }
-        const subjectPermission = permissionsPerSubject.find(entry => subjectResolver.checkMatch(entry.subject, subject))
+        const subjects = await subjectConfig.manager.getRemotePermissions(resourceUrl);
+        const subjectPermission = subjects.find(entry => subjectConfig.resolver.checkMatch(entry.subject, subject))
 
         return [...subjectPermission?.permissions ?? []]
     }
 
     private async updateItem<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>, permissions: Permission[]) {
         let item = await this.getItem(resourceUrl, subject);
+        const subjectConfig = this.getSubjectConfig(subject)
 
         if (item) {
-            await this.permissionManager.editPermissions(resourceUrl, item, subject, permissions);
+            await subjectConfig.manager.editPermissions(resourceUrl, item, subject, permissions);
         } else {
-            await this.permissionManager.createPermissions(resourceUrl, subject, permissions);
+            await subjectConfig.manager.createPermissions(resourceUrl, subject, permissions);
 
             item = {
                 id: crypto.randomUUID(),
@@ -70,17 +74,12 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
     }
 
     getLabelForSubject<K extends SubjectKey<T>>(subject: T[K]): string {
-        if (!this.subjectResolvers[subject.type]) {
-            throw new Error(`No resolver found for subject type ${subject.type}`);
-        }
-        return this.subjectResolvers[subject.type].toLabel(subject);
+        const { resolver } = this.getSubjectConfig(subject);
+        return resolver.toLabel(subject);
     }
 
     async getItem<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>) {
-        const resolver = this.subjectResolvers[subject.type];
-        if (!resolver) {
-            throw new Error(`No resolver found for subject type ${subject.type}`);
-        }
+        const { resolver } = this.getSubjectConfig(subject);
 
         const index = await this.store.getCurrentIndex();
         return resolver.getItem(index, resourceUrl, subject.selector)
@@ -155,11 +154,40 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
     }
 
     // NOTE: Do the following functions need to use the cached index when possible?
-    getContainerPermissionList(containerUrl: string): Promise<ResourcePermissions<T[keyof T]>[]> {
-        return this.permissionManager.getContainerPermissionList(containerUrl);
+    async getContainerPermissionList(containerUrl: string): Promise<ResourcePermissions<T[keyof T]>[]> {
+        // Need to put it in a variable because the type declaration vanishes
+        const configs: SubjectConfig<T>[] = Object.values(this.subjectConfigs);
+        const results = await Promise.allSettled(configs.map(c => c.manager.getContainerPermissionList(containerUrl)))
+
+        return results.reduce<ResourcePermissions<T[keyof T]>[]>((arr, v) => {
+            if (v.status === "fulfilled") {
+                // Check if the resourceUrl is already present before pushing it into the array
+                v.value.forEach((resource) => {
+                    let existingInfo = arr.find((info) => info.resourceUrl === resource.resourceUrl);
+                    if (existingInfo) {
+                        existingInfo.permissionsPerSubject.push(...resource.permissionsPerSubject)
+                    } else {
+                        arr.push(resource)
+                    }
+                })
+            }
+            return arr;
+        }, [])
     }
 
-    getResourcePermissionList(resourceUrl: string) {
-        return this.permissionManager.getRemotePermissions(resourceUrl);
+    async getResourcePermissionList(resourceUrl: string) {
+        // Need to put it in a variable because the type declaration vanishes
+        const configs: SubjectConfig<T>[] = Object.values(this.subjectConfigs);
+        const results = await Promise.allSettled(configs.map(c => c.manager.getRemotePermissions(resourceUrl)))
+
+        return {
+            resourceUrl,
+            permissionsPerSubject: results.reduce<SubjectPermissions<T[keyof T]>[]>((arr, v) => {
+                if (v.status === "fulfilled") {
+                    arr.push(...v.value)
+                }
+                return arr;
+            }, [])
+        }
     }
 }
