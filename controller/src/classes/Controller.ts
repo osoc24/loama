@@ -36,12 +36,12 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
 
     private async updateItem<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>, permissions: Permission[]) {
         let item = await this.getItem(resourceUrl, subject);
-        const subjectConfig = this.getSubjectConfig(subject)
+        const { manager } = this.getSubjectConfig(subject)
 
         if (item) {
-            await subjectConfig.manager.editPermissions(resourceUrl, item, subject, permissions);
+            await manager.editPermissions(resourceUrl, item, subject, permissions);
         } else {
-            await subjectConfig.manager.createPermissions(resourceUrl, subject, permissions);
+            await manager.createPermissions(resourceUrl, subject, permissions);
 
             item = {
                 id: crypto.randomUUID(),
@@ -56,7 +56,14 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
             index.items.push(item);
         }
 
-        item.permissions = permissions;
+        console.log(permissions)
+        if (permissions.length === 0 && manager.shouldDeleteOnAllRevoked()) {
+            const index = await this.store.getCurrentIndex();
+            const idx = index.items.findIndex(i => i.id === item.id);
+            index.items.splice(idx, 1);
+        } else {
+            item.permissions = permissions;
+        }
 
         await this.store.saveToRemoteIndex();
     }

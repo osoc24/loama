@@ -96,4 +96,6 @@ export abstract class InruptPermissionManager<T extends Record<keyof T, BaseSubj
         }, [])
 
     }
+
+    shouldDeleteOnAllRevoked() { return true }
 }
