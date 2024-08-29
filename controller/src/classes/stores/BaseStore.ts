@@ -1,8 +1,9 @@
-import { Index } from "../../types";
+import { SubjectKey } from "@/types/modules";
+import { BaseSubject, Index } from "../../types";
 
-export abstract class BaseStore {
+export abstract class BaseStore<T extends Record<keyof T, BaseSubject<keyof T & string>>> {
     protected podUrl?: string = undefined;
-    protected index?: Index = undefined;
+    protected index?: Index<T[keyof T]> = undefined;
 
     setPodUrl(url: string): void {
         this.podUrl = url;
@@ -12,12 +13,12 @@ export abstract class BaseStore {
         this.podUrl = undefined;
     }
 
-    abstract getOrCreateIndex(): Promise<Index>;
+    abstract getOrCreateIndex(): Promise<Index<T[keyof T]>>;
 
-    async getCurrentIndex(): Promise<Index> {
+    async getCurrentIndex<K extends SubjectKey<T>>() {
         if (!this.index) {
             this.index = await this.getOrCreateIndex();
         }
-        return this.index;
+        return this.index as Index<T[K]>;
     }
 }

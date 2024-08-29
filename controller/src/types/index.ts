@@ -3,9 +3,9 @@ import { url } from "loama-common";
 /**
  * The json schema for the index configuration file inside a Solid data pod.
  */
-export interface Index {
+export interface Index<T extends BaseSubject<string> = BaseSubject<string>> {
     id: url;
-    items: IndexItem[];
+    items: IndexItem<T>[];
 }
 
 export interface IndexItem<T extends BaseSubject<string> = BaseSubject<string>> {

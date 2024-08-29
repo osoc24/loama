@@ -1,5 +1,5 @@
 import { FetchError, getFile, overwriteFile, saveFileInContainer, WithResourceInfo } from "@inrupt/solid-client";
-import { Index } from "../../types";
+import { BaseSubject, Index } from "../../types";
 import { IStore } from "../../types/modules";
 import { BaseStore } from "./BaseStore";
 import { getDefaultSession, Session } from "@inrupt/solid-client-authn-browser";
@@ -9,7 +9,7 @@ import { getDefaultSession, Session } from "@inrupt/solid-client-authn-browser";
  * The "Inrupt" prefix is to indicate the usage of the inrupt sdk
  * This store can be used without the the InruptPermissionManager
 */
-export class InruptStore extends BaseStore implements IStore {
+export class InruptStore<T extends Record<keyof T, BaseSubject<keyof T & string>>> extends BaseStore<T> implements IStore<T> {
     // TODO this should be a more resilient path: be.ugent.idlab.knows.solid.loama.index.js or smth
     private indexPath = "index.json";
     private session: Session;
@@ -26,7 +26,7 @@ export class InruptStore extends BaseStore implements IStore {
     }
 
     // NOTE: Possible will move the podUrl to the parameters, this works for the current POC
-    async getOrCreateIndex(): Promise<Index> {
+    async getOrCreateIndex(): Promise<Index<T[keyof T]>> {
         if (!this.podUrl) {
             throw new Error("Cannot get current index file: pod location is not set");
         }

@@ -14,7 +14,7 @@ export class PublicResolver implements ISubjectResolver<PublicSubject> {
         return subjectA.type === subjectB.type
     }
 
-    getItem(index: Index, resourceUrl: string, subjectSelector?: unknown): IndexItem | undefined {
+    getItem(index: Index<PublicSubject>, resourceUrl: string, subjectSelector?: unknown) {
         return index.items.find(item => {
             return item.resource == resourceUrl && item.subject.type === "public"
         })
