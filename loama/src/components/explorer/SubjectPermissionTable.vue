@@ -121,6 +121,15 @@ const handleSubjectPermissionUpdates = async (newValue: boolean, permission: Per
 }
 
 const handleSubjectDrawerClose = async () => {
+    if (updating.value === true) {
+        toast.add({
+            severity: "info",
+            summary: "Please wait",
+            detail: "The permissions are currently being updated, please wait for the operation to finish",
+            life: 2000
+        })
+        return;
+    }
     selectedSubject.value = null
     await refreshEntryPermissions();
 }
