@@ -18,6 +18,10 @@ const onCreate = async () => {
         console.error("No entry selected to add subject to!")
         return true;
     }
+    if (!webId.value || webId.value == "") {
+        console.error("WebId is required")
+        return;
+    }
     const entry = await inruptController.getItem(selectedEntry.value.resourceUrl, {
         type: "webId",
         selector: {
