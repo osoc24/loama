@@ -20,18 +20,22 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
         return subjectConfig as SubjectConfig<T, T[K]>
     }
 
+    private async getExistingRemotePermissions<K extends SubjectKey<T>>(resourceUrl: string, subject: T[K]): Promise<Permission[]> {
+        const subjectConfig = this.getSubjectConfig(subject)
+        const subjects = await subjectConfig.manager.getRemotePermissions<K>(resourceUrl);
+        const subjectPermission = subjects.find(entry => subjectConfig.resolver.checkMatch(entry.subject, subject))
+
+        return [...subjectPermission?.permissions ?? []]
+    }
+
+
     private async getExistingPermissions<K extends SubjectKey<T>>(resourceUrl: string, subject: T[K]): Promise<Permission[]> {
         const item = await this.getItem(resourceUrl, subject);
         if (item) {
             // Makeing sure the array is not a reference to the one stored in the index
             return [...item.permissions]
         }
-        const subjectConfig = this.getSubjectConfig(subject)
-
-        const subjects = await subjectConfig.manager.getRemotePermissions<K>(resourceUrl);
-        const subjectPermission = subjects.find(entry => subjectConfig.resolver.checkMatch(entry.subject, subject))
-
-        return [...subjectPermission?.permissions ?? []]
+        return this.getExistingRemotePermissions(resourceUrl, subject);
     }
 
     private async updateItem<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>, permissions: Permission[]) {
@@ -62,6 +66,16 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
             index.items.splice(idx, 1);
         } else {
             item.permissions = permissions;
+
+            // The SOLID server OR the SDK does not directly push the update to the acl files for some reason
+            // Here we give it some time to save/push the changes
+            await new Promise(res => setTimeout(res, 500));
+            // extra check what the ACL currently has stored as info. Will decrease the chance of the index going out of sync with the ACL file
+            const remotePermissions = await this.getExistingRemotePermissions(resourceUrl, subject);
+            if (remotePermissions !== permissions) {
+                console.debug("Permissions in index are out of sync with remote, updating index...");
+                item.permissions = remotePermissions;
+            }
         }
 
         await this.store.saveToRemoteIndex();
