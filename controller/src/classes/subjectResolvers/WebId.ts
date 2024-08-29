@@ -14,9 +14,9 @@ export class WebIdResolver implements ISubjectResolver<WebIdSubject> {
         return subjectA.selector.url === subjectB.selector.url;
     }
 
-    getItem(index: Index, resourceUrl: string, subjectSelector?: unknown): IndexItem | undefined {
+    getItem(index: Index, resourceUrl: string, subjectSelector?: { url: string }): IndexItem | undefined {
         return index.items.find(item => {
-            return item.resource == resourceUrl && item.subject.type === "webId" && item.subject.selector && item.subject.selector.url === subjectSelector
+            return item.resource == resourceUrl && item.subject.type === "webId" && item.subject.selector && item.subject.selector.url === subjectSelector?.url
         })
     };
 }
