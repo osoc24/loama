@@ -4,8 +4,12 @@ import { WebIdManager } from "./classes/permissionManager/inrupt/WebIdManager";
 import { InruptStore } from "./classes/stores/InruptStore";
 import { PublicResolver } from "./classes/subjectResolvers/Public";
 import { WebIdResolver } from "./classes/subjectResolvers/WebId";
+import { PublicSubject, WebIdSubject } from "./types/subjects";
 
-export const inruptController = new Controller(
+export const inruptController = new Controller<{
+    webId: WebIdSubject,
+    public: PublicSubject,
+}>(
     new InruptStore(),
     {
         webId: {

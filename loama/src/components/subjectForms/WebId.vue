@@ -24,7 +24,7 @@ const onCreate = async () => {
     if (!webId.value || webId.value == "") {
         console.error("WebId is required")
         toast.add({ severity: "warn", summary: "The webId field is required" })
-        return;
+        return false;
     }
     const entry = await inruptController.getItem(selectedEntry.value.resourceUrl, {
         type: "webId",
