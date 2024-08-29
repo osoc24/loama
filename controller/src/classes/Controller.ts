@@ -126,6 +126,22 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
         }
     }
 
+    async removeSubject<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>) {
+        await this.updateItem(resourceUrl, subject, []);
+
+        const subjectConfig = this.getSubjectConfig(subject);
+        const index = await this.store.getCurrentIndex<K>();
+
+        const item = subjectConfig.resolver.getItem(index, resourceUrl, subject.selector);
+        if (!item) return;
+
+        const idx = index.items.findIndex(i => subjectConfig.resolver.checkMatch(i.subject, subject));
+        console.log(index.items.splice(idx, 1));
+        console.log(this.store.getCurrentIndex())
+
+        await this.store.saveToRemoteIndex();
+    }
+
     async removePermission<K extends SubjectKey<T>>(resourceUrl: string, removedPermission: Permission, subject: SubjectType<T, K>) {
         const release = await this.acquire();
         try {
