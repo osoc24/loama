@@ -90,11 +90,13 @@ import { ref } from 'vue';
 import Drawer from 'primevue/drawer';
 import LoSwitch from '../LoSwitch.vue';
 import NewSubject from './NewSubject.vue';
+import { useToast } from 'primevue/usetoast';
 
 const ALL_PERMISSIONS: Permission[] = [Permission.Read, Permission.Write, Permission.Append];
 
 const selectedSubject = ref<SubjectPermissions<WebIdSubject | PublicSubject> | null>(null);
 const updating = ref(false);
+const toast = useToast();
 
 const handleSubjectPermissionUpdates = async (newValue: boolean, permission: Permission) => {
     if (!selectedEntry.value) {
@@ -112,6 +114,7 @@ const handleSubjectPermissionUpdates = async (newValue: boolean, permission: Per
         }
     } catch (e) {
         console.error('Failed to update permissions', e);
+        toast.add({ severity: "error", summary: `Failed to ${newValue ? "grant" : "revoke"} ${permission} permission`, detail: (e instanceof Error) ? e.message : "Unknown error occurred, check the console" })
     } finally {
         updating.value = false;
     }

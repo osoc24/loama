@@ -10,8 +10,11 @@
 import { refreshEntryPermissions, selectedEntry } from '@/lib/state';
 import { Permission, inruptController } from 'loama-controller';
 import InputText from 'primevue/inputtext';
+import { useToast } from 'primevue/usetoast';
 import { ref } from 'vue';
 const webId = ref("");
+
+const toast = useToast();
 
 const onCreate = async () => {
     if (!selectedEntry.value) {
@@ -20,6 +23,7 @@ const onCreate = async () => {
     }
     if (!webId.value || webId.value == "") {
         console.error("WebId is required")
+        toast.add({ severity: "warn", summary: "The webId field is required" })
         return;
     }
     const entry = await inruptController.getItem(selectedEntry.value.resourceUrl, {
@@ -29,7 +33,8 @@ const onCreate = async () => {
         }
     });
     if (entry) {
-        console.log("This webid was already added")
+        console.log("This webId was already added")
+        toast.add({ severity: "warn", summary: "The webId is already present in the permission table" })
         return true;
     }
     try {
@@ -43,6 +48,7 @@ const onCreate = async () => {
         return true;
     } catch (e) {
         console.error(e)
+        toast.add({ severity: "error", summary: "An error occurred while adding the new webId", detail: (e instanceof Error) ? e.message : "An unknown error occurred" })
         return false;
     }
 }
