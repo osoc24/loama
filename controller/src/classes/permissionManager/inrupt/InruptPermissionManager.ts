@@ -1,8 +1,7 @@
 import { Access, AccessModes, getSolidDataset, getThingAll } from "@inrupt/solid-client";
-import { SubjectPermissions, BaseSubject, IndexItem, Permission, ResourcePermissions } from "@/types";
-import { SubjectKey } from "@/types/modules";
+import { SubjectPermissions, BaseSubject, IndexItem, Permission, ResourcePermissions } from "../../../types";
+import { SubjectKey } from "../../../types/modules";
 import { getDefaultSession } from "@inrupt/solid-client-authn-browser";
-import "core-js/modules/esnext.set.difference.v2"
 
 const ACCESS_MODES_TO_PERMISSION_MAPPING: Record<keyof (AccessModes & Access), Permission> = {
     read: Permission.Read,
@@ -67,11 +66,10 @@ export abstract class InruptPermissionManager<T extends Record<keyof T, BaseSubj
 
 
     protected editPermissionsToAccessModes(item: IndexItem, permissions: Permission[]) {
-        // 1. make diff with index to see what to create/update/delete, per resource
-        const oldPermissionsSet = new Set(item.permissions);
-        const newPermissionsSet = new Set(permissions);
-        const addedPermissions = newPermissionsSet.difference(oldPermissionsSet);
-        const removedPermissions = oldPermissionsSet.difference(newPermissionsSet);
+        const oldPermissionsSet = [...new Set(item.permissions)];
+        const newPermissionsSet = [...new Set(permissions)];
+        const addedPermissions = newPermissionsSet.filter(p => !oldPermissionsSet.includes(p));
+        const removedPermissions = oldPermissionsSet.filter(p => !newPermissionsSet.includes(p));
 
         const accessModes = this.permissionsToAccessModes(addedPermissions, removedPermissions);
         return accessModes;
