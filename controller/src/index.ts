@@ -2,4 +2,4 @@
 export * from "./types";
 export * from "./types/modules";
 export * from "./types/subjects";
-export * from "./inruptController";
+export * from "./controllers";

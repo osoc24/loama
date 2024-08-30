@@ -6,7 +6,7 @@ import { PublicResolver } from "./classes/subjectResolvers/Public";
 import { WebIdResolver } from "./classes/subjectResolvers/WebId";
 import { PublicSubject, WebIdSubject } from "./types/subjects";
 
-export const inruptController = new Controller<{
+export const activeController = new Controller<{
     webId: WebIdSubject,
     public: PublicSubject,
 }>(

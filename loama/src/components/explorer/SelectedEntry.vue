@@ -1,36 +1,36 @@
 <template>
-    <div class="container" v-if="selectedEntry">
-        <header>
-            <ExplorerEntity :is-container="selectedEntry.isContainer">
-                {{ selectedEntry.name }}
-            </ExplorerEntity>
-            <PhXCircle :size="40" @click="$emit('close')" class="clickable" />
-        </header>
-        <section>
-            <div class="list-header">
-                <h3>Subjects with permissions:</h3>
-                <LoButton :left-icon="PhPencil" @click="() => permissionDrawerVisible = true">Edit</LoButton>
-            </div>
-            <ul>
-                <li :key="inruptController.getLabelForSubject(permission.subject)"
-                    v-for="permission in selectedEntry.permissionsPerSubject">
-                    {{ inruptController.getLabelForSubject(permission.subject) }}
-                </li>
-            </ul>
-        </section>
-        <Drawer v-model:visible="permissionDrawerVisible" header="Edit permissions" position="right"
-            class="permission-drawer">
-            <SubjectPermissionTable />
-        </Drawer>
-    </div>
-    <p v-else>No entry selected in the resource explorer, this shouldn't be possible!</p>
+  <div class="container" v-if="selectedEntry">
+    <header>
+      <ExplorerEntity :is-container="selectedEntry.isContainer">
+        {{ selectedEntry.name }}
+      </ExplorerEntity>
+      <PhXCircle :size="40" @click="$emit('close')" class="clickable" />
+    </header>
+    <section>
+      <div class="list-header">
+        <h3>Subjects with permissions:</h3>
+        <LoButton :left-icon="PhPencil" @click="() => permissionDrawerVisible = true">Edit</LoButton>
+      </div>
+      <ul>
+        <li :key="activeController.getLabelForSubject(permission.subject)"
+          v-for="permission in selectedEntry.permissionsPerSubject">
+          {{ activeController.getLabelForSubject(permission.subject) }}
+        </li>
+      </ul>
+    </section>
+    <Drawer v-model:visible="permissionDrawerVisible" header="Edit permissions" position="right"
+      class="permission-drawer">
+      <SubjectPermissionTable />
+    </Drawer>
+  </div>
+  <p v-else>No entry selected in the resource explorer, this shouldn't be possible!</p>
 </template>
 
 <script setup lang="ts">
 import { selectedEntry } from '@/lib/state';
 import ExplorerEntity from './ExplorerEntity.vue';
 import { PhPencil, PhXCircle } from '@phosphor-icons/vue';
-import { inruptController } from 'loama-controller';
+import { activeController } from 'loama-controller';
 import LoButton from '../LoButton.vue';
 import { ref } from 'vue';
 import Drawer from 'primevue/drawer';
@@ -41,49 +41,49 @@ const permissionDrawerVisible = ref(false);
 
 <style scoped>
 form {
-    margin-top: calc(var(--base-unit) * 2);
+  margin-top: calc(var(--base-unit) * 2);
 }
 
 section {
-    background-color: var(--off-white);
-    border-radius: var(--base-corner);
-    height: 100%;
-    padding: 2rem;
+  background-color: var(--off-white);
+  border-radius: var(--base-corner);
+  height: 100%;
+  padding: 2rem;
 }
 
 header {
-    display: flex;
-    color: var(--off-white);
-    flex-grow: 1;
-    padding: 2rem;
+  display: flex;
+  color: var(--off-white);
+  flex-grow: 1;
+  padding: 2rem;
 }
 
 h3 {
-    font-size: calc(var(--base-unit) * 2);
+  font-size: calc(var(--base-unit) * 2);
 }
 
 a {
-    text-decoration: none;
+  text-decoration: none;
 }
 
 .clickable {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .container {
-    background-color: var(--solid-purple);
+  background-color: var(--solid-purple);
 }
 
 .list-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>
 <style src="@vueform/multiselect/themes/default.css"></style>
 <style>
 .permission-drawer {
-    width: 90vw !important;
+  width: 90vw !important;
 }
 </style>
 <style src="@vueform/multiselect/themes/default.css"></style>
