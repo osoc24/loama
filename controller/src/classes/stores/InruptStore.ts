@@ -31,6 +31,10 @@ export class InruptStore<T extends Record<keyof T, BaseSubject<keyof T & string>
             throw new Error("Cannot get current index file: pod location is not set");
         }
 
+        if (this.index) {
+            return this.index;
+        }
+
         const indexUrl = `${this.podUrl}${this.indexPath}`;
         let file: (Blob & WithResourceInfo) | undefined = undefined
         try {
