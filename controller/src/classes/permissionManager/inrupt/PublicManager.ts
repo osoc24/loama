@@ -38,7 +38,8 @@ export class PublicManager<T extends Record<keyof T, BaseSubject<keyof T & strin
             subject: {
                 type: "public",
             } as T[K],
-            permissions: this.AccessModesToPermissions(publicAccess)
+            permissions: this.AccessModesToPermissions(publicAccess),
+            isEnabled: true,
         }]
     }
 }

@@ -50,7 +50,8 @@ export class GroupManager<T extends Record<keyof T, BaseSubject<keyof T & string
                 type: "webId",
                 selector: { url },
             } as T[K],
-            permissions: this.AccessModesToPermissions(access)
+            permissions: this.AccessModesToPermissions(access),
+            isEnabled: true,
         }))
     }
 }
