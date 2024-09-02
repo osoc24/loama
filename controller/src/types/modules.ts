@@ -78,7 +78,7 @@ export interface IPermissionManager<T = Record<string, BaseSubject<string>>> {
     * Retrieve the permissions of the resources  in this  container.
     * Will probably work for a resource, but not guaranteed. Use getRemotePermissions for that
     */
-    getContainerPermissionList(containerUrl: string): Promise<ResourcePermissions<T[keyof T]>[]>
+    getContainerPermissionList(containerUrl: string, resourceToSkip?: string[]): Promise<ResourcePermissions<T[keyof T]>[]>
     /**
     * This indicates if the underlying SDK automatically removes the entry from the SDK if all permissions are revoked
     */
