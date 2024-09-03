@@ -73,7 +73,7 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
             // extra check what the ACL currently has stored as info. Will decrease the chance of the index going out of sync with the ACL file
             const remotePermissions = await this.getExistingRemotePermissions(resourceUrl, subject);
             if (remotePermissions !== permissions) {
-                console.debug("Permissions in index are out of sync with remote, updating index...");
+                console.debug("Permissions in index are out of sync with remote, updating index...", subject);
                 item.permissions = remotePermissions;
             }
         }
@@ -153,14 +153,9 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
             throw new Error("Item not found to enable permissions from")
         }
 
-        await this.updateItem(resource, subject, item.permissions)
+        const { manager } = this.getSubjectConfig(subject)
+        await manager.createPermissions(resource, subject, item.permissions);
 
-        // We need to refresh the item because the updateItem function changes it
-        item = await this.getItem(resource, subject);
-        if (!item) {
-            // This point should never be reached
-            throw new Error("Item not found to enable permissions from")
-        }
         item.isEnabled = true;
         await this.store.saveToRemoteIndex()
     }
@@ -255,7 +250,9 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
                         const indexItem = arr.find(pps => resolver.checkMatch(remotePps.subject, pps.subject));
 
                         if (indexItem) {
-                            indexItem.permissions = remotePps.permissions;
+                            if (indexItem.isEnabled) {
+                                indexItem.permissions = remotePps.permissions;
+                            }
                         } else {
                             arr.push(remotePps)
                         }
