@@ -39,7 +39,7 @@
             </Column>
             <Column header="Enabled">
                 <template #body="slotProps">
-                    <ToggleSwitch :modelValue="slotProps.data.isEnabled"
+                    <ToggleSwitch v-model="slotProps.data.isEnabled"
                         @update:modelValue="e => toggleSubjectAccess(e, slotProps.data.subject)" />
                 </template>
             </Column>
