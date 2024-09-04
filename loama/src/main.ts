@@ -6,6 +6,7 @@ import Tooltip from 'primevue/tooltip';
 import Lara from "@primevue/themes/lara";
 import { definePreset } from '@primevue/themes';
 import ToastService from 'primevue/toastservice';
+import ConfirmationService from 'primevue/confirmationservice';
 
 const app = createApp(App)
 
@@ -40,5 +41,6 @@ app.use(PrimeVue, {
     }
 });
 app.use(ToastService);
+app.use(ConfirmationService);
 
 app.mount('#app')

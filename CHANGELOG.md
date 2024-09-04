@@ -22,3 +22,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Rewritten the controller package to make the store & permission management logic modulair
 - Added a toaster component to loama for better ux when an error occurs
 - Try to refresh existing sessions (0-click refresh)
+- Add confirm dialog when granting control permission
