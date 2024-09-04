@@ -38,7 +38,7 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
         return this.getExistingRemotePermissions(resourceUrl, subject);
     }
 
-    private async updateItem<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>, permissions: Permission[], alwayKeepItem = false) {
+    private async updateItem<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>, permissions: Permission[], alwaysKeepItem = false) {
         let item = await this.getItem(resourceUrl, subject);
         const { manager } = this.getSubjectConfig(subject)
 
@@ -60,7 +60,7 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
             index.items.push(item);
         }
 
-        if (!alwayKeepItem && permissions.length === 0 && manager.shouldDeleteOnAllRevoked()) {
+        if (!alwaysKeepItem && permissions.length === 0 && manager.shouldDeleteOnAllRevoked()) {
             const index = await this.store.getCurrentIndex();
             const idx = index.items.findIndex(i => i.id === item.id);
             index.items.splice(idx, 1);
