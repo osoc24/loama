@@ -135,9 +135,10 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
         const item = subjectConfig.resolver.getItem(index, resourceUrl, subject.selector);
         if (!item) return;
 
+        await subjectConfig.manager.deletePermissions(resourceUrl, subject);
+
         const idx = index.items.findIndex(i => subjectConfig.resolver.checkMatch(i.subject, subject));
-        console.log(index.items.splice(idx, 1));
-        console.log(this.store.getCurrentIndex())
+        index.items.splice(idx, 1);
 
         await this.store.saveToRemoteIndex();
     }
