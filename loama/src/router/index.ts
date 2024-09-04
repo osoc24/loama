@@ -23,7 +23,9 @@ const router = createRouter({
 
 router.beforeEach(async (to) => {
     if (!store.session.info.isLoggedIn) {
-        await store.session.handleIncomingRedirect()
+        await store.session.handleIncomingRedirect({
+            restorePreviousSession: true,
+        })
         if (store.session.info.isLoggedIn) {
             // Default to the first pod
             const currentPodUrl = (await listPodUrls(store.session))[0]
