@@ -1,5 +1,5 @@
 <template>
-    <button :class="classList" :disabled="disabled">
+    <button :class="classList" :disabled="disabled" :type>
         <component :v-if="leftIcon" :is="leftIcon" :size="24" />
         <span>
             <slot></slot>
@@ -28,8 +28,10 @@ const props = withDefaults(defineProps<{
      * If the button is disabled or not.
      */
     disabled?: boolean
+    type?: "button" | "submit" | "reset";
 }>(), {
-    variant: "primary"
+    variant: "primary",
+    type: "button",
 })
 
 const classList = computed(() => {

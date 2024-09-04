@@ -19,3 +19,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Replace seperate npm lock files with yarn workspaces
 - Add [nx](nx.dev) as monorepo tool to run multipe jobs at once
 - Removed /loama prefix in url
+- Rewritten the controller package to make the store & permission management logic modulair
+- Added a toaster component to loama for better ux when an error occurs
