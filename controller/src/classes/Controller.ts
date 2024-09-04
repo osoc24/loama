@@ -173,26 +173,60 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
         await this.store.saveToRemoteIndex()
     }
 
-    // NOTE: Do the following functions need to use the cached index when possible?
     async getContainerPermissionList(containerUrl: string): Promise<ResourcePermissions<T[keyof T]>[]> {
-        // Need to put it in a variable because the type declaration vanishes
         const configs: SubjectConfig<T>[] = Object.values(this.subjectConfigs);
-        const results = await Promise.allSettled(configs.map(c => c.manager.getContainerPermissionList(containerUrl)))
 
-        return results.reduce<ResourcePermissions<T[keyof T]>[]>((arr, v) => {
-            if (v.status === "fulfilled") {
-                // Check if the resourceUrl is already present before pushing it into the array
-                v.value.forEach((resource) => {
-                    let existingInfo = arr.find((info) => info.resourceUrl === resource.resourceUrl);
-                    if (existingInfo) {
-                        existingInfo.permissionsPerSubject.push(...resource.permissionsPerSubject)
-                    } else {
-                        arr.push(resource)
-                    }
+        const index = await this.store.getCurrentIndex();
+        const resourcesToSkip = index.items.filter(i => i.resource.includes(containerUrl));
+
+        const results = await Promise.allSettled(configs.map(c => c.manager.getContainerPermissionList(containerUrl, resourcesToSkip.map(i => i.resource))))
+
+        if (results.length !== 0) {
+            index.items.push(...results.reduce<IndexItem<T[SubjectKey<T>]>[]>((arr, v) => {
+                if (v.status === "fulfilled") {
+                    // Check if the resourceUrl is already present before pushing it into the array
+                    v.value.forEach((r) => {
+                        // @ts-expect-error
+                        arr.push(...r.permissionsPerSubject.map(p => ({
+                            id: crypto.randomUUID(),
+                            requestId: crypto.randomUUID(),
+                            isEnabled: true,
+                            permissions: p.permissions,
+                            resource: r.resourceUrl,
+                            subject: p.subject
+                        })))
+                    })
+                }
+                return arr;
+            }, []));
+
+            await this.store.saveToRemoteIndex();
+        }
+
+
+        return index.items.reduce<ResourcePermissions<T[keyof T]>[]>((arr, v) => {
+            const resourcePath = v.resource.replace(containerUrl, "");
+            const amountOfSlashes = resourcePath.replace(/[^\/]/g, "").length;
+            if ((amountOfSlashes == 1 && !resourcePath.endsWith("/")) || resourcePath.startsWith("/") || amountOfSlashes > 1) {
+                return arr;
+            }
+            let existingInfo = arr.find((info) => info.resourceUrl === v.resource);
+            if (existingInfo) {
+                existingInfo.permissionsPerSubject.push({
+                    permissions: v.permissions,
+                    subject: v.subject
+                })
+            } else {
+                arr.push({
+                    resourceUrl: v.resource,
+                    permissionsPerSubject: [{
+                        permissions: v.permissions,
+                        subject: v.subject
+                    }]
                 })
             }
             return arr;
-        }, [])
+        }, []);
     }
 
     async getResourcePermissionList(resourceUrl: string) {

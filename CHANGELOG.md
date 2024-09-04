@@ -23,3 +23,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added a toaster component to loama for better ux when an error occurs
 - Try to refresh existing sessions (0-click refresh)
 - Add confirm dialog when granting control permission
+- Load index eagerly when requesting info about container resources

@@ -77,12 +77,13 @@ export abstract class InruptPermissionManager<T extends Record<keyof T, BaseSubj
 
     abstract getRemotePermissions<K extends SubjectKey<T>>(resourceUrl: string): Promise<SubjectPermissions<T[K]>[]>
 
-    async getContainerPermissionList(containerUrl: string) {
+    async getContainerPermissionList(containerUrl: string, resourceToSkip: string[] = []) {
         const session = getDefaultSession();
         // this request is cached, so it doesn't matter if it's emitted multiple times in a short span
         const dataset = await getSolidDataset(containerUrl, { fetch: session.fetch });
         const results = await Promise.allSettled(
             getThingAll(dataset)
+                .filter(r => !resourceToSkip?.includes(r.url))
                 .map(async (resource) => ({
                     resourceUrl: resource.url,
                     permissionsPerSubject: await this.getRemotePermissions(resource.url)
