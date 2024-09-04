@@ -24,3 +24,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Try to refresh existing sessions (0-click refresh)
 - Add confirm dialog when granting control permission
 - Load index eagerly when requesting info about container resources
+- Add button to remove access from resource for subject
+
