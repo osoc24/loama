@@ -23,6 +23,12 @@ const handleInput = (e: Event) => {
     emit('update:checked', checked)
 };
 
+defineExpose({
+    updateChecked: (newValue: boolean) => {
+        checked.value = newValue
+    },
+})
+
 watch(() => props.defaultValue, (newValue) => {
     checked.value = newValue;
 });
