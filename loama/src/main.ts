@@ -7,8 +7,10 @@ import Lara from "@primevue/themes/lara";
 import { definePreset } from '@primevue/themes';
 import ToastService from 'primevue/toastservice';
 import ConfirmationService from 'primevue/confirmationservice';
+import { createPinia } from 'pinia';
 
 const app = createApp(App)
+const pinia = createPinia()
 
 // TODO be able to rebuild index? or update index based on real-world access config?
 
@@ -42,5 +44,6 @@ app.use(PrimeVue, {
 });
 app.use(ToastService);
 app.use(ConfirmationService);
+app.use(pinia)
 
 app.mount('#app')

@@ -1,6 +1,6 @@
 <template>
-    <div v-if="selectedEntry">
-        <DataTable :value="selectedEntry?.permissionsPerSubject ?? []">
+    <div v-if="podStore.selectedEntry">
+        <DataTable :value="podStore.selectedEntry?.permissionsPerSubject ?? []">
             <template #header>
                 <div class="table-header">
                     <span class="">Subjects with permissions</span>
@@ -79,7 +79,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { refreshEntryPermissions, selectedEntry } from '@/lib/state';
+import { usePodStore } from '@/lib/state';
 import LoButton from '../LoButton.vue';
 import LoCheck from '../LoCheck.vue';
 import { PhPencil, PhWarning } from '@phosphor-icons/vue';
@@ -98,12 +98,13 @@ const ALL_PERMISSIONS: Permission[] = [Permission.Read, Permission.Write, Permis
 const selectedSubject = ref<SubjectPermissions<WebIdSubject | PublicSubject> | null>(null);
 const updating = ref(false);
 const controlCheckbox = ref<typeof LoSwitch | null>(null)
-const toast = useToast();
 
+const toast = useToast();
+const podStore = usePodStore();
 const confirm = useConfirm();
 
 const handleControlPermissionChange = async (newValue: boolean) => {
-    if (!selectedEntry.value) {
+    if (!podStore.selectedEntry) {
         throw new Error('No selected entry to update permissions for');
     }
     if (!controlCheckbox.value) {
@@ -134,7 +135,7 @@ const handleControlPermissionChange = async (newValue: boolean) => {
 }
 
 const handleSubjectPermissionUpdates = async (newValue: boolean, permission: Permission) => {
-    if (!selectedEntry.value) {
+    if (!podStore.selectedEntry) {
         throw new Error('No selected entry to update permissions for');
     }
     if (!selectedSubject.value) {
@@ -143,9 +144,9 @@ const handleSubjectPermissionUpdates = async (newValue: boolean, permission: Per
     try {
         updating.value = true;
         if (newValue) {
-            await activeController.addPermission(selectedEntry.value.resourceUrl, permission, selectedSubject.value.subject);
+            await activeController.addPermission(podStore.selectedEntry.resourceUrl, permission, selectedSubject.value.subject);
         } else {
-            await activeController.removePermission(selectedEntry.value.resourceUrl, permission, selectedSubject.value.subject);
+            await activeController.removePermission(podStore.selectedEntry.resourceUrl, permission, selectedSubject.value.subject);
         }
     } catch (e) {
         console.error('Failed to update permissions', e);
@@ -166,7 +167,7 @@ const handleSubjectDrawerClose = async () => {
         return;
     }
     selectedSubject.value = null
-    await refreshEntryPermissions();
+    await podStore.refreshEntryPermissions();
 }
 
 </script>
