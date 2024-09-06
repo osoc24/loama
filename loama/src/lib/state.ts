@@ -37,13 +37,13 @@ export const usePodStore = defineStore("pod", {
         }
     },
     actions: {
-        async loadThings(url: string) {
+        async loadResources(url: string) {
             this.podEntries = (await activeController.getContainerPermissionList(url))
                 // Filter out the current resource
-                .filter(thing => thing.resourceUrl !== url)
+                .filter(entry => entry.resourceUrl !== url)
                 // Filter out the things that are nested (?)
-                .filter(thing => {
-                    const depth = thing.resourceUrl.replace(store.usedPod, '').split('/');
+                .filter(entry => {
+                    const depth = entry.resourceUrl.replace(store.usedPod, '').split('/');
                     return depth.length <= 2;
                 })
         },

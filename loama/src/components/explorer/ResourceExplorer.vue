@@ -2,9 +2,9 @@
     <div class="panel-container">
         <div class="left-panel">
             <ExplorerBreadcrumbs />
-            <ExplorerEntry v-for="thing in podStore.formattedEntries" :key="thing.resourceUrl"
-                @click="changeSelectedEntry(thing)" :isContainer="thing.isContainer" :authProtected="false"
-                :url="thing.name + '/'">{{ thing.name }}
+            <ExplorerEntry v-for="resource in podStore.formattedEntries" :key="resource.resourceUrl"
+                @click="changeSelectedEntry(resource)" :isContainer="resource.isContainer" :authProtected="false"
+                :url="resource.name + '/'">{{ resource.name }}
 
             </ExplorerEntry>
         </div>
@@ -34,15 +34,15 @@ import SelectedEntry from './SelectedEntry.vue';
 const route = useRoute();
 const podStore = usePodStore();
 
-await podStore.loadThings(store.usedPod)
+await podStore.loadResources(store.usedPod)
 
-const changeSelectedEntry = (thing: Entry) => podStore.selectedEntry = thing;
+const changeSelectedEntry = (entry: Entry) => podStore.selectedEntry = entry;
 
 const fileUrl = (path: string | string[]) => `${store.usedPod}${path}`
 
 watch(() => route.params.filePath, async (path) => {
     podStore.selectedEntry = null;
-    podStore.loadThings(fileUrl(path));
+    podStore.loadResources(fileUrl(path));
 })
 
 </script>
