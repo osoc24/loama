@@ -22,6 +22,7 @@ export interface IController<T extends Record<keyof T, BaseSubject<keyof T & str
     */
     enablePermissions<K extends SubjectKey<T>>(resource: string, subject: SubjectType<T, K>): Promise<void>
     disablePermissions<K extends SubjectKey<T>>(resource: string, subject: SubjectType<T, K>): Promise<void>
+    removeSubject<K extends SubjectKey<T>>(resource: string, subject: SubjectType<T, K>): Promise<void>
     /**
     * Retrieve the permissions of the resources in this container.
     * Will probably work for a resource, but not guaranteed. Use getItem for that
@@ -73,6 +74,7 @@ export interface IPermissionManager<T = Record<string, BaseSubject<string>>> {
     createPermissions<K extends SubjectKey<T>>(resource: string, subject: T[K], permissions: Permission[]): Promise<void>
     // Does not update the index file
     editPermissions<K extends SubjectKey<T>>(resource: string, item: IndexItem, subject: T[K], permissions: Permission[]): Promise<void>
+    deletePermissions<K extends SubjectKey<T>>(resource: string, subject: T[K]): Promise<void>
     getRemotePermissions<K extends SubjectKey<T>>(resourceUrl: string): Promise<SubjectPermissions<T[K]>[]>
     /**
     * Retrieve the permissions of the resources  in this  container.

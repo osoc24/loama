@@ -45,7 +45,11 @@
             </Column>
             <Column header="">
                 <template #body="slotProps">
-                    <LoButton :left-icon="PhPencil" @click="() => selectedSubject = slotProps.data">Edit</LoButton>
+                    <div class="subject-actions">
+                        <LoButton :left-icon="PhPencil" @click="() => selectedSubject = slotProps.data">Edit</LoButton>
+                        <LoButton :left-icon="PhX" @click="removeSubjectAccess(slotProps.data.subject)">Delete
+                        </LoButton>
+                    </div>
                 </template>
             </Column>
         </DataTable>
@@ -88,7 +92,7 @@
 import { refreshEntryPermissions, selectedEntry } from '@/lib/state';
 import LoButton from '../LoButton.vue';
 import LoCheck from '../LoCheck.vue';
-import { PhPencil, PhWarning } from '@phosphor-icons/vue';
+import { PhPencil, PhWarning, PhX } from '@phosphor-icons/vue';
 import { Permission, activeController, type PublicSubject, type SubjectPermissions, type WebIdSubject } from 'loama-controller';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -188,6 +192,15 @@ const handleSubjectDrawerClose = async () => {
     await refreshEntryPermissions();
 }
 
+const removeSubjectAccess = async (entry: WebIdSubject | PublicSubject) => {
+    if (!selectedEntry.value) {
+        throw new Error("No selected entry to remove subject from")
+    }
+
+    await activeController.removeSubject(selectedEntry.value.resourceUrl, entry);
+    await refreshEntryPermissions();
+}
+
 </script>
 <style scoped lang="scss">
 .table-header {
@@ -201,12 +214,24 @@ const handleSubjectDrawerClose = async () => {
     }
 }
 
+.name-header {
+    min-width: 15vw;
+    font-weight: 700;
+}
+
 .control-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: .25rem;
     font-weight: 700;
+}
+
+.subject-actions {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: 1;
+    gap: .5rem;
 }
 </style>
 <style>
