@@ -168,15 +168,15 @@ const handleSubjectPermissionUpdates = async (newValue: boolean, permission: Per
 }
 
 const toggleSubjectAccess = async (isEnabled: boolean, subject: WebIdSubject | PublicSubject) => {
-    if (!selectedEntry.value) {
+    if (!podStore.selectedEntry) {
         throw new Error('No selected entry to toggle permissions for');
     }
     if (isEnabled) {
-        await activeController.enablePermissions(selectedEntry.value.resourceUrl, subject);
+        await activeController.enablePermissions(podStore.selectedEntry.resourceUrl, subject);
     } else {
-        await activeController.disablePermissions(selectedEntry.value.resourceUrl, subject);
+        await activeController.disablePermissions(podStore.selectedEntry.resourceUrl, subject);
     }
-    await refreshEntryPermissions();
+    await podStore.refreshEntryPermissions();
 }
 
 const handleSubjectDrawerClose = async () => {
@@ -194,12 +194,12 @@ const handleSubjectDrawerClose = async () => {
 }
 
 const removeSubjectAccess = async (entry: WebIdSubject | PublicSubject) => {
-    if (!selectedEntry.value) {
+    if (!podStore.selectedEntry) {
         throw new Error("No selected entry to remove subject from")
     }
 
-    await activeController.removeSubject(selectedEntry.value.resourceUrl, entry);
-    await refreshEntryPermissions();
+    await activeController.removeSubject(podStore.selectedEntry.resourceUrl, entry);
+    await podStore.refreshEntryPermissions();
 }
 
 </script>
