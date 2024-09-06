@@ -38,7 +38,7 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
         return this.getExistingRemotePermissions(resourceUrl, subject);
     }
 
-    private async updateItem<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>, permissions: Permission[]) {
+    private async updateItem<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>, permissions: Permission[], alwaysKeepItem = false) {
         let item = await this.getItem(resourceUrl, subject);
         const { manager } = this.getSubjectConfig(subject)
 
@@ -60,7 +60,7 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
             index.items.push(item);
         }
 
-        if (permissions.length === 0 && manager.shouldDeleteOnAllRevoked()) {
+        if (!alwaysKeepItem && permissions.length === 0 && manager.shouldDeleteOnAllRevoked()) {
             const index = await this.store.getCurrentIndex();
             const idx = index.items.findIndex(i => i.id === item.id);
             index.items.splice(idx, 1);
@@ -73,7 +73,7 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
             // extra check what the ACL currently has stored as info. Will decrease the chance of the index going out of sync with the ACL file
             const remotePermissions = await this.getExistingRemotePermissions(resourceUrl, subject);
             if (remotePermissions !== permissions) {
-                console.debug("Permissions in index are out of sync with remote, updating index...");
+                console.debug("Permissions in index are out of sync with remote, updating index...", subject);
                 item.permissions = remotePermissions;
             }
         }
@@ -164,26 +164,27 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
     }
 
     async enablePermissions<K extends SubjectKey<T>>(resource: string, subject: SubjectType<T, K>) {
-        const item = await this.getItem(resource, subject);
+        let item = await this.getItem(resource, subject);
         if (!item) {
             // This point should never be reached
-            throw new Error("Item not found after disabling permissions")
+            throw new Error("Item not found to enable permissions from")
         }
 
-        item.isEnabled = true;
-        await this.updateItem(resource, subject, item.permissions)
+        const { manager } = this.getSubjectConfig(subject)
+        await manager.createPermissions(resource, subject, item.permissions);
 
+        item.isEnabled = true;
         await this.store.saveToRemoteIndex()
     }
 
-    async disablePermissions<K extends SubjectKey<T>>(resource: string, subject: SubjectType<T, K>) {
-        await this.updateItem(resource, subject, [])
-
-        const item = await this.getItem(resource, subject);
+    async disablePermissions<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>) {
+        let item = await this.getItem(resourceUrl, subject);
         if (!item) {
-            // This point should never be reached
-            throw new Error("Item not found after disabling permissions")
+            throw new Error("Item not found to disable permissions from")
         }
+
+        const { manager } = this.getSubjectConfig(subject)
+        await manager.editPermissions(resourceUrl, item, subject, []);
 
         item.isEnabled = false;
 
@@ -231,14 +232,16 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
             if (existingInfo) {
                 existingInfo.permissionsPerSubject.push({
                     permissions: v.permissions,
-                    subject: v.subject
+                    subject: v.subject,
+                    isEnabled: v.isEnabled,
                 })
             } else {
                 arr.push({
                     resourceUrl: v.resource,
                     permissionsPerSubject: [{
                         permissions: v.permissions,
-                        subject: v.subject
+                        subject: v.subject,
+                        isEnabled: v.isEnabled,
                     }]
                 })
             }
@@ -246,19 +249,34 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
         }, []);
     }
 
+    // NOTE: Do we want to force this to only use the index stored in the store?
     async getResourcePermissionList(resourceUrl: string) {
         // Need to put it in a variable because the type declaration vanishes
         const configs: SubjectConfig<T>[] = Object.values(this.subjectConfigs);
-        const results = await Promise.allSettled(configs.map(c => c.manager.getRemotePermissions(resourceUrl)))
+        const index = await this.store.getCurrentIndex<keyof T & string>();
+        const results = await Promise.allSettled(configs.map(c => c.manager.getRemotePermissions<keyof T & string>(resourceUrl)))
+
+        let permissionsPerSubject = index.items.filter(i => i.resource === resourceUrl)
 
         return {
             resourceUrl,
-            permissionsPerSubject: results.reduce<SubjectPermissions<T[keyof T]>[]>((arr, v) => {
+            permissionsPerSubject: results.reduce<SubjectPermissions<T[keyof T & string]>[]>((arr, v) => {
                 if (v.status === "fulfilled") {
-                    arr.push(...v.value)
+                    v.value.forEach(remotePps => {
+                        const { resolver } = this.getSubjectConfig(remotePps.subject);
+                        const indexItem = arr.find(pps => resolver.checkMatch(remotePps.subject, pps.subject));
+
+                        if (indexItem) {
+                            if (indexItem.isEnabled) {
+                                indexItem.permissions = remotePps.permissions;
+                            }
+                        } else {
+                            arr.push(remotePps)
+                        }
+                    })
                 }
                 return arr;
-            }, [])
+            }, permissionsPerSubject)
         }
     }
 }

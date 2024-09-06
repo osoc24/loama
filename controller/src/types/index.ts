@@ -32,8 +32,9 @@ export interface BaseSubject<T extends string> {
 }
 
 export interface SubjectPermissions<T = BaseSubject<string>> {
-    subject: T,
-    permissions: Permission[]
+    subject: T;
+    permissions: Permission[];
+    isEnabled: boolean;
 }
 
 export interface ResourcePermissions<T = BaseSubject<string>> {

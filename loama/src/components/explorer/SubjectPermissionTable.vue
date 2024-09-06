@@ -37,6 +37,12 @@
                     <LoCheck v-if="slotProps.data.permissions?.includes(Permission.Control)" />
                 </template>
             </Column>
+            <Column header="Enabled">
+                <template #body="slotProps">
+                    <ToggleSwitch v-model="slotProps.data.isEnabled"
+                        @update:modelValue="e => toggleSubjectAccess(e, slotProps.data.subject)" />
+                </template>
+            </Column>
             <Column header="">
                 <template #body="slotProps">
                     <div class="subject-actions">
@@ -96,6 +102,7 @@ import LoSwitch from '../LoSwitch.vue';
 import NewSubject from './NewSubject.vue';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from "primevue/useconfirm";
+import ToggleSwitch from 'primevue/toggleswitch';
 
 const ALL_PERMISSIONS: Permission[] = [Permission.Read, Permission.Write, Permission.Append];
 
@@ -157,6 +164,18 @@ const handleSubjectPermissionUpdates = async (newValue: boolean, permission: Per
     } finally {
         updating.value = false;
     }
+}
+
+const toggleSubjectAccess = async (isEnabled: boolean, subject: WebIdSubject | PublicSubject) => {
+    if (!selectedEntry.value) {
+        throw new Error('No selected entry to toggle permissions for');
+    }
+    if (isEnabled) {
+        await activeController.enablePermissions(selectedEntry.value.resourceUrl, subject);
+    } else {
+        await activeController.disablePermissions(selectedEntry.value.resourceUrl, subject);
+    }
+    await refreshEntryPermissions();
 }
 
 const handleSubjectDrawerClose = async () => {
