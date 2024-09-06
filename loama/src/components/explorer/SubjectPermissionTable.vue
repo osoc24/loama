@@ -37,9 +37,19 @@
                     <LoCheck v-if="slotProps.data.permissions?.includes(Permission.Control)" />
                 </template>
             </Column>
+            <Column header="Enabled">
+                <template #body="slotProps">
+                    <ToggleSwitch v-model="slotProps.data.isEnabled"
+                        @update:modelValue="e => toggleSubjectAccess(e, slotProps.data.subject)" />
+                </template>
+            </Column>
             <Column header="">
                 <template #body="slotProps">
-                    <LoButton :left-icon="PhPencil" @click="() => selectedSubject = slotProps.data">Edit</LoButton>
+                    <div class="subject-actions">
+                        <LoButton :left-icon="PhPencil" @click="() => selectedSubject = slotProps.data">Edit</LoButton>
+                        <LoButton :left-icon="PhX" @click="removeSubjectAccess(slotProps.data.subject)">Delete
+                        </LoButton>
+                    </div>
                 </template>
             </Column>
         </DataTable>
@@ -82,7 +92,7 @@
 import { usePodStore } from '@/lib/state';
 import LoButton from '../LoButton.vue';
 import LoCheck from '../LoCheck.vue';
-import { PhPencil, PhWarning } from '@phosphor-icons/vue';
+import { PhPencil, PhWarning, PhX } from '@phosphor-icons/vue';
 import { Permission, activeController, type PublicSubject, type SubjectPermissions, type WebIdSubject } from 'loama-controller';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -92,6 +102,7 @@ import LoSwitch from '../LoSwitch.vue';
 import NewSubject from './NewSubject.vue';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from "primevue/useconfirm";
+import ToggleSwitch from 'primevue/toggleswitch';
 
 const ALL_PERMISSIONS: Permission[] = [Permission.Read, Permission.Write, Permission.Append];
 
@@ -156,6 +167,18 @@ const handleSubjectPermissionUpdates = async (newValue: boolean, permission: Per
     }
 }
 
+const toggleSubjectAccess = async (isEnabled: boolean, subject: WebIdSubject | PublicSubject) => {
+    if (!selectedEntry.value) {
+        throw new Error('No selected entry to toggle permissions for');
+    }
+    if (isEnabled) {
+        await activeController.enablePermissions(selectedEntry.value.resourceUrl, subject);
+    } else {
+        await activeController.disablePermissions(selectedEntry.value.resourceUrl, subject);
+    }
+    await refreshEntryPermissions();
+}
+
 const handleSubjectDrawerClose = async () => {
     if (updating.value === true) {
         toast.add({
@@ -168,6 +191,15 @@ const handleSubjectDrawerClose = async () => {
     }
     selectedSubject.value = null
     await podStore.refreshEntryPermissions();
+}
+
+const removeSubjectAccess = async (entry: WebIdSubject | PublicSubject) => {
+    if (!selectedEntry.value) {
+        throw new Error("No selected entry to remove subject from")
+    }
+
+    await activeController.removeSubject(selectedEntry.value.resourceUrl, entry);
+    await refreshEntryPermissions();
 }
 
 </script>
@@ -183,12 +215,24 @@ const handleSubjectDrawerClose = async () => {
     }
 }
 
+.name-header {
+    min-width: 15vw;
+    font-weight: 700;
+}
+
 .control-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: .25rem;
     font-weight: 700;
+}
+
+.subject-actions {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: 1;
+    gap: .5rem;
 }
 </style>
 <style>

@@ -21,6 +21,10 @@ export class PublicManager<T extends Record<keyof T, BaseSubject<keyof T & strin
         await this.updateACL(resource, subject, accessModes)
     }
 
+    async deletePermissions<K extends SubjectKey<T>>(resource: string, subject: T[K]) {
+        await this.updateACL(resource, subject, {});
+    }
+
     async editPermissions<K extends SubjectKey<T>>(resource: string, item: IndexItem, subject: T[K], permissions: Permission[]) {
         const accessModes = this.editPermissionsToAccessModes(item, permissions);
         await this.updateACL(resource, subject, accessModes)
@@ -38,7 +42,8 @@ export class PublicManager<T extends Record<keyof T, BaseSubject<keyof T & strin
             subject: {
                 type: "public",
             } as T[K],
-            permissions: this.AccessModesToPermissions(publicAccess)
+            permissions: this.AccessModesToPermissions(publicAccess),
+            isEnabled: true,
         }]
     }
 }
