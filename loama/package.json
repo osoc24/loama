@@ -23,6 +23,7 @@
         "loama-app": "^1.0.0",
         "loama-common": "^1.0.0",
         "loama-controller": "^1.0.0",
+        "pinia": "^2.2.2",
         "primevue": "^4.0.5",
         "vite-svg-loader": "^5.1.0",
         "vue": "^3.4.29",

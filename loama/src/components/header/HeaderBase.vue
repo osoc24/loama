@@ -10,7 +10,7 @@
         </nav>
         <img :src="pfpSrc" alt="User profile picture" @click="toggleContextMenu" />
         <Suspense>
-            <HeaderContextMenu class="menu" :class="{ hidden: isContextMenuHidden }" @click="toggleContextMenu" />
+            <HeaderContextMenu class="menu" :class="{ hidden: isContextMenuHidden }" />
             <template #fallback>
                 Loading context menu...
             </template>
@@ -32,7 +32,7 @@ const isContextMenuHidden = ref(true)
 
 
 function toggleContextMenu() {
-    isContextMenuHidden.value = !isContextMenuHidden.value
+    isContextMenuHidden.value = !isContextMenuHidden.value;
 }
 
 </script>
