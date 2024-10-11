@@ -43,7 +43,7 @@ export const usePodStore = defineStore("pod", {
                 .filter(entry => entry.resourceUrl !== url)
                 // Filter out the things that are nested (?)
                 .filter(entry => {
-                    const depth = entry.resourceUrl.replace(store.usedPod, '').split('/');
+                    const depth = entry.resourceUrl.replace(url, '').split('/');
                     return depth.length <= 2;
                 })
         },
