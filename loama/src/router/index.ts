@@ -1,9 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
+import RequestView from '@/views/RequestView.vue'
 import { store } from 'loama-app'
 import { listPodUrls } from 'loama-common'
 import { activeController } from 'loama-controller'
+import HeaderLayout from '@/components/layouts/HeaderLayout.vue'
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -14,9 +16,20 @@ const router = createRouter({
             component: LoginView
         },
         {
-            path: `/home/:filePath(.*)`,
-            name: 'home',
-            component: HomeView
+            path: "/",
+            component: HeaderLayout,
+            children: [
+                {
+                    path: `/home/:filePath(.*)`,
+                    name: 'home',
+                    component: HomeView
+                },
+                {
+                    path: "/request",
+                    name: "request",
+                    component: RequestView,
+                }
+            ]
         }
     ]
 })
