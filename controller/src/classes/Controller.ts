@@ -306,4 +306,25 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
             }, permissionsPerSubject)
         }
     }
+
+    async allowAccessRequest(resourceUrl: string) {
+        const resources = await this.store.getCurrentResources();
+        if (resources.items.includes(resourceUrl)) {
+            return;
+        }
+        resources.items.push(resourceUrl);
+
+        await this.store.saveToRemoteResources();
+    }
+
+    async denyAccessRequest(resourceUrl: string) {
+        const resources = await this.store.getCurrentResources();
+        if (!resources.items.includes(resourceUrl)) {
+            return;
+        }
+        const idx = resources.items.indexOf(resourceUrl);
+        resources.items.splice(idx, 1);
+
+        await this.store.saveToRemoteResources();
+    }
 }

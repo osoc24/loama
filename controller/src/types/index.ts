@@ -1,5 +1,10 @@
 import { url } from "loama-common";
 
+export interface Resources {
+    id: url;
+    items: string[]
+}
+
 /**
  * The json schema for the index configuration file inside a Solid data pod.
  */
