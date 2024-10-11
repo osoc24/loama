@@ -31,8 +31,9 @@ export interface IController<T extends Record<keyof T, BaseSubject<keyof T & str
 
     getResourcePermissionList(resourceUrl: string): Promise<ResourcePermissions<T[keyof T]>>
 
+    canRequestAccessToResource(resourceUrl: string): Promise<boolean>
     allowAccessRequest(resourceUrl: string): Promise<void>
-    denyAccessRequest(resourceUrl: string): Promise<void>
+    disallowAccessRequest(resourceUrl: string): Promise<void>
 }
 
 export interface IStore<T extends Record<keyof T, BaseSubject<keyof T & string>>> {

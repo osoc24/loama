@@ -1,4 +1,3 @@
-import { ref } from "vue";
 import type { Entry } from "./types";
 import { activeController, type PublicSubject, type ResourcePermissions, type WebIdSubject } from "loama-controller";
 import { defineStore } from "pinia";
@@ -54,5 +53,11 @@ export const usePodStore = defineStore("pod", {
             const newResourceInfo = await activeController.getResourcePermissionList(this.selectedEntry.resourceUrl);
             this.selectedEntry.permissionsPerSubject = newResourceInfo.permissionsPerSubject;
         },
+        async refreshRequestAccessAllowance() {
+            if (!this.selectedEntry) {
+                throw new Error('No selected entry to update permissions for');
+            }
+            this.selectedEntry.canRequestAccess = await activeController.canRequestAccessToResource(this.selectedEntry.resourceUrl);
+        }
     }
 })

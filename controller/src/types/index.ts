@@ -44,5 +44,6 @@ export interface SubjectPermissions<T = BaseSubject<string>> {
 
 export interface ResourcePermissions<T = BaseSubject<string>> {
     resourceUrl: url;
+    canRequestAccess: boolean;
     permissionsPerSubject: SubjectPermissions<T>[]
 }

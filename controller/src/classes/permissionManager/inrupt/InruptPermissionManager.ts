@@ -87,11 +87,15 @@ export abstract class InruptPermissionManager<T extends Record<keyof T, BaseSubj
                     if (resourceToSkip.includes(resource.url)) {
                         return {
                             resourceUrl: resource.url,
+                            // We can set this to false as this is the default & getting doubled checked in the controller
+                            canRequestAccess: false,
                             permissionsPerSubject: [],
                         }
                     }
                     return {
                         resourceUrl: resource.url,
+                        // We can set this to false as this is the default & getting doubled checked in the controller
+                        canRequestAccess: false,
                         permissionsPerSubject: await this.getRemotePermissions(resource.url)
                     }
                 })
