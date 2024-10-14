@@ -22,3 +22,22 @@ export const activeController = new Controller<{
         },
     },
 )
+
+export const createBasicController = () => {
+    return new Controller<{
+        webId: WebIdSubject,
+        public: PublicSubject,
+    }>(
+        new InruptStore(),
+        {
+            webId: {
+                resolver: new WebIdResolver(),
+                manager: new WebIdManager()
+            },
+            public: {
+                resolver: new PublicResolver(),
+                manager: new PublicManager(),
+            },
+        },
+    )
+}
