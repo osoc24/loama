@@ -1,3 +1,4 @@
+import { AccessRequest } from "./classes/AccessRequest";
 import { Controller } from "./classes/Controller";
 import { PublicManager } from "./classes/permissionManager/inrupt/PublicManager";
 import { WebIdManager } from "./classes/permissionManager/inrupt/WebIdManager";
@@ -10,7 +11,8 @@ export const activeController = new Controller<{
     webId: WebIdSubject,
     public: PublicSubject,
 }>(
-    new InruptStore(),
+    new InruptStore("index.json", () => ({ id: "", items: [] })),
+    new AccessRequest(new InruptStore("resources.json", () => ({ id: "", items: [] }))),
     {
         webId: {
             resolver: new WebIdResolver(),
@@ -28,7 +30,8 @@ export const createBasicController = () => {
         webId: WebIdSubject,
         public: PublicSubject,
     }>(
-        new InruptStore(),
+        new InruptStore("index.json", () => ({ id: "", items: [] })),
+        new AccessRequest(new InruptStore("resources.json", () => ({ id: "", items: [] }))),
         {
             webId: {
                 resolver: new WebIdResolver(),

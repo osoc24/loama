@@ -1,23 +1,21 @@
 import { FetchError, getFile, overwriteFile, saveFileInContainer, WithResourceInfo } from "@inrupt/solid-client";
-import { BaseSubject, Index, Resources } from "../../types";
 import { IStore } from "../../types/modules";
 import { BaseStore } from "./BaseStore";
 import { getDefaultSession, Session } from "@inrupt/solid-client-authn-browser";
-import { setPublicAccess } from "@inrupt/solid-client/universal";
 
 /**
  * A store implementation using the inrupt sdk to actually communicate with the pod
  * The "Inrupt" prefix is to indicate the usage of the inrupt sdk
  * This store can be used without the the InruptPermissionManager
 */
-export class InruptStore<T extends Record<keyof T, BaseSubject<keyof T & string>>> extends BaseStore<T> implements IStore<T> {
-    // TODO this should be a more resilient path: be.ugent.idlab.knows.solid.loama.index.js or smth
-    private indexPath = "index.json";
-    private resourcesPath = "resources.json";
+export class InruptStore<T> extends BaseStore<T> implements IStore<T> {
     private session: Session;
+    private templateGenerator: () => T;
 
-    constructor() {
-        super()
+    // TODO this should be a more resilient path: be.ugent.idlab.knows.solid.loama.index.js or smth
+    constructor(filePath: string, templateGenerator: () => T) {
+        super(filePath)
+        this.templateGenerator = templateGenerator;
         this.session = getDefaultSession()
     }
 
@@ -27,96 +25,50 @@ export class InruptStore<T extends Record<keyof T, BaseSubject<keyof T & string>
         });
     }
 
-    async getOrCreateResources(): Promise<Resources> {
-        if (!this.podUrl) {
-            throw new Error("Cannot get current resources file: pod location is not set");
-        }
-
-        if (this.resources) {
-            return this.resources;
-        }
-
-        const resourcesPath = `${this.podUrl}${this.resourcesPath}`;
-        let file: (Blob & WithResourceInfo) | undefined = undefined
-        try {
-            file = await getFile(resourcesPath, { fetch: this.session.fetch })
-        } catch (error: unknown) {
-            if (error instanceof FetchError && error.statusCode === 404) {
-                this.resources = { id: resourcesPath, items: [] }
-                file = await saveFileInContainer(
-                    this.podUrl,
-                    this.toJsonFile(this.resources, this.resourcesPath),
-                    { fetch: this.session.fetch }
-                );
-                await setPublicAccess(resourcesPath, { read: true }, { fetch: this.session.fetch });
-            }
-        }
-
-        const fileText = await file?.text();
-        this.resources = JSON.parse(fileText ?? "{}");
-        if (!this.resources) {
-            throw new Error("Resources not found or invalid");
-        }
-
-        return this.resources;
-    }
-
     // NOTE: Possible will move the podUrl to the parameters, this works for the current POC
-    async getOrCreateIndex(): Promise<Index<T[keyof T]>> {
+    async getOrCreate(): Promise<T> {
         if (!this.podUrl) {
             throw new Error("Cannot get current index file: pod location is not set");
         }
 
-        if (this.index) {
-            return this.index;
+        if (this.data) {
+            return this.data;
         }
 
-        const indexUrl = `${this.podUrl}${this.indexPath}`;
+        const dataUrl = `${this.podUrl}${this.filePath}`;
         let file: (Blob & WithResourceInfo) | undefined = undefined
         try {
-            file = await getFile(indexUrl, { fetch: this.session.fetch })
+            file = await getFile(dataUrl, { fetch: this.session.fetch })
         } catch (error: unknown) {
             if (error instanceof FetchError && error.statusCode === 404) {
-                this.index = { id: indexUrl, items: [] }
+                this.data = this.templateGenerator();
                 file = await saveFileInContainer(
                     this.podUrl,
-                    this.toJsonFile(this.index, this.indexPath),
+                    this.toJsonFile(this.data, this.filePath),
                     { fetch: this.session.fetch }
                 );
             }
         }
 
         const fileText = await file?.text();
-        this.index = JSON.parse(fileText ?? "{}");
-        if (!this.index) {
-            throw new Error("Index not found or invalid");
+        this.data = JSON.parse(fileText ?? "{}");
+        if (!this.data) {
+            throw new Error(`Store data(${this.filePath}) not found or invalid`);
         }
 
-        return this.index;
+        return this.data;
     }
 
-    async saveToRemoteIndex() {
-        if (!this.index) {
-            await this.getOrCreateIndex();
+    async saveToRemote() {
+        if (!this.data) {
+            await this.getOrCreate();
         }
-        if (!this.index) {
-            throw new Error("Index not found or invalid");
-        }
-
-        overwriteFile(this.index.id, this.toJsonFile(this.index, this.indexPath), {
-            fetch: this.session.fetch,
-        });
-    }
-
-    async saveToRemoteResources() {
-        if (!this.resources) {
-            await this.getOrCreateResources();
-        }
-        if (!this.resources) {
-            throw new Error("Resources not found or invalid");
+        if (!this.data) {
+            throw new Error(`Store data(${this.filePath}) not found or invalid`);
         }
 
-        overwriteFile(this.resources.id, this.toJsonFile(this.resources, this.resourcesPath), {
+        // NOTE: the fileUrl was stored in the file, do we want to enforce our generic to atleast have this id property available?
+        overwriteFile(`${this.podUrl}${this.filePath}`, this.toJsonFile(this.data, this.filePath), {
             fetch: this.session.fetch,
         });
     }

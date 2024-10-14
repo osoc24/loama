@@ -30,13 +30,15 @@ export interface IController<T extends Record<keyof T, BaseSubject<keyof T & str
     getContainerPermissionList(containerUrl: string): Promise<ResourcePermissions<T[keyof T]>[]>
 
     getResourcePermissionList(resourceUrl: string): Promise<ResourcePermissions<T[keyof T]>>
+}
 
+export interface IAccessRequest {
     canRequestAccessToResource(resourceUrl: string): Promise<boolean>
     allowAccessRequest(resourceUrl: string): Promise<void>
     disallowAccessRequest(resourceUrl: string): Promise<void>
 }
 
-export interface IStore<T extends Record<keyof T, BaseSubject<keyof T & string>>> {
+export interface IStore<T> {
     /**
     * Implemented by BaseStore
     * Will set the protected pod url property
@@ -47,32 +49,18 @@ export interface IStore<T extends Record<keyof T, BaseSubject<keyof T & string>>
     */
     unsetPodUrl(): void;
     /**
-    * Returns the currently stored index or calls getOrCreateIndex if the index is not set
+    * Returns the currently stored data or calls getOrCreate if the data is not set
     */
-    getCurrentIndex<K extends SubjectKey<T>>(): Promise<Index<T[K]>>;
+    getCurrent(): Promise<T>;
 
     /**
-    * Tries to retrieve the stored index.json from the pod. If it doesn't exist, it creates an empty one.
+    * Tries to retrieve the stored file from the pod. If it doesn't exist, it creates an empty one.
     */
-    getOrCreateIndex(): Promise<Index>;
+    getOrCreate(): Promise<T>;
     /**
-    * Saves the index to the pod
+    * Saves the data to the pod
     */
-    saveToRemoteIndex(): Promise<void>;
-
-    /**
-    * Returns the currently stored index or calls getOrCreateIndex if the index is not set
-    */
-    getCurrentResources(): Promise<Resources>;
-
-    /**
-    * Tries to retrieve the stored index.json from the pod. If it doesn't exist, it creates an empty one.
-    */
-    getOrCreateResources(): Promise<Resources>;
-    /**
-    * Saves the index to the pod
-    */
-    saveToRemoteResources(): Promise<void>;
+    saveToRemote(): Promise<void>;
 }
 
 export interface ISubjectResolver<T extends BaseSubject<string>> {
