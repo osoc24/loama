@@ -12,7 +12,7 @@ export const activeController = new Controller<{
     public: PublicSubject,
 }>(
     new InruptStore("index.json", () => ({ id: "", items: [] })),
-    new AccessRequest(new InruptStore("resources.json", () => ({ id: "", items: [] }))),
+    new InruptStore("resources.json", () => ({ id: "", items: [] })),
     {
         webId: {
             resolver: new WebIdResolver(),
@@ -31,7 +31,7 @@ export const createBasicController = () => {
         public: PublicSubject,
     }>(
         new InruptStore("index.json", () => ({ id: "", items: [] })),
-        new AccessRequest(new InruptStore("resources.json", () => ({ id: "", items: [] }))),
+        new InruptStore("resources.json", () => ({ id: "", items: [] })),
         {
             webId: {
                 resolver: new WebIdResolver(),

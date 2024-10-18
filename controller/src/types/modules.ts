@@ -11,6 +11,7 @@ export type SubjectConfigs<T extends Record<keyof T, BaseSubject<keyof T & strin
 export interface IController<T extends Record<keyof T, BaseSubject<keyof T & string>>> {
     setPodUrl(podUrl: string): void;
     unsetPodUrl(podUrl: string): void;
+    AccessRequest(): IAccessRequest;
     getLabelForSubject<K extends SubjectKey<T>>(subject: T[K]): string;
     getOrCreateIndex(): Promise<Index>;
     getItem<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>): Promise<IndexItem<T[K]> | undefined>;

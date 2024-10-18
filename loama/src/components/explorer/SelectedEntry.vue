@@ -52,9 +52,9 @@ const handleSubjectRequestAccess = (canRequest: boolean) => {
         throw new Error('No entry selected, this should not be possible');
     }
     if (canRequest) {
-        activeController.allowAccessRequest(podStore.selectedEntry.resourceUrl)
+        activeController.AccessRequest().allowAccessRequest(podStore.selectedEntry.resourceUrl)
     } else {
-        activeController.disallowAccessRequest(podStore.selectedEntry.resourceUrl)
+        activeController.AccessRequest().disallowAccessRequest(podStore.selectedEntry.resourceUrl)
     }
 
     podStore.refreshRequestAccessAllowance();

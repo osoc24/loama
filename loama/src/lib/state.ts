@@ -57,7 +57,7 @@ export const usePodStore = defineStore("pod", {
             if (!this.selectedEntry) {
                 throw new Error('No selected entry to update permissions for');
             }
-            this.selectedEntry.canRequestAccess = await activeController.canRequestAccessToResource(this.selectedEntry.resourceUrl);
+            this.selectedEntry.canRequestAccess = await activeController.AccessRequest().canRequestAccessToResource(this.selectedEntry.resourceUrl);
         }
     }
 })

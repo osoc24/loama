@@ -1,16 +1,19 @@
-import { BaseSubject, Index, IndexItem, Permission, ResourcePermissions, SubjectPermissions } from "../types";
+import { BaseSubject, Index, IndexItem, Permission, ResourcePermissions, Resources, SubjectPermissions } from "../types";
 import { IAccessRequest, IController, IStore, SubjectConfig, SubjectConfigs, SubjectKey, SubjectType } from "../types/modules";
+import { AccessRequest } from "./AccessRequest";
 import { Mutex } from "./utils/Mutex";
 
 export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>> extends Mutex implements IController<T> {
     private index: IStore<Index<T[keyof T & string]>>
+    private resources: IStore<Resources>
     private accessRequest: IAccessRequest;
     private subjectConfigs: SubjectConfigs<T>
 
-    constructor(indexStore: IStore<Index<T[keyof T & string]>>, accessRequest: IAccessRequest, subjects: SubjectConfigs<T>) {
+    constructor(indexStore: IStore<Index<T[keyof T & string]>>, resourcesStore: IStore<Resources>, subjects: SubjectConfigs<T>) {
         super();
         this.index = indexStore;
-        this.accessRequest = accessRequest;
+        this.resources = resourcesStore;
+        this.accessRequest = new AccessRequest(resourcesStore);
         this.subjectConfigs = subjects;
     }
 
@@ -83,12 +86,18 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
         await this.index.saveToRemote();
     }
 
+    AccessRequest(): IAccessRequest {
+        return this.accessRequest;
+    }
+
     setPodUrl(podUrl: string) {
         this.index.setPodUrl(podUrl);
+        this.resources.setPodUrl(podUrl);
     }
 
     unsetPodUrl() {
         this.index.unsetPodUrl();
+        this.resources.unsetPodUrl();
     }
 
     async getOrCreateIndex() {
@@ -103,7 +112,7 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
     async getItem<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>): Promise<IndexItem<T[K]> | undefined> {
         const { resolver } = this.getSubjectConfig<K>(subject);
 
-        const index = await this.index.getCurrent();
+        const index = await this.index.getCurrent() as Index<T[K]>;
         return resolver.getItem(index, resourceUrl, subject.selector)
     }
 
@@ -132,7 +141,7 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
         await this.updateItem(resourceUrl, subject, []);
 
         const subjectConfig = this.getSubjectConfig(subject);
-        const index = await this.index.getCurrent();
+        const index = await this.index.getCurrent() as Index<T[K]>;
 
         const item = subjectConfig.resolver.getItem(index, resourceUrl, subject.selector);
         if (!item) return;
@@ -197,7 +206,6 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
         const configs: SubjectConfig<T>[] = Object.values(this.subjectConfigs);
 
         const index = await this.index.getCurrentIndex();
-        const requestAccessResources = await this.index.getCurrentResources();
         const resourcesToSkip = index.items.filter(i => {
             if (!i.resource.includes(containerUrl)) {
                 return false;
@@ -252,13 +260,14 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
 
         await this.index.saveToRemoteIndex();
 
-        return index.items.reduce<ResourcePermissions<T[keyof T]>[]>((arr, v) => {
+        return await index.items.reduce<Promise<ResourcePermissions<T[keyof T]>[]>>(async (arr, v) => {
             const resourcePath = v.resource.replace(containerUrl, "");
             const amountOfSlashes = resourcePath.replace(/[^\/]/g, "").length;
             if ((amountOfSlashes == 1 && !resourcePath.endsWith("/")) || resourcePath.startsWith("/") || amountOfSlashes > 1) {
                 return arr;
             }
-            let existingInfo = arr.find((info) => info.resourceUrl === v.resource);
+            let indexItems = await arr;
+            let existingInfo = indexItems.find((info) => info.resourceUrl === v.resource);
             if (existingInfo) {
                 existingInfo.permissionsPerSubject.push({
                     permissions: v.permissions,
@@ -266,9 +275,9 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
                     isEnabled: v.isEnabled,
                 })
             } else {
-                arr.push({
+                indexItems.push({
                     resourceUrl: v.resource,
-                    canRequestAccess: requestAccessResources.items.includes(v.resource),
+                    canRequestAccess: await this.accessRequest.canRequestAccessToResource(v.resource),
                     permissionsPerSubject: [{
                         permissions: v.permissions,
                         subject: v.subject,
@@ -276,8 +285,8 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
                     }]
                 })
             }
-            return arr;
-        }, []);
+            return indexItems;
+        }, Promise.resolve([]));
     }
 
     // NOTE: Do we want to force this to only use the index stored in the store?
@@ -285,14 +294,13 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
         // Need to put it in a variable because the type declaration vanishes
         const configs: SubjectConfig<T>[] = Object.values(this.subjectConfigs);
         const index = await this.index.getCurrent();
-        const requestAccessResources = await this.index.getCurrentResources();
         const results = await Promise.allSettled(configs.map(c => c.manager.getRemotePermissions<keyof T & string>(resourceUrl)))
 
         let permissionsPerSubject = index.items.filter(i => i.resource === resourceUrl)
 
         return {
             resourceUrl,
-            canRequestAccess: requestAccessResources.items.includes(resourceUrl),
+            canRequestAccess: await this.accessRequest.canRequestAccessToResource(resourceUrl),
             permissionsPerSubject: results.reduce<SubjectPermissions<T[keyof T & string]>[]>((arr, v) => {
                 if (v.status === "fulfilled") {
                     v.value.forEach(remotePps => {
