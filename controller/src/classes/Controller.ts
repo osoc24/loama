@@ -6,7 +6,7 @@ import { Mutex } from "./utils/Mutex";
 export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>> extends Mutex implements IController<T> {
     private index: IStore<Index<T[keyof T & string]>>
     private resources: IStore<Resources>
-    private accessRequest: IAccessRequest;
+    private accessRequest: AccessRequest;
     private subjectConfigs: SubjectConfigs<T>
 
     constructor(indexStore: IStore<Index<T[keyof T & string]>>, resourcesStore: IStore<Resources>, subjects: SubjectConfigs<T>) {
@@ -93,6 +93,7 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
     setPodUrl(podUrl: string) {
         this.index.setPodUrl(podUrl);
         this.resources.setPodUrl(podUrl);
+        this.accessRequest.validateInboxExistence()
     }
 
     unsetPodUrl() {

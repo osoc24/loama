@@ -41,6 +41,9 @@ export interface IAccessRequest {
     canRequestAccessToResource(resourceUrl: string): Promise<boolean>
     allowAccessRequest(resourceUrl: string): Promise<void>
     disallowAccessRequest(resourceUrl: string): Promise<void>
+
+    // Notifications
+    sendRequestNotification(resources: string[]): Promise<void>;
 }
 
 export interface IStore<T> {
@@ -53,6 +56,8 @@ export interface IStore<T> {
     * Removes the pod url property value
     */
     unsetPodUrl(): void;
+    getPodUrl(): string | undefined;
+
     /**
     * Returns the currently stored data or calls getOrCreate if the data is not set
     */

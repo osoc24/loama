@@ -15,6 +15,10 @@ export abstract class BaseStore<T> {
         this.podUrl = undefined;
     }
 
+    getPodUrl() {
+        return this.podUrl
+    }
+
     abstract getOrCreate(): Promise<T>;
 
     async getCurrent() {

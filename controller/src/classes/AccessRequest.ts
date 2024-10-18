@@ -1,11 +1,35 @@
 import { ResourceAccessRequestNode, Resources } from "@/types";
 import { IAccessRequest, IStore } from "@/types/modules";
+import { fetch as solidFetch } from '@inrupt/solid-client-authn-browser'
 
 export class AccessRequest implements IAccessRequest {
     private resources: IStore<Resources>;
 
     constructor(resources: IStore<Resources>) {
         this.resources = resources;
+    }
+
+    // Checks if our inbox to retrieve requests exists
+    public async validateInboxExistence() {
+        if (this.resources.getPodUrl()) {
+            throw new Error("No pod url set");
+        }
+        const fileUrl = `${this.resources.getPodUrl()}public/loama/inbox.ttl`
+        // TODO: Move away from inrupt OR move the inrupt to a pluggable module
+        const resp = await solidFetch(fileUrl, {
+            method: 'GET',
+            headers: { 'Content-Type': 'text/turtle' },
+            credentials: 'include',
+        });
+        if (resp.status > 300 && resp.status < 500) {
+            // TODO: Make file publicly available
+            await solidFetch(fileUrl, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'text/turtle' },
+                body: "",
+                credentials: 'include',
+            });
+        }
     }
 
     async getRequestableResources(containerUrl: string) {
@@ -64,5 +88,9 @@ export class AccessRequest implements IAccessRequest {
         resources.items.splice(idx, 1);
 
         await this.resources.saveToRemote();
+    }
+
+    async sendRequestNotification(resources: string[]) {
+
     }
 }
