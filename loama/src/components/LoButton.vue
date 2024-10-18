@@ -55,7 +55,6 @@ button {
     gap: var(--base-unit);
     border-radius: var(--base-corner);
     height: fit-content;
-    border: none;
     cursor: pointer;
     border: 0.25rem solid;
 }
@@ -68,7 +67,6 @@ button:hover {
 
 button:disabled {
     background-color: color-mix(in srgb, var(--off-black) 60%, transparent);
-    border: none;
     color: var(--off-white);
     cursor: not-allowed;
 }
