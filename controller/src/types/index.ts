@@ -47,3 +47,9 @@ export interface ResourcePermissions<T = BaseSubject<string>> {
     canRequestAccess: boolean;
     permissionsPerSubject: SubjectPermissions<T>[]
 }
+
+export interface ResourceAccessRequestNode {
+    resourceUrl: url;
+    canRequestAccess: boolean;
+    children?: Record<string, ResourceAccessRequestNode>;
+}

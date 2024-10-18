@@ -1,4 +1,4 @@
-import { BaseSubject, Index, IndexItem, Permission, ResourcePermissions, Resources, SubjectPermissions } from "../types";
+import { BaseSubject, Index, IndexItem, Permission, ResourceAccessRequestNode, ResourcePermissions, Resources, SubjectPermissions } from "../types";
 
 export type SubjectKey<T> = keyof T & string;
 export type SubjectType<T, K extends SubjectKey<T>> = T[K];
@@ -34,6 +34,10 @@ export interface IController<T extends Record<keyof T, BaseSubject<keyof T & str
 }
 
 export interface IAccessRequest {
+    /**
+    * Will return a tree structure starting from the containerUrl with the access requestable (container) resources
+    */
+    getRequestableResources(containerUrl: string): Promise<ResourceAccessRequestNode>
     canRequestAccessToResource(resourceUrl: string): Promise<boolean>
     allowAccessRequest(resourceUrl: string): Promise<void>
     disallowAccessRequest(resourceUrl: string): Promise<void>
