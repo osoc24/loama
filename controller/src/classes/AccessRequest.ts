@@ -1,12 +1,14 @@
 import { ResourceAccessRequestNode, Resources } from "@/types";
-import { IAccessRequest, IStore } from "@/types/modules";
+import { IAccessRequest, IStore, IStoreConstructor } from "@/types/modules";
 import { fetch as solidFetch } from '@inrupt/solid-client-authn-browser'
 
 export class AccessRequest implements IAccessRequest {
     private resources: IStore<Resources>;
+    private inbox: IStore<unknown>;
 
-    constructor(resources: IStore<Resources>) {
-        this.resources = resources;
+    constructor(storeConstructor: IStoreConstructor, resourcesStore: IStore<Resources>) {
+        this.resources = resourcesStore;
+        this.inbox = new storeConstructor("public/loama/inbox.ttl", () => ({}));
     }
 
     // Checks if our inbox to retrieve requests exists

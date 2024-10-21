@@ -1,4 +1,4 @@
-import { BaseSubject, Index, IndexItem, Permission, ResourceAccessRequestNode, ResourcePermissions, Resources, SubjectPermissions } from "../types";
+import { BaseSubject, Index, IndexItem, Permission, ResourceAccessRequestNode, ResourcePermissions, SubjectPermissions } from "../types";
 
 export type SubjectKey<T> = keyof T & string;
 export type SubjectType<T, K extends SubjectKey<T>> = T[K];
@@ -44,6 +44,10 @@ export interface IAccessRequest {
 
     // Notifications
     sendRequestNotification(resources: string[]): Promise<void>;
+}
+
+export interface IStoreConstructor<T = unknown> {
+    new(filePath: string, templateGenerator: () => T): IStore<T>
 }
 
 export interface IStore<T> {

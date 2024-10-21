@@ -1,5 +1,5 @@
 import { BaseSubject, Index, IndexItem, Permission, ResourcePermissions, Resources, SubjectPermissions } from "../types";
-import { IAccessRequest, IController, IStore, SubjectConfig, SubjectConfigs, SubjectKey, SubjectType } from "../types/modules";
+import { IAccessRequest, IController, IStore, IStoreConstructor, SubjectConfig, SubjectConfigs, SubjectKey, SubjectType } from "../types/modules";
 import { AccessRequest } from "./AccessRequest";
 import { Mutex } from "./utils/Mutex";
 
@@ -9,11 +9,12 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
     private accessRequest: AccessRequest;
     private subjectConfigs: SubjectConfigs<T>
 
-    constructor(indexStore: IStore<Index<T[keyof T & string]>>, resourcesStore: IStore<Resources>, subjects: SubjectConfigs<T>) {
+    constructor(storeConstructor: IStoreConstructor, subjects: SubjectConfigs<T>) {
         super();
-        this.index = indexStore;
-        this.resources = resourcesStore;
-        this.accessRequest = new AccessRequest(resourcesStore);
+        // There is currently no "easy" solution to get around the as IStore...
+        this.index = new storeConstructor("index.json", () => ({ id: "", items: [] })) as IStore<Index<T[keyof T & string]>>;
+        this.resources = new storeConstructor("resources.json", () => ({ id: "", items: [] })) as IStore<Resources>;;
+        this.accessRequest = new AccessRequest(storeConstructor, this.resources);
         this.subjectConfigs = subjects;
     }
 
