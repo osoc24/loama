@@ -1,3 +1,4 @@
+import { getLinkedResourceUrlAll, getResourceInfo } from "@inrupt/solid-client";
 import { Permission, ResourceAccessRequestNode, Resources } from "../types";
 import { IAccessRequest, IController, IInboxConstructor, IStore } from "../types/modules";
 
@@ -87,18 +88,29 @@ export class AccessRequest implements IAccessRequest {
     }
 
     async sendRequestNotification(originWebId: string, resources: string[]) {
-        const messages = resources.map(r => {
-            return {
+        const messages: unknown[] = [];
+        for (let r of resources) {
+            // TODO: Replace with our own calls instead of using the inrupt SDK
+            const resourceInfo = await getResourceInfo(r, {
+                ignoreAuthenticationErrors: true,
+            });
+            const linkedResources = getLinkedResourceUrlAll(resourceInfo)
+            let acl = linkedResources.acl?.[0];
+            if (!acl) {
+                console.warn(`No acl found for ${r}, using ${r}.acl`);
+                acl = `${r}.acl`;
+            }
+
+            messages.push({
                 "@context": {
                     "tbd": "http://example.org/to-be-determined",
                     "acl": "http://www.w3.org/ns/auth/acl",
                     "as": "https://www.w3.org/ns/activitystreams",
                 },
                 "@type": "tbd:AppendRequest",
-                // TODO: set ACL based on linkedResources
                 "@id": `urn:loama:${crypto.randomUUID()}`,
                 "as:actor": originWebId,
-                "as:target": `${r}.acl`,
+                "as:target": acl,
                 "as:published": new Date().toISOString(),
                 "as:object": {
                     "@id": `urn:loama:${crypto.randomUUID()}`,
@@ -111,12 +123,10 @@ export class AccessRequest implements IAccessRequest {
                         }
                     ]
                 }
-            }
-        });
+            });
+        };
 
-        // TODO: check if this is actually possible with the RFC for LDN https://www.w3.org/TR/ldn/#sender
         const inbox = await this.inbox.getCurrent();
-        console.log(messages)
         inbox.push(...messages);
         await this.inbox.saveToRemote();
     }
