@@ -94,12 +94,13 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
     setPodUrl(podUrl: string) {
         this.index.setPodUrl(podUrl);
         this.resources.setPodUrl(podUrl);
-        this.accessRequest.validateInboxExistence()
+        this.accessRequest.setPodUrl(podUrl)
     }
 
     unsetPodUrl() {
         this.index.unsetPodUrl();
         this.resources.unsetPodUrl();
+        this.accessRequest.unsetPodUrl();
     }
 
     async getOrCreateIndex() {

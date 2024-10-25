@@ -1,37 +1,23 @@
 import { ResourceAccessRequestNode, Resources } from "@/types";
 import { IAccessRequest, IStore, IStoreConstructor } from "@/types/modules";
-import { fetch as solidFetch } from '@inrupt/solid-client-authn-browser'
 
 export class AccessRequest implements IAccessRequest {
     private resources: IStore<Resources>;
-    private inbox: IStore<unknown>;
+    private inbox: IStore<unknown[]>;
 
     constructor(storeConstructor: IStoreConstructor, resourcesStore: IStore<Resources>) {
         this.resources = resourcesStore;
-        this.inbox = new storeConstructor("public/loama/inbox.ttl", () => ({}));
+        this.inbox = new storeConstructor("public/loama/inbox.ttl", () => ([])) as IStore<unknown[]>;
     }
 
-    // Checks if our inbox to retrieve requests exists
-    public async validateInboxExistence() {
-        if (this.resources.getPodUrl()) {
-            throw new Error("No pod url set");
-        }
-        const fileUrl = `${this.resources.getPodUrl()}public/loama/inbox.ttl`
-        // TODO: Move away from inrupt OR move the inrupt to a pluggable module
-        const resp = await solidFetch(fileUrl, {
-            method: 'GET',
-            headers: { 'Content-Type': 'text/turtle' },
-            credentials: 'include',
-        });
-        if (resp.status > 300 && resp.status < 500) {
-            // TODO: Make file publicly available
-            await solidFetch(fileUrl, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'text/turtle' },
-                body: "",
-                credentials: 'include',
-            });
-        }
+    setPodUrl(url: string) {
+        this.inbox.setPodUrl(url)
+        // This will make sure we have the inbox created in our own container
+        this.inbox.getOrCreate();
+    }
+
+    unsetPodUrl() {
+        this.inbox.unsetPodUrl();
     }
 
     async getRequestableResources(containerUrl: string) {
@@ -92,7 +78,7 @@ export class AccessRequest implements IAccessRequest {
         await this.resources.saveToRemote();
     }
 
-    async sendRequestNotification(resources: string[]) {
+    async sendRequestNotification(originWebId: string, resources: string[]) {
 
     }
 }

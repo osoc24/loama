@@ -43,7 +43,7 @@ export interface IAccessRequest {
     disallowAccessRequest(resourceUrl: string): Promise<void>
 
     // Notifications
-    sendRequestNotification(resources: string[]): Promise<void>;
+    sendRequestNotification(originWebId: string, resources: string[]): Promise<void>;
 }
 
 export interface IStoreConstructor<T = unknown> {
