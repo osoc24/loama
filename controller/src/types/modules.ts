@@ -62,6 +62,8 @@ export interface IStore<T> {
     unsetPodUrl(): void;
     getPodUrl(): string | undefined;
 
+    getDataUrl(): string;
+
     /**
     * Returns the currently stored data or calls getOrCreate if the data is not set
     */

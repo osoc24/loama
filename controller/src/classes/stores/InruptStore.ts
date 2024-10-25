@@ -1,4 +1,4 @@
-import { FetchError, getFile, overwriteFile, saveFileInContainer, WithResourceInfo } from "@inrupt/solid-client";
+import { FetchError, getFile, overwriteFile } from "@inrupt/solid-client";
 import { IStore } from "../../types/modules";
 import { BaseStore } from "./BaseStore";
 import { getDefaultSession, Session } from "@inrupt/solid-client-authn-browser";
@@ -25,7 +25,6 @@ export class InruptStore<T> extends BaseStore<T> implements IStore<T> {
         });
     }
 
-    // NOTE: Possible will move the podUrl to the parameters, this works for the current POC
     async getOrCreate(): Promise<T> {
         if (!this.podUrl) {
             throw new Error("Cannot get current index file: pod location is not set");
@@ -35,23 +34,17 @@ export class InruptStore<T> extends BaseStore<T> implements IStore<T> {
             return this.data;
         }
 
-        const dataUrl = `${this.podUrl}${this.filePath}`;
-        let file: (Blob & WithResourceInfo) | undefined = undefined
         try {
-            file = await getFile(dataUrl, { fetch: this.session.fetch })
+            let file = await getFile(this.getDataUrl(), { fetch: this.session.fetch })
+            const fileText = await file?.text();
+            this.data = JSON.parse(fileText ?? "{}");
         } catch (error: unknown) {
             if (error instanceof FetchError && error.statusCode === 404) {
                 this.data = this.templateGenerator();
-                file = await saveFileInContainer(
-                    this.podUrl,
-                    this.toJsonFile(this.data, this.filePath),
-                    { fetch: this.session.fetch }
-                );
+                this.saveToRemote();
             }
         }
 
-        const fileText = await file?.text();
-        this.data = JSON.parse(fileText ?? "{}");
         if (!this.data) {
             throw new Error(`Store data(${this.filePath}) not found or invalid`);
         }
@@ -68,7 +61,7 @@ export class InruptStore<T> extends BaseStore<T> implements IStore<T> {
         }
 
         // NOTE: the fileUrl was stored in the file, do we want to enforce our generic to atleast have this id property available?
-        overwriteFile(`${this.podUrl}${this.filePath}`, this.toJsonFile(this.data, this.filePath), {
+        overwriteFile(this.getDataUrl(), this.toJsonFile(this.data, this.filePath), {
             fetch: this.session.fetch,
         });
     }

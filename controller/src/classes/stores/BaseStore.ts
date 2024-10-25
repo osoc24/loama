@@ -19,6 +19,10 @@ export abstract class BaseStore<T> {
         return this.podUrl
     }
 
+    getDataUrl() {
+        return `${this.podUrl}${this.filePath}`
+    }
+
     abstract getOrCreate(): Promise<T>;
 
     async getCurrent() {
