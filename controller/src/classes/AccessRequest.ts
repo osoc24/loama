@@ -1,19 +1,27 @@
-import { ResourceAccessRequestNode, Resources } from "@/types";
-import { IAccessRequest, IStore, IStoreConstructor } from "@/types/modules";
+import { Permission, ResourceAccessRequestNode, Resources } from "../types";
+import { IAccessRequest, IController, IInboxConstructor, IStore } from "../types/modules";
 
 export class AccessRequest implements IAccessRequest {
     private resources: IStore<Resources>;
     private inbox: IStore<unknown[]>;
+    private controller: IController<{}>;
 
-    constructor(storeConstructor: IStoreConstructor, resourcesStore: IStore<Resources>) {
+    constructor(controller: IController<{}>, inboxConstructor: IInboxConstructor, resourcesStore: IStore<Resources>) {
+        this.controller = controller;
         this.resources = resourcesStore;
-        this.inbox = new storeConstructor("public/loama/inbox.ttl", () => ([])) as IStore<unknown[]>;
+        this.inbox = new inboxConstructor("public/loama/inbox/") as IStore<unknown[]>;
     }
 
-    setPodUrl(url: string) {
+    async setPodUrl(url: string) {
         this.inbox.setPodUrl(url)
         // This will make sure we have the inbox created in our own container
-        this.inbox.getOrCreate();
+        await this.inbox.getOrCreate();
+
+        const publicController = this.controller.isSubjectSupported({ type: "public" });
+
+        // Set permissions for info resources
+        await publicController.addPermission(this.resources.getDataUrl(), Permission.Read, { type: "public" });
+        await publicController.addPermission(this.inbox.getDataUrl(), Permission.Write, { type: "public" });
     }
 
     unsetPodUrl() {
@@ -79,6 +87,37 @@ export class AccessRequest implements IAccessRequest {
     }
 
     async sendRequestNotification(originWebId: string, resources: string[]) {
+        const messages = resources.map(r => {
+            return {
+                "@context": {
+                    "tbd": "http://example.org/to-be-determined",
+                    "acl": "http://www.w3.org/ns/auth/acl",
+                    "as": "https://www.w3.org/ns/activitystreams",
+                },
+                "@type": "tbd:AppendRequest",
+                // TODO: set ACL based on linkedResources
+                "@id": `urn:loama:${crypto.randomUUID()}`,
+                "as:actor": originWebId,
+                "as:target": `${r}.acl`,
+                "as:published": new Date().toISOString(),
+                "as:object": {
+                    "@id": `urn:loama:${crypto.randomUUID()}`,
+                    "@type": "acl:Authorization",
+                    "acl:agent": originWebId,
+                    "acl:accessTo": r,
+                    "acl:mode": [
+                        {
+                            "@id": "acl:Read"
+                        }
+                    ]
+                }
+            }
+        });
 
+        // TODO: check if this is actually possible with the RFC for LDN https://www.w3.org/TR/ldn/#sender
+        const inbox = await this.inbox.getCurrent();
+        console.log(messages)
+        inbox.push(...messages);
+        await this.inbox.saveToRemote();
     }
 }

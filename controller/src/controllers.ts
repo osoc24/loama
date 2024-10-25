@@ -1,6 +1,7 @@
 import { Controller } from "./classes/Controller";
 import { PublicManager } from "./classes/permissionManager/inrupt/PublicManager";
 import { WebIdManager } from "./classes/permissionManager/inrupt/WebIdManager";
+import { InruptInboxStore } from "./classes/stores/InruptInboxStore";
 import { InruptStore } from "./classes/stores/InruptStore";
 import { PublicResolver } from "./classes/subjectResolvers/Public";
 import { WebIdResolver } from "./classes/subjectResolvers/WebId";
@@ -12,6 +13,7 @@ export const createBasicController = () => {
         public: PublicSubject,
     }>(
         InruptStore,
+        InruptInboxStore,
         {
             webId: {
                 resolver: new WebIdResolver(),

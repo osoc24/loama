@@ -9,6 +9,9 @@ export abstract class BaseStore<T> {
 
     setPodUrl(url: string): void {
         this.podUrl = url;
+        if (!this.podUrl.endsWith("/")) {
+            this.podUrl += "/";
+        }
     }
 
     unsetPodUrl(): void {

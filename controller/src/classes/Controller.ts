@@ -1,5 +1,5 @@
 import { BaseSubject, Index, IndexItem, Permission, ResourcePermissions, Resources, SubjectPermissions } from "../types";
-import { IAccessRequest, IController, IStore, IStoreConstructor, SubjectConfig, SubjectConfigs, SubjectKey, SubjectType } from "../types/modules";
+import { IAccessRequest, IController, IInboxConstructor, IStore, IStoreConstructor, SubjectConfig, SubjectConfigs, SubjectKey, SubjectType } from "../types/modules";
 import { AccessRequest } from "./AccessRequest";
 import { Mutex } from "./utils/Mutex";
 
@@ -9,12 +9,13 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
     private accessRequest: AccessRequest;
     private subjectConfigs: SubjectConfigs<T>
 
-    constructor(storeConstructor: IStoreConstructor, subjects: SubjectConfigs<T>) {
+    // TODO : Find a better way of constructing the controller with all the different modules
+    constructor(storeConstructor: IStoreConstructor, inboxConstructor: IInboxConstructor, subjects: SubjectConfigs<T>) {
         super();
         // There is currently no "easy" solution to get around the as IStore...
         this.index = new storeConstructor("index.json", () => ({ id: "", items: [] })) as IStore<Index<T[keyof T & string]>>;
         this.resources = new storeConstructor("resources.json", () => ({ id: "", items: [] })) as IStore<Resources>;;
-        this.accessRequest = new AccessRequest(storeConstructor, this.resources);
+        this.accessRequest = new AccessRequest(this as unknown as Controller<{}>, inboxConstructor, this.resources);
         this.subjectConfigs = subjects;
     }
 
@@ -322,5 +323,13 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
                 return arr;
             }, permissionsPerSubject)
         }
+    }
+
+    isSubjectSupported<K extends string, B extends BaseSubject<K>>(subject: BaseSubject<K>): IController<Record<K, B>> {
+        if (!this.subjectConfigs[subject.type as unknown as keyof T]) {
+
+            throw new Error(`Subject type ${subject.type} is not supported`);
+        }
+        return this as unknown as IController<Record<K, B>>
     }
 }

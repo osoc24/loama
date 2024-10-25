@@ -6,7 +6,8 @@
         </div>
         <Tree v-model:selectionKeys="selectedEntries" :value="requestableFiles" selectionMode="checkbox"
             class="w-full md:w-[30rem]" />
-        <LoButton>Request Access</LoButton>
+        <LoButton @click="sendRequestNotification" :disabled="Object.keys(selectedEntries).length < 1">Request Access
+        </LoButton>
     </div>
 </template>
 <script setup lang="ts">
@@ -41,6 +42,12 @@ const accessRequestNodeToTreeNode = (key: string, node: ResourceAccessRequestNod
         children: node.children ? Object.entries(node.children).map(([k, node]) => accessRequestNodeToTreeNode(k, node)) : undefined,
     }
 };
+
+const sendRequestNotification = () => {
+    const session = getDefaultSession();
+    const checkedEntries = Object.keys(selectedEntries.value).filter(k => selectedEntries.value[k].checked)
+    controller.value.AccessRequest().sendRequestNotification(session.info.webId!, checkedEntries)
+}
 
 watch(webId, async (newVal) => {
     debouncedPodFetcher(newVal);

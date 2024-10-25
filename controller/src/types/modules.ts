@@ -31,6 +31,8 @@ export interface IController<T extends Record<keyof T, BaseSubject<keyof T & str
     getContainerPermissionList(containerUrl: string): Promise<ResourcePermissions<T[keyof T]>[]>
 
     getResourcePermissionList(resourceUrl: string): Promise<ResourcePermissions<T[keyof T]>>
+
+    isSubjectSupported<T extends string>(subject: BaseSubject<T>): IController<Record<T, BaseSubject<T>>>
 }
 
 export interface IAccessRequest {
@@ -44,6 +46,10 @@ export interface IAccessRequest {
 
     // Notifications
     sendRequestNotification(originWebId: string, resources: string[]): Promise<void>;
+}
+
+export interface IInboxConstructor<T = unknown> {
+    new(filePath: string): IStore<T>
 }
 
 export interface IStoreConstructor<T = unknown> {
