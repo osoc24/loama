@@ -67,6 +67,7 @@ button:hover {
 
 button:disabled {
     background-color: color-mix(in srgb, var(--off-black) 60%, transparent);
+    border-color: color-mix(in srgb, var(--off-black) 60%, transparent);
     color: var(--off-white);
     cursor: not-allowed;
 }
