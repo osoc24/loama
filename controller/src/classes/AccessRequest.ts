@@ -15,8 +15,9 @@ export class AccessRequest implements IAccessRequest {
 
     async setPodUrl(url: string) {
         this.inbox.setPodUrl(url)
-        // This will make sure we have the inbox created in our own container
+        // This will make sure we have the inbox & resources.json created in our own container
         await this.inbox.getOrCreate();
+        await this.resources.getOrCreate();
 
         const publicController = this.controller.isSubjectSupported({ type: "public" });
 
