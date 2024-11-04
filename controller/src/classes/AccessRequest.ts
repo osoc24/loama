@@ -89,8 +89,11 @@ export class AccessRequest implements IAccessRequest {
     }
 
     async sendRequestNotification(originWebId: string, resources: string[]) {
+        const requestableResources = await this.resources.getCurrent();
+        const filteredResources = resources.filter(r => requestableResources.items.includes(r));
+
         const messages: unknown[] = [];
-        for (let r of resources) {
+        for (let r of filteredResources) {
             // TODO: Replace with our own calls instead of using the inrupt SDK
             const resourceInfo = await getResourceInfo(r, {
                 ignoreAuthenticationErrors: true,
