@@ -53,3 +53,11 @@ export interface ResourceAccessRequestNode {
     canRequestAccess: boolean;
     children?: Record<string, ResourceAccessRequestNode>;
 }
+
+export type AccessRequestMessage = {
+    id: string;
+    actor: string;
+    requestedAt: string;
+    target: string;
+    permissions: string[];
+}

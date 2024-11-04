@@ -6,6 +6,7 @@ import { store } from 'loama-app'
 import { listPodUrls } from 'loama-common'
 import { activeController } from 'loama-controller'
 import HeaderLayout from '@/components/layouts/HeaderLayout.vue'
+import InboxView from '@/views/InboxView.vue'
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,6 +29,11 @@ const router = createRouter({
                     path: "/request",
                     name: "request",
                     component: RequestView,
+                },
+                {
+                    path: "/inbox",
+                    name: "inbox",
+                    component: InboxView,
                 }
             ]
         }

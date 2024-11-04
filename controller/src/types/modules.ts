@@ -1,4 +1,4 @@
-import { BaseSubject, Index, IndexItem, Permission, ResourceAccessRequestNode, ResourcePermissions, SubjectPermissions } from "../types";
+import { AccessRequestMessage, BaseSubject, Index, IndexItem, Permission, ResourceAccessRequestNode, ResourcePermissions, SubjectPermissions } from "../types";
 
 export type SubjectKey<T> = keyof T & string;
 export type SubjectType<T, K extends SubjectKey<T>> = T[K];
@@ -46,6 +46,10 @@ export interface IAccessRequest {
 
     // Notifications
     sendRequestNotification(originWebId: string, resources: string[]): Promise<void>;
+
+    loadAccessRequests(): Promise<AccessRequestMessage[]>
+
+    removeRequest(messageUrl: string): Promise<void>;
 }
 
 export interface IInboxConstructor<T = unknown> {
@@ -86,6 +90,7 @@ export interface IStore<T> {
 }
 
 export interface IInbox<T = unknown> extends IStore<T[]> {
+    getMessages(): Promise<unknown[]>;
 }
 
 export interface ISubjectResolver<T extends BaseSubject<string>> {

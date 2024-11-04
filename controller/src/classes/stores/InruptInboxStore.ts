@@ -77,7 +77,6 @@ export class InruptInboxStore<M> extends BaseStore<M[]> implements IInbox<M> {
             if (!authorizationThing) {
                 throw new Error(`Message with id ${url} does not contain the referenced authorization object`);
             }
-            console.log(authorizationThing);
 
             const entry = {
                 id: appendRequest.url,
@@ -86,9 +85,8 @@ export class InruptInboxStore<M> extends BaseStore<M[]> implements IInbox<M> {
                 target: getStringNoLocale(authorizationThing, "acl:accessTo"),
                 permissions: authorizationThing.predicates["acl:mode"].namedNodes,
             }
-            console.log(appendRequest, entry);
             messages.push(entry);
         }
-        return []
+        return messages;
     }
 }

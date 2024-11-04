@@ -1,5 +1,5 @@
 import { getLinkedResourceUrlAll, getResourceInfo } from "@inrupt/solid-client";
-import { Permission, ResourceAccessRequestNode, Resources } from "../types";
+import { AccessRequestMessage, Permission, ResourceAccessRequestNode, Resources } from "../types";
 import { IAccessRequest, IController, IInbox, IInboxConstructor, IStore } from "../types/modules";
 
 export class AccessRequest implements IAccessRequest {
@@ -136,5 +136,14 @@ export class AccessRequest implements IAccessRequest {
         const inbox = await this.inbox.getCurrent();
         inbox.push(...messages);
         await this.inbox.saveToRemote();
+    }
+
+    async loadAccessRequests() {
+        const messages = await this.inbox.getMessages();
+        return messages as AccessRequestMessage[];
+    }
+
+    async removeRequest(messageUrl: string) {
+
     }
 }
