@@ -1,16 +1,16 @@
 import { getLinkedResourceUrlAll, getResourceInfo } from "@inrupt/solid-client";
 import { Permission, ResourceAccessRequestNode, Resources } from "../types";
-import { IAccessRequest, IController, IInboxConstructor, IStore } from "../types/modules";
+import { IAccessRequest, IController, IInbox, IInboxConstructor, IStore } from "../types/modules";
 
 export class AccessRequest implements IAccessRequest {
     private resources: IStore<Resources>;
-    private inbox: IStore<unknown[]>;
+    private inbox: IInbox<unknown>;
     private controller: IController<{}>;
 
     constructor(controller: IController<{}>, inboxConstructor: IInboxConstructor, resourcesStore: IStore<Resources>) {
         this.controller = controller;
         this.resources = resourcesStore;
-        this.inbox = new inboxConstructor("public/loama/inbox/") as IStore<unknown[]>;
+        this.inbox = new inboxConstructor("public/loama/inbox/") as IInbox<unknown>;
     }
 
     async setPodUrl(url: string) {

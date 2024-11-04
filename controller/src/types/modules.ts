@@ -49,7 +49,7 @@ export interface IAccessRequest {
 }
 
 export interface IInboxConstructor<T = unknown> {
-    new(filePath: string): IStore<T>
+    new(filePath: string): IInbox<T>
 }
 
 export interface IStoreConstructor<T = unknown> {
@@ -83,6 +83,9 @@ export interface IStore<T> {
     * Saves the data to the pod
     */
     saveToRemote(): Promise<void>;
+}
+
+export interface IInbox<T = unknown> extends IStore<T[]> {
 }
 
 export interface ISubjectResolver<T extends BaseSubject<string>> {
