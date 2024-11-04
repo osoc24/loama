@@ -43,6 +43,9 @@ export class AccessRequest implements IAccessRequest {
             const pathParts = resource.replace(containerUrl, "").split('/');
             pathParts.reduce(function(parentNode, pathPart, index) {
                 if (pathPart == "") {
+                    // Requestable is a directory, which ends in "/"
+                    parentNode.resourceUrl += "/";
+                    parentNode.canRequestAccess = true;
                     return parentNode;
                 }
                 if (!parentNode.children) {
