@@ -1,7 +1,9 @@
-import { getLinkedResourceUrlAll, getResourceInfo } from "@inrupt/solid-client";
-import { AccessRequestMessage, Permission, ResourceAccessRequestNode, Resources } from "../../types";
+import { getDatetime, getLinkedResourceUrlAll, getResourceInfo, getStringNoLocale, getStringNoLocaleAll, getThingAll, getUrl } from "@inrupt/solid-client";
+import { AccessRequestMessage, Permission, RequestResponseMessage, ResourceAccessRequestNode, Resources } from "../../types";
 import { IAccessRequest, IController, IInbox, IInboxConstructor, IStore } from "../../types/modules";
 import { cacheBustedFetch } from "../../util";
+
+const REQUEST_RESPONSE_TYPES = ["as:Accept", "as:Reject"]
 
 export abstract class AccessRequest implements IAccessRequest {
     private resources: IStore<Resources>;
@@ -162,7 +164,86 @@ export abstract class AccessRequest implements IAccessRequest {
 
     async loadAccessRequests() {
         const messages = await this.inbox.getMessages();
-        return messages as AccessRequestMessage[];
+        const parsedMessages: AccessRequestMessage[] = [];
+        for (let [url, message] of Object.entries(messages)) {
+            const allThings = getThingAll(message)
+            const appendRequest = allThings.filter(t => t.predicates["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"].namedNodes?.includes("tbd:AppendRequest"))?.[0];
+
+            // This message does not contain a tbd:AppendRequest
+            if (!appendRequest) {
+                continue
+            }
+
+            const authorizationUrl = getUrl(appendRequest, "as:object");
+            if (!authorizationUrl) {
+                throw new Error(`Message with id ${url} does has no reference to an authorization object`);
+            }
+
+            const authorizationThing = allThings.filter(t => t.url === authorizationUrl)?.[0];
+            if (!authorizationThing) {
+                throw new Error(`Message with id ${url} does not contain the referenced authorization object`);
+            }
+
+            const entryTarget = getStringNoLocale(authorizationThing, "acl:accessTo");
+            if (!entryTarget) {
+                console.error("Inbox contains appendRequest without resource target");
+                continue;
+            }
+
+            const entry: AccessRequestMessage = {
+                id: url,
+                actor: getStringNoLocale(appendRequest, "as:actor") ?? "Unknown actor",
+                requestedAt: getDatetime(appendRequest, "as:published") ?? new Date(),
+                target: entryTarget,
+                permissions: [...(authorizationThing.predicates["acl:mode"].namedNodes ?? ["acl:Read"])],
+            }
+            parsedMessages.push(entry);
+        }
+        return parsedMessages;
+    }
+
+    async loadRequestResponses() {
+        const messages = await this.inbox.getMessages();
+        const parsedMessages: RequestResponseMessage[] = [];
+        for (let [url, message] of Object.entries(messages)) {
+            const allThings = getThingAll(message)
+            const responseThing = allThings.filter(t => {
+                const type = t.predicates["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"].namedNodes?.[0];
+                if (!type) return false;
+                return REQUEST_RESPONSE_TYPES.includes(type)
+            })?.[0];
+
+            // This message does not contain a tbd:AppendRequest
+            if (!responseThing) {
+                continue
+            }
+
+            const authorizationUrl = getUrl(responseThing, "as:object");
+            if (!authorizationUrl) {
+                throw new Error(`Message with id ${url} does has no reference to an authorization object`);
+            }
+
+            const authorizationThing = allThings.filter(t => t.url === authorizationUrl)?.[0];
+            if (!authorizationThing) {
+                throw new Error(`Message with id ${url} does not contain the referenced authorization object`);
+            }
+
+            const entryTarget = getStringNoLocale(authorizationThing, "acl:accessTo");
+            if (!entryTarget) {
+                console.error(`Access request response without target resource in inbox`)
+                continue
+            }
+            console.log(authorizationThing)
+
+            const entry: RequestResponseMessage = {
+                id: url,
+                target: entryTarget,
+                isAccepted: responseThing.predicates["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"].namedNodes?.[0] === "as:Accept",
+                permissions: [...(authorizationThing.predicates["acl:mode"].namedNodes ?? [])]
+            }
+            parsedMessages.push(entry);
+        }
+        return parsedMessages;
     }
 
     abstract removeRequest(messageUrl: string): Promise<void>;

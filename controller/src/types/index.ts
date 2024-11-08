@@ -57,7 +57,14 @@ export interface ResourceAccessRequestNode {
 export type AccessRequestMessage = {
     id: string;
     actor: string;
-    requestedAt: string;
+    requestedAt: Date;
+    target: string;
+    permissions: string[];
+}
+
+export type RequestResponseMessage = {
+    id: string;
+    isAccepted: boolean;
     target: string;
     permissions: string[];
 }

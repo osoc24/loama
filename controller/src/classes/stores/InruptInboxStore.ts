@@ -1,7 +1,8 @@
 import { IInbox } from "@/types/modules";
-import { createContainerAt, FetchError, getContainedResourceUrlAll, getDatetime, getResourceInfo, getSolidDataset, getStringNoLocale, getThingAll, getUrl, isContainer } from "@inrupt/solid-client";
+import { createContainerAt, FetchError, getContainedResourceUrlAll, getResourceInfo, getSolidDataset, isContainer, SolidDataset, WithResourceInfo } from "@inrupt/solid-client";
 import { BaseStore } from "./BaseStore";
 import { getDefaultSession, Session } from "@inrupt/solid-client-authn-browser";
+import { cacheBustedSessionFetch } from "../../util";
 
 // A modified store which does not retrieve the data from the server and only does append actions
 export class InruptInboxStore<M> extends BaseStore<M[]> implements IInbox<M> {
@@ -55,37 +56,12 @@ export class InruptInboxStore<M> extends BaseStore<M[]> implements IInbox<M> {
     }
 
     async getMessages() {
-        const inboxDataSet = await getSolidDataset(this.getDataUrl(), { fetch: this.session.fetch });
+        const inboxDataSet = await getSolidDataset(this.getDataUrl(), { fetch: cacheBustedSessionFetch(this.session) });
         const messageUrls = getContainedResourceUrlAll(inboxDataSet);
-        const messages: unknown[] = [];
+        const messages: Record<string, SolidDataset & WithResourceInfo> = {};
         for (let url of messageUrls) {
-            const message = await getSolidDataset(url, { fetch: this.session.fetch });
-            const allThings = getThingAll(message)
-            const appendRequest = allThings.filter(t => t.predicates["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"].namedNodes?.includes("tbd:AppendRequest"))?.[0];
-
-            // This message does not contain a tbd:AppendRequest
-            if (!appendRequest) {
-                continue
-            }
-
-            const authorizationUrl = getUrl(appendRequest, "as:object");
-            if (!authorizationUrl) {
-                throw new Error(`Message with id ${url} does has no reference to an authorization object`);
-            }
-
-            const authorizationThing = allThings.filter(t => t.url === authorizationUrl)?.[0];
-            if (!authorizationThing) {
-                throw new Error(`Message with id ${url} does not contain the referenced authorization object`);
-            }
-
-            const entry = {
-                id: url,
-                actor: getStringNoLocale(appendRequest, "as:actor"),
-                requestedAt: getDatetime(appendRequest, "as:published"),
-                target: getStringNoLocale(authorizationThing, "acl:accessTo"),
-                permissions: authorizationThing.predicates["acl:mode"].namedNodes,
-            }
-            messages.push(entry);
+            const message = await getSolidDataset(url, { fetch: cacheBustedSessionFetch(this.session) });
+            messages[url] = message;
         }
         return messages;
     }

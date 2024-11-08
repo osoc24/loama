@@ -1,4 +1,5 @@
-import { AccessRequestMessage, BaseSubject, Index, IndexItem, Permission, ResourceAccessRequestNode, ResourcePermissions, SubjectPermissions } from "../types";
+import { SolidDataset, WithResourceInfo } from "@inrupt/solid-client";
+import { AccessRequestMessage, BaseSubject, Index, IndexItem, Permission, RequestResponseMessage, ResourceAccessRequestNode, ResourcePermissions, SubjectPermissions } from "../types";
 
 export type SubjectKey<T> = keyof T & string;
 export type SubjectType<T, K extends SubjectKey<T>> = T[K];
@@ -48,8 +49,8 @@ export interface IAccessRequest {
     sendRequestNotification(originWebId: string, resources: string[]): Promise<void>;
     sendResponseNotification(type: "accept" | "reject", message: AccessRequestMessage): Promise<void>;
 
-    loadAccessRequests(): Promise<AccessRequestMessage[]>
-
+    loadAccessRequests(): Promise<AccessRequestMessage[]>;
+    loadRequestResponses(): Promise<RequestResponseMessage[]>;
     removeRequest(messageUrl: string): Promise<void>;
 }
 
@@ -91,7 +92,7 @@ export interface IStore<T> {
 }
 
 export interface IInbox<T = unknown> extends IStore<T[]> {
-    getMessages(): Promise<unknown[]>;
+    getMessages(): Promise<Record<string, SolidDataset & WithResourceInfo>>;
 }
 
 export interface ISubjectResolver<T extends BaseSubject<string>> {
