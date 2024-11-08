@@ -12,7 +12,7 @@ export class InruptAccessRequest extends AccessRequest implements IAccessRequest
     async removeRequest(messageUrl: string) {
         const session = getDefaultSession();
 
-        deleteFile(messageUrl, {
+        await deleteFile(messageUrl, {
             fetch: session.fetch
         })
     }
