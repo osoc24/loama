@@ -4,14 +4,14 @@ import { IPermissionManager, SubjectKey } from "../../../types/modules";
 import { InruptPermissionManager } from "./InruptPermissionManager";
 import { getDefaultSession } from "@inrupt/solid-client-authn-browser";
 import { setAgentAccess } from "@inrupt/solid-client/universal";
-import { cacheBustedFetch } from "../../../util";
+import { cacheBustedSessionFetch } from "../../../util";
 
 export class GroupManager<T extends Record<keyof T, BaseSubject<keyof T & string>>> extends InruptPermissionManager<T> implements IPermissionManager<T> {
     // This is a replacement for https://github.com/inrupt/solid-client-js/blob/eb8e86f61458ec76fa2244f7b38b7d7983bbd810/src/access/wac.ts#L262 because it is not exposed in the inrupt library
     private async getGroupAccessAll(resource: string): Promise<Record<string, Access> | null> {
         const session = getDefaultSession();
         const resourceInfo = await getResourceInfoWithAcl(resource, {
-            fetch: cacheBustedFetch(session),
+            fetch: cacheBustedSessionFetch(session),
         });
         return getGroupAccessAll(resourceInfo)
     }

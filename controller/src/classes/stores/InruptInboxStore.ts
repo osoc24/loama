@@ -79,7 +79,7 @@ export class InruptInboxStore<M> extends BaseStore<M[]> implements IInbox<M> {
             }
 
             const entry = {
-                id: appendRequest.url,
+                id: url,
                 actor: getStringNoLocale(appendRequest, "as:actor"),
                 requestedAt: getDatetime(appendRequest, "as:published"),
                 target: getStringNoLocale(authorizationThing, "acl:accessTo"),

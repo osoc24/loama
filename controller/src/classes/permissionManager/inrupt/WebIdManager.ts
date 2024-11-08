@@ -4,7 +4,7 @@ import { IPermissionManager, SubjectKey } from "../../../types/modules";
 import { InruptPermissionManager } from "./InruptPermissionManager";
 import { getAgentAccessAll, setAgentAccess } from "@inrupt/solid-client/universal";
 import { AccessModes, } from "@inrupt/solid-client";
-import { cacheBustedFetch } from "../../../util";
+import { cacheBustedSessionFetch } from "../../../util";
 
 export class WebIdManager<T extends Record<keyof T, BaseSubject<keyof T & string>>> extends InruptPermissionManager<T> implements IPermissionManager<T> {
     private async updateACL<K extends SubjectKey<T>>(resource: string, subject: T[K], accessModes: Partial<AccessModes>) {
@@ -33,7 +33,7 @@ export class WebIdManager<T extends Record<keyof T, BaseSubject<keyof T & string
 
     async getRemotePermissions<K extends SubjectKey<T>>(resourceUrl: string) {
         const session = getDefaultSession();
-        const agentAccess = await getAgentAccessAll(resourceUrl, { fetch: cacheBustedFetch(session) });
+        const agentAccess = await getAgentAccessAll(resourceUrl, { fetch: cacheBustedSessionFetch(session) });
 
         if (!agentAccess) {
             return [];

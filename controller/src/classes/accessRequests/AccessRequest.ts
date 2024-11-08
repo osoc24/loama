@@ -1,8 +1,9 @@
 import { getLinkedResourceUrlAll, getResourceInfo } from "@inrupt/solid-client";
-import { AccessRequestMessage, Permission, ResourceAccessRequestNode, Resources } from "../types";
-import { IAccessRequest, IController, IInbox, IInboxConstructor, IStore } from "../types/modules";
+import { AccessRequestMessage, Permission, ResourceAccessRequestNode, Resources } from "../../types";
+import { IAccessRequest, IController, IInbox, IInboxConstructor, IStore } from "../../types/modules";
+import { cacheBustedFetch } from "../../util";
 
-export class AccessRequest implements IAccessRequest {
+export abstract class AccessRequest implements IAccessRequest {
     private resources: IStore<Resources>;
     private inbox: IInbox<unknown>;
     private controller: IController<{}>;
@@ -100,6 +101,7 @@ export class AccessRequest implements IAccessRequest {
             // TODO: Replace with our own calls instead of using the inrupt SDK
             const resourceInfo = await getResourceInfo(r, {
                 ignoreAuthenticationErrors: true,
+                fetch: cacheBustedFetch
             });
             const linkedResources = getLinkedResourceUrlAll(resourceInfo)
             let acl = linkedResources.acl?.[0];
@@ -138,12 +140,24 @@ export class AccessRequest implements IAccessRequest {
         await this.inbox.saveToRemote();
     }
 
+    async sendResponseNotification(type: "accept" | "reject", affectedResource: string) {
+        const inbox = await this.inbox.getCurrent();
+        inbox.push({
+            "@context": {
+                "as": "https://www.w3.org/ns/activitystreams",
+            },
+            "@type": type == "accept" ? "as:Accept" : "as:Reject",
+            "@id": `urn:loama:${crypto.randomUUID()}`,
+            "as:object": this.inbox.getDataUrl(),
+            "as:target": affectedResource,
+        });
+        await this.inbox.saveToRemote();
+    }
+
     async loadAccessRequests() {
         const messages = await this.inbox.getMessages();
         return messages as AccessRequestMessage[];
     }
 
-    async removeRequest(messageUrl: string) {
-
-    }
+    abstract removeRequest(messageUrl: string): Promise<void>;
 }

@@ -21,6 +21,9 @@ import Tree, { type TreeSelectionKeys } from 'primevue/tree';
 import type { TreeNode } from 'primevue/treenode';
 import { debounce } from '@/lib/utils';
 import LoButton from '@/components/LoButton.vue';
+import { useToast } from 'primevue/usetoast';
+
+const toast = useToast();
 
 const webId = ref("");
 const podUrls = ref<string[]>([]);
@@ -43,10 +46,24 @@ const accessRequestNodeToTreeNode = (key: string, node: ResourceAccessRequestNod
     }
 };
 
-const sendRequestNotification = () => {
+const sendRequestNotification = async () => {
     const session = getDefaultSession();
     const checkedEntries = Object.keys(selectedEntries.value).filter(k => selectedEntries.value[k].checked)
-    controller.value.AccessRequest().sendRequestNotification(session.info.webId!, checkedEntries)
+    try {
+        await controller.value.AccessRequest().sendRequestNotification(session.info.webId!, checkedEntries)
+        toast.add({
+            severity: "success",
+            summary: "Access request(s) sended to user",
+            life: 3000,
+        })
+    } catch (e) {
+        console.error(e);
+        toast.add({
+            severity: "error",
+            summary: `Failed to send access request: ${e instanceof Error ? e.message : e}`,
+            life: 3000,
+        })
+    }
 }
 
 watch(webId, async (newVal) => {

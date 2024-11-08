@@ -1,6 +1,7 @@
 import { BaseSubject, Index, IndexItem, Permission, ResourcePermissions, Resources, SubjectPermissions } from "../types";
 import { IAccessRequest, IController, IInboxConstructor, IStore, IStoreConstructor, SubjectConfig, SubjectConfigs, SubjectKey, SubjectType } from "../types/modules";
-import { AccessRequest } from "./AccessRequest";
+import { AccessRequest } from "./accessRequests/AccessRequest";
+import { InruptAccessRequest } from "./accessRequests/InruptAccessRequest";
 import { Mutex } from "./utils/Mutex";
 
 export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>> extends Mutex implements IController<T> {
@@ -15,7 +16,7 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
         // There is currently no "easy" solution to get around the as IStore...
         this.index = new storeConstructor("index.json", () => ({ id: "", items: [] })) as IStore<Index<T[keyof T & string]>>;
         this.resources = new storeConstructor("resources.json", () => ({ id: "", items: [] })) as IStore<Resources>;;
-        this.accessRequest = new AccessRequest(this as unknown as Controller<{}>, inboxConstructor, this.resources);
+        this.accessRequest = new InruptAccessRequest(this as unknown as Controller<{}>, inboxConstructor, this.resources);
         this.subjectConfigs = subjects;
     }
 
