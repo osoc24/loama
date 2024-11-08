@@ -4,7 +4,7 @@
     "scripts": {
         "build": "tsc",
         "predev": "yarn build",
-        "dev": "tsc -w"
+        "dev": "tsc -b -w"
     },
     "description": "",
     "main": "dist/index.js",
