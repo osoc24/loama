@@ -5,7 +5,7 @@
                 <RequestInbox />
             </div>
             <div>
-                <h3>Accepted request</h3>
+                <ResponseInbox />
             </div>
         </div>
         <template #fallback>
@@ -17,6 +17,7 @@
 <script lang="ts" setup>
 import FallbackExplorer from '@/components/explorer/FallbackExplorer.vue';
 import RequestInbox from '@/components/inbox/RequestInbox.vue';
+import ResponseInbox from '@/components/inbox/ResponseInbox.vue';
 
 </script>
 <style scoped lang="scss">

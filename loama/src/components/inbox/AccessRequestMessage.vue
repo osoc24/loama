@@ -3,7 +3,7 @@
         <p><span class="prefix">From:</span> {{ message.actor }}</p>
         <p><span class="prefix">Target:</span> {{ message.target }}</p>
         <div>
-            <span class="prefix">Requested: </span>
+            <span class="prefix">Requested Permissions: </span>
             <p v-for="label in aclLabels" :key="label">{{ label }}</p>
         </div>
         <div class="actions">

@@ -1,23 +1,23 @@
 <template>
     <div class="header">
-        <h3>Incoming Access Requests</h3>
+        <h3>Request Responses</h3>
         <PhArrowClockwise weight="bold" :size="32" @click="reloadMessages" />
     </div>
     <div class="request-list">
-        <AccessRequestMessage v-for="message in messages" :key="message.id" :message="message"
+        <RequestResponseMessage v-for="message in messages" :key="message.id" :message="message"
             @reload="reloadMessages" />
     </div>
 </template>
 <script setup lang="ts">
 import { activeController } from 'loama-controller';
-import AccessRequestMessage from './AccessRequestMessage.vue';
 import { PhArrowClockwise } from '@phosphor-icons/vue';
+import RequestResponseMessage from './RequestResponseMessage.vue';
 import { ref } from 'vue';
 
-let messages = ref(await activeController.AccessRequest().loadAccessRequests());
+let messages = ref(await activeController.AccessRequest().loadRequestResponses());
 
 const reloadMessages = async () => {
-    messages.value = await activeController.AccessRequest().loadAccessRequests();
+    messages.value = await activeController.AccessRequest().loadRequestResponses();
 }
 </script>
 <style scoped lang="scss">
