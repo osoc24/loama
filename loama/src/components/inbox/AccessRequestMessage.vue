@@ -84,7 +84,7 @@ const acceptAccessRequest = async () => {
     const actorController = await getActorController();
     try {
         await activeController.AccessRequest().removeRequest(props.message.id)
-        await actorController.AccessRequest().sendResponseNotification("accept", props.message.target);
+        await actorController.AccessRequest().sendResponseNotification("accept", props.message);
         toast.add({
             severity: "success",
             summary: "Access request accepted",
@@ -106,7 +106,7 @@ const rejectAccessRequest = async () => {
     const actorController = await getActorController();
     try {
         await activeController.AccessRequest().removeRequest(props.message.id)
-        await actorController.AccessRequest().sendResponseNotification("reject", props.message.target);
+        await actorController.AccessRequest().sendResponseNotification("reject", props.message);
         toast.add({
             severity: "info",
             summary: "Access request denied",

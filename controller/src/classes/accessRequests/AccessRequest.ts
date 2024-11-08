@@ -140,7 +140,7 @@ export abstract class AccessRequest implements IAccessRequest {
         await this.inbox.saveToRemote();
     }
 
-    async sendResponseNotification(type: "accept" | "reject", affectedResource: string) {
+    async sendResponseNotification(type: "accept" | "reject", message: AccessRequestMessage) {
         const inbox = await this.inbox.getCurrent();
         inbox.push({
             "@context": {
@@ -148,8 +148,14 @@ export abstract class AccessRequest implements IAccessRequest {
             },
             "@type": type == "accept" ? "as:Accept" : "as:Reject",
             "@id": `urn:loama:${crypto.randomUUID()}`,
-            "as:object": this.inbox.getDataUrl(),
-            "as:target": affectedResource,
+            "as:actor": this.inbox.getDataUrl(),
+            "as:object": {
+                "@id": `urn:loama:${crypto.randomUUID()}`,
+                "@type": "acl:Authorization",
+                "acl:agent": message.actor,
+                "acl:accessTo": message.target,
+                "acl:mode": message.permissions.map(p => ({ "@id": p }))
+            }
         });
         await this.inbox.saveToRemote();
     }
