@@ -210,7 +210,7 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
     async getContainerPermissionList(containerUrl: string): Promise<ResourcePermissions<T[keyof T]>[]> {
         const configs: SubjectConfig<T>[] = Object.values(this.subjectConfigs);
 
-        const index = await this.index.getCurrentIndex();
+        const index = await this.index.getCurrent();
         const resourcesToSkip = index.items.filter(i => {
             if (!i.resource.includes(containerUrl)) {
                 return false;
@@ -263,7 +263,7 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
             }
         }));
 
-        await this.index.saveToRemoteIndex();
+        await this.index.saveToRemote();
 
         return await index.items.reduce<Promise<ResourcePermissions<T[keyof T]>[]>>(async (arr, v) => {
             const resourcePath = v.resource.replace(containerUrl, "");
