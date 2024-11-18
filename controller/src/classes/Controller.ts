@@ -195,15 +195,33 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
         const configs: SubjectConfig<T>[] = Object.values(this.subjectConfigs);
 
         const index = await this.store.getCurrentIndex();
-        const resourcesToSkip = index.items.filter(i => i.resource.includes(containerUrl));
+        const resourcesToSkip = index.items.filter(i => {
+            if (!i.resource.includes(containerUrl)) {
+                return false;
+            }
+            const strippedURI = i.resource.replace(containerUrl, "");
+            const slashIdx = strippedURI.indexOf("/");
+            if (slashIdx < 0) {
+                return true;
+            }
+            return !strippedURI.includes("/", slashIdx + 1)
+        });
 
         const results = await Promise.allSettled(configs.map(c => c.manager.getContainerPermissionList(containerUrl, resourcesToSkip.map(i => i.resource))))
+        const resourcesToClean = resourcesToSkip.filter(r => r.isEnabled).map(r => r.resource);
 
         if (results.length !== 0) {
             index.items.push(...results.reduce<IndexItem<T[SubjectKey<T>]>[]>((arr, v) => {
                 if (v.status === "fulfilled") {
                     // Check if the resourceUrl is already present before pushing it into the array
                     v.value.forEach((r) => {
+                        for (let i = 0; i < resourcesToClean.length; i++) {
+                            const rtc = resourcesToClean[i];
+                            if (r.resourceUrl.includes(rtc)) {
+                                resourcesToClean.splice(i, 1);
+                                i--;
+                            }
+                        }
                         // @ts-expect-error
                         arr.push(...r.permissionsPerSubject.map(p => ({
                             id: crypto.randomUUID(),
@@ -217,10 +235,19 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
                 }
                 return arr;
             }, []));
-
-            await this.store.saveToRemoteIndex();
         }
 
+        await Promise.allSettled(resourcesToClean.map(async r => {
+            for (let i = 0; i < index.items.length; i++) {
+                let entry = index.items[i];
+                if (!entry.resource.includes(r)) {
+                    continue
+                }
+                index.items.splice(i, 1);
+            }
+        }));
+
+        await this.store.saveToRemoteIndex();
 
         return index.items.reduce<ResourcePermissions<T[keyof T]>[]>((arr, v) => {
             const resourcePath = v.resource.replace(containerUrl, "");

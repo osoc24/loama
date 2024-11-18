@@ -83,11 +83,18 @@ export abstract class InruptPermissionManager<T extends Record<keyof T, BaseSubj
         const dataset = await getSolidDataset(containerUrl, { fetch: session.fetch });
         const results = await Promise.allSettled(
             getThingAll(dataset)
-                .filter(r => !resourceToSkip?.includes(r.url))
-                .map(async (resource) => ({
-                    resourceUrl: resource.url,
-                    permissionsPerSubject: await this.getRemotePermissions(resource.url)
-                }))
+                .map(async (resource) => {
+                    if (resourceToSkip.includes(resource.url)) {
+                        return {
+                            resourceUrl: resource.url,
+                            permissionsPerSubject: [],
+                        }
+                    }
+                    return {
+                        resourceUrl: resource.url,
+                        permissionsPerSubject: await this.getRemotePermissions(resource.url)
+                    }
+                })
         )
         return results.reduce<ResourcePermissions<T[keyof T]>[]>((arr, v) => {
             if (v.status == "fulfilled") {

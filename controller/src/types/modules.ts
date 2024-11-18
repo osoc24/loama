@@ -77,7 +77,9 @@ export interface IPermissionManager<T = Record<string, BaseSubject<string>>> {
     deletePermissions<K extends SubjectKey<T>>(resource: string, subject: T[K]): Promise<void>
     getRemotePermissions<K extends SubjectKey<T>>(resourceUrl: string): Promise<SubjectPermissions<T[K]>[]>
     /**
-    * Retrieve the permissions of the resources  in this  container.
+    * Retrieve the permissions of the resources in this container.
+    * It will add the skipped resources to the returning object but without the permissions assignments.
+    * As this is necessary to clean-up the index
     * Will probably work for a resource, but not guaranteed. Use getRemotePermissions for that
     */
     getContainerPermissionList(containerUrl: string, resourceToSkip?: string[]): Promise<ResourcePermissions<T[keyof T]>[]>
