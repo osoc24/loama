@@ -93,10 +93,10 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
         return this.accessRequest;
     }
 
-    setPodUrl(podUrl: string) {
+    async setPodUrl(podUrl: string) {
         this.index.setPodUrl(podUrl);
         this.resources.setPodUrl(podUrl);
-        this.accessRequest.setPodUrl(podUrl)
+        await this.accessRequest.setPodUrl(podUrl)
     }
 
     unsetPodUrl() {

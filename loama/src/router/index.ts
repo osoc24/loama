@@ -48,7 +48,7 @@ router.beforeEach(async (to) => {
         if (store.session.info.isLoggedIn) {
             // Default to the first pod
             const currentPodUrl = (await listPodUrls(store.session))[0]
-            activeController.setPodUrl(currentPodUrl);
+            await activeController.setPodUrl(currentPodUrl);
             store.setUsedPod(currentPodUrl)
         }
         if (!store.session.info.isLoggedIn && to.name !== 'login') {

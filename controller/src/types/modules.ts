@@ -10,7 +10,7 @@ export type SubjectConfig<T extends Record<keyof T, BaseSubject<keyof T & string
 export type SubjectConfigs<T extends Record<keyof T, BaseSubject<keyof T & string>>> = Record<keyof T, SubjectConfig<T, T[keyof T]>>;
 
 export interface IController<T extends Record<keyof T, BaseSubject<keyof T & string>>> {
-    setPodUrl(podUrl: string): void;
+    setPodUrl(podUrl: string): Promise<void>;
     unsetPodUrl(podUrl: string): void;
     AccessRequest(): IAccessRequest;
     getLabelForSubject<K extends SubjectKey<T>>(subject: T[K]): string;
