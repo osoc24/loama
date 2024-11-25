@@ -1,11 +1,29 @@
 <template>
     <div class="container">
         <div class="header">
-            <LoInput v-model="webId" name="webid" label="Web ID" />
-            <Select v-model="selectedPodUrl" :options="podUrls" />
+            <div>
+                <label class="input-label" for="webid">
+                    <span>Web ID </span>
+                    <RequestWebIdPopup title="Target Web Id" message="The web ID url where you want to request access to files." />
+                </label>
+                <LoInput v-model="webId" name="webid" />
+            </div>
+            <div>
+                <label class="input-label" for="webid">
+                    <span>Pod</span>
+                    <RequestWebIdPopup title="Target pod" message="Select one of the pods (retrieved from the given web Id). The pods should have access requestable resources" />
+                </label>
+                <Select name="pod-url" v-model="selectedPodUrl" :options="podUrls" placeholder="Select a pod URL" />
+            </div>
         </div>
         <Tree v-model:selectionKeys="selectedEntries" :value="requestableFiles" selectionMode="checkbox"
-            class="w-full md:w-[30rem]" />
+            class="w-full md:w-[30rem]" v-if="requestableFiles.length > 0" />
+        <div v-else-if="selectedPodUrl !== '' && requestableFiles.length === 0">
+            <p>This pod doesn't contain any files which you can request access to</p>
+        </div>
+        <div v-else>
+            <p>No pod selected!</p>
+        </div>
         <LoButton @click="sendRequestNotification" :disabled="Object.keys(selectedEntries).length < 1">Request Access
         </LoButton>
     </div>
@@ -22,6 +40,7 @@ import type { TreeNode } from 'primevue/treenode';
 import { debounce } from '@/lib/utils';
 import LoButton from '@/components/LoButton.vue';
 import { useToast } from 'primevue/usetoast';
+import RequestWebIdPopup from '@/components/popups/RequestWebIdPopup.vue';
 
 const toast = useToast();
 
@@ -98,8 +117,13 @@ watch(selectedPodUrl, async (newPodUrl) => {
         width: 100%;
     }
 
-    &>.p-select {
+    & .p-select {
         height: min-content;
+        width: 100%;
+    }
+
+    & .input-label {
+        display: flex;
     }
 }
 </style>
