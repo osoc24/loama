@@ -1,13 +1,17 @@
 <template>
     <div class="container">
-        <div><p class="prefix">Accepted:</p><PhCheckCircle v-if="message.isAccepted" weight="bold" /><PhXCircle v-else weight="bold" /></div>
-        <p><span class="prefix">To:</span> {{ message.target }}</p>
+        <div>
+            <p class="prefix">Accepted:</p>
+            <PhCheckCircle v-if="message.isAccepted" weight="bold" />
+            <PhXCircle v-else weight="bold" />
+        </div>
+        <p><span class="prefix">Target:</span> {{ message.target }}</p>
         <div>
             <span class="prefix">Requested Permissions: </span>
             <p v-for="label in aclLabels" :key="label">{{ label }}</p>
         </div>
         <div class="actions">
-            <LoButton @click="confirmMessage">Confirm</LoButton>
+            <LoButton @click="confirmMessage">Mark as read</LoButton>
         </div>
     </div>
 </template>

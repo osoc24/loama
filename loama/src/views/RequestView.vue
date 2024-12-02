@@ -72,7 +72,7 @@ const sendRequestNotification = async () => {
         await controller.value.AccessRequest().sendRequestNotification(session.info.webId!, checkedEntries)
         toast.add({
             severity: "success",
-            summary: "Access request(s) sended to user",
+            summary: "Access request(s) sent to user",
             life: 3000,
         })
     } catch (e) {
