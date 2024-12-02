@@ -41,7 +41,7 @@ async function fetchStorageTriple(webId: string) {
     const links = resp.headers.get("link")?.split(", ")
     const storageDescriptionUrl = links?.find(l => l.includes('rel="http://www.w3.org/ns/solid/terms#storageDescription"'))?.replace(/<([^>]+)>.*/, "$1")
     if (!storageDescriptionUrl) {
-        throw new Error("No storage description found in the web id")
+        return undefined
     }
 
     const dataset = await getSolidDataset(storageDescriptionUrl)
