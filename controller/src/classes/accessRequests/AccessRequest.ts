@@ -26,7 +26,7 @@ export abstract class AccessRequest implements IAccessRequest {
 
         // Set permissions for info resources
         await publicController.addPermission(this.resources.getDataUrl(), Permission.Read, { type: "public" });
-        await publicController.addPermission(this.inbox.getDataUrl(), Permission.Write, { type: "public" });
+        await publicController.addPermission(this.inbox.getDataUrl(), Permission.Append, { type: "public" });
     }
 
     unsetPodUrl() {
