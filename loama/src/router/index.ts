@@ -52,7 +52,7 @@ router.beforeEach(async (to) => {
             store.setUsedPod(currentPodUrl)
         }
         if (!store.session.info.isLoggedIn && to.name !== 'login') {
-            return { name: 'login' }
+            return { name: 'login', query: { "next": to.name?.toString() } }
         }
     }
 })
