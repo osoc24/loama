@@ -1,3 +1,5 @@
+import { Permission } from "loama-controller";
+
 export const uriToName = (uri: string, isContainer: boolean) => {
     const splitted = uri.split('/');
 
@@ -17,3 +19,10 @@ export const debounce = (fn: Function, wait: number) => {
         }, wait);
     }
 }
+
+export const allPermissions = [
+    Permission.Read,
+    Permission.Write,
+    Permission.Append,
+    Permission.Control,
+]

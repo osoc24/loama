@@ -46,7 +46,7 @@ export interface IAccessRequest {
     disallowAccessRequest(resourceUrl: string): Promise<void>
 
     // Notifications
-    sendRequestNotification(originWebId: string, resources: string[]): Promise<void>;
+    sendRequestNotification(originWebId: string, resources: string[], permissions: Permission[]): Promise<void>;
     sendResponseNotification(type: "accept" | "reject", message: AccessRequestMessage): Promise<void>;
 
     loadAccessRequests(): Promise<AccessRequestMessage[]>;

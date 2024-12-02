@@ -2,6 +2,7 @@ import { getDatetime, getLinkedResourceUrlAll, getResourceInfo, getStringNoLocal
 import { AccessRequestMessage, Permission, RequestResponseMessage, ResourceAccessRequestNode, Resources } from "../../types";
 import { IAccessRequest, IController, IInbox, IInboxConstructor, IStore } from "../../types/modules";
 import { cacheBustedFetch } from "../../util";
+import { PermissionToACL } from "../utils/Permissions";
 
 const REQUEST_RESPONSE_TYPES = ["as:Accept", "as:Reject"]
 
@@ -94,7 +95,7 @@ export abstract class AccessRequest implements IAccessRequest {
         await this.resources.saveToRemote();
     }
 
-    async sendRequestNotification(originWebId: string, resources: string[]) {
+    async sendRequestNotification(originWebId: string, resources: string[], permissions: Permission[]) {
         const requestableResources = await this.resources.getCurrent();
         const filteredResources = resources.filter(r => requestableResources.items.includes(r));
 
@@ -128,11 +129,7 @@ export abstract class AccessRequest implements IAccessRequest {
                     "@type": "acl:Authorization",
                     "acl:agent": originWebId,
                     "acl:accessTo": r,
-                    "acl:mode": [
-                        {
-                            "@id": "acl:Read"
-                        }
-                    ]
+                    "acl:mode": permissions.map(p => ({ "@id": PermissionToACL(p) }))
                 }
             });
         };

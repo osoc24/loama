@@ -4,14 +4,16 @@
             <div>
                 <label class="input-label" for="webid">
                     <span>Web ID </span>
-                    <RequestWebIdPopup title="Target Web Id" message="The web ID url where you want to request access to files." />
+                    <RequestWebIdPopup title="Target Web Id"
+                        message="The web ID url where you want to request access to files." />
                 </label>
                 <LoInput v-model="webId" name="webid" />
             </div>
             <div>
                 <label class="input-label" for="webid">
                     <span>Pod</span>
-                    <RequestWebIdPopup title="Target pod" message="Select one of the pods (retrieved from the given web Id). The pods should have access requestable resources" />
+                    <RequestWebIdPopup title="Target pod"
+                        message="Select one of the pods (retrieved from the given web Id). The pods should have access requestable resources" />
                 </label>
                 <Select name="pod-url" v-model="selectedPodUrl" :options="podUrls" placeholder="Select a pod URL" />
             </div>
@@ -24,6 +26,12 @@
         <div v-else>
             <p>No pod selected!</p>
         </div>
+        <div class="permission-box" v-if="Object.keys(selectedEntries).length > 0">
+            <LoSwitch v-for="perm in allPermissions" :key="perm" :id="perm" :default-value="false"
+                @update:checked="checked => requestedPermissions[perm] = checked">
+                {{ perm }}
+            </LoSwitch>
+        </div>
         <LoButton @click="sendRequestNotification" :disabled="Object.keys(selectedEntries).length < 1">Request Access
         </LoButton>
     </div>
@@ -31,16 +39,17 @@
 <script setup lang="ts">
 import LoInput from '@/components/LoInput.vue';
 import { getDefaultSession } from '@inrupt/solid-client-authn-browser';
-import { createBasicController, type ResourceAccessRequestNode } from 'loama-controller';
+import { Permission, createBasicController, type ResourceAccessRequestNode } from 'loama-controller';
 import { ref, watch } from 'vue';
 import Select from 'primevue/select';
 import { listWebIdPodUrls } from 'loama-common';
 import Tree, { type TreeSelectionKeys } from 'primevue/tree';
 import type { TreeNode } from 'primevue/treenode';
-import { debounce } from '@/lib/utils';
+import { allPermissions, debounce } from '@/lib/utils';
 import LoButton from '@/components/LoButton.vue';
 import { useToast } from 'primevue/usetoast';
 import RequestWebIdPopup from '@/components/popups/RequestWebIdPopup.vue';
+import LoSwitch from '@/components/LoSwitch.vue';
 
 const toast = useToast();
 
@@ -55,6 +64,12 @@ const debouncedPodFetcher = debounce(async (newVal: string) => {
     let pods = await listWebIdPodUrls(newVal, session.fetch);
     podUrls.value = pods;
 }, 1000)
+const requestedPermissions = ref({
+    [Permission.Read]: false,
+    [Permission.Write]: false,
+    [Permission.Append]: false,
+    [Permission.Control]: false,
+})
 
 const accessRequestNodeToTreeNode = (key: string, node: ResourceAccessRequestNode): TreeNode => {
     return {
@@ -68,8 +83,10 @@ const accessRequestNodeToTreeNode = (key: string, node: ResourceAccessRequestNod
 const sendRequestNotification = async () => {
     const session = getDefaultSession();
     const checkedEntries = Object.keys(selectedEntries.value).filter(k => selectedEntries.value[k].checked)
+    const permissions = Object.entries(requestedPermissions.value).filter(([_, checked]) => checked).map(([perm, _]) => perm as Permission)
+
     try {
-        await controller.value.AccessRequest().sendRequestNotification(session.info.webId!, checkedEntries)
+        await controller.value.AccessRequest().sendRequestNotification(session.info.webId!, checkedEntries, permissions)
         toast.add({
             severity: "success",
             summary: "Access request(s) sent to user",
@@ -125,5 +142,12 @@ watch(selectedPodUrl, async (newPodUrl) => {
     & .input-label {
         display: flex;
     }
+}
+
+.permission-box {
+    display: flex;
+    padding: .5em;
+    border-radius: 1em;
+    background: white;
 }
 </style>
