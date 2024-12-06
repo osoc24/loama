@@ -16,14 +16,14 @@
                     <i>Select one to get started</i>
                 </div>
             </div>
-            <SelectedEntry v-else />
+            <SelectedEntry v-else @close="() => changeSelectedEntry(null)" />
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import { store } from 'loama-app'
-import { onMounted, watch } from "vue";
+import { watch } from "vue";
 import ExplorerEntry from "./ExplorerEntry.vue";
 import { useRoute } from "vue-router";
 import ExplorerBreadcrumbs from "./ExplorerBreadcrumbs.vue";
@@ -36,7 +36,7 @@ const podStore = usePodStore();
 
 await podStore.loadResources(store.usedPod)
 
-const changeSelectedEntry = (entry: Entry) => podStore.selectedEntry = entry;
+const changeSelectedEntry = (entry: Entry | null) => podStore.selectedEntry = entry;
 
 const fileUrl = (path: string | string[]) => `${store.usedPod}${path}`
 

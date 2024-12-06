@@ -38,6 +38,8 @@ import SubjectPermissionTable from './SubjectPermissionTable.vue';
 
 const podStore = usePodStore();
 
+defineEmits<{ close: [] }>()
+
 const permissionDrawerVisible = ref(false);
 </script>
 
