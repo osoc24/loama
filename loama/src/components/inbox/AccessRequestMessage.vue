@@ -19,8 +19,10 @@ import LoButton from '../LoButton.vue';
 import { useToast } from 'primevue/usetoast';
 import { getDefaultSession } from '@inrupt/solid-client-authn-browser';
 import { listWebIdPodUrls } from 'loama-common';
+import { useConfirm } from 'primevue/useconfirm';
 
 const toast = useToast();
+const confirm = useConfirm();
 const props = defineProps<{
     message: AccessRequestMessage
 }>()
@@ -67,6 +69,29 @@ const getActorController = async () => {
 }
 
 const acceptAccessRequest = async () => {
+    await new Promise<void>((res, rej) => {
+        if (props.message.permissions.includes("acl:Control")) {
+            confirm.require({
+                header: "Grant control permission?",
+                message: `This will give ${props.message.actor} complete control/admin rights over ${props.message.target}, give with care!`,
+                rejectProps: {
+                    label: 'Cancel',
+                    severity: 'secondary',
+                    outlined: true
+                },
+                acceptProps: {
+                    label: 'Grant'
+                },
+                accept: () => {
+                    res();
+                },
+                reject: () => {
+                    rej();
+                }
+            })
+        }
+    });
+
     for (const acl of props.message.permissions) {
         const permission = aclToInfo[acl]?.value;
         if (!permission) {
