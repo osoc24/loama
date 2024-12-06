@@ -41,8 +41,19 @@ export interface IAccessRequest {
     * Will return a tree structure starting from the containerUrl with the access requestable (container) resources
     */
     getRequestableResources(containerUrl: string): Promise<ResourceAccessRequestNode>
+
+    /**
+    * Checks if access to the resource is possible
+    * This should be based on the content of the resources.json file
+    */
     canRequestAccessToResource(resourceUrl: string): Promise<boolean>
+    /**
+    * Adds a resource to the shareable resource list (resources.json)
+    */
     allowAccessRequest(resourceUrl: string): Promise<void>
+    /**
+    * Removes a resource from the shareable resource list (resources.json)
+    */
     disallowAccessRequest(resourceUrl: string): Promise<void>
 
     // Notifications
@@ -51,6 +62,9 @@ export interface IAccessRequest {
 
     loadAccessRequests(): Promise<AccessRequestMessage[]>;
     loadRequestResponses(): Promise<RequestResponseMessage[]>;
+    /**
+    * Remove the given message resource from the inbox
+    */
     removeRequest(messageUrl: string): Promise<void>;
 }
 
