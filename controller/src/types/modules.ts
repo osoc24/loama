@@ -1,4 +1,5 @@
-import { BaseSubject, Index, IndexItem, Permission, ResourcePermissions, SubjectPermissions } from "../types";
+import { SolidDataset, WithResourceInfo } from "@inrupt/solid-client";
+import { AccessRequestMessage, BaseSubject, Index, IndexItem, Permission, RequestResponseMessage, ResourceAccessRequestNode, ResourcePermissions, SubjectPermissions } from "../types";
 
 export type SubjectKey<T> = keyof T & string;
 export type SubjectType<T, K extends SubjectKey<T>> = T[K];
@@ -9,8 +10,9 @@ export type SubjectConfig<T extends Record<keyof T, BaseSubject<keyof T & string
 export type SubjectConfigs<T extends Record<keyof T, BaseSubject<keyof T & string>>> = Record<keyof T, SubjectConfig<T, T[keyof T]>>;
 
 export interface IController<T extends Record<keyof T, BaseSubject<keyof T & string>>> {
-    setPodUrl(podUrl: string): void;
+    setPodUrl(podUrl: string): Promise<void>;
     unsetPodUrl(podUrl: string): void;
+    AccessRequest(): IAccessRequest;
     getLabelForSubject<K extends SubjectKey<T>>(subject: T[K]): string;
     getOrCreateIndex(): Promise<Index>;
     getItem<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>): Promise<IndexItem<T[K]> | undefined>;
@@ -30,9 +32,51 @@ export interface IController<T extends Record<keyof T, BaseSubject<keyof T & str
     getContainerPermissionList(containerUrl: string): Promise<ResourcePermissions<T[keyof T]>[]>
 
     getResourcePermissionList(resourceUrl: string): Promise<ResourcePermissions<T[keyof T]>>
+
+    isSubjectSupported<T extends string>(subject: BaseSubject<T>): IController<Record<T, BaseSubject<T>>>
 }
 
-export interface IStore<T extends Record<keyof T, BaseSubject<keyof T & string>>> {
+export interface IAccessRequest {
+    /**
+    * Will return a tree structure starting from the containerUrl with the access requestable (container) resources
+    */
+    getRequestableResources(containerUrl: string): Promise<ResourceAccessRequestNode>
+
+    /**
+    * Checks if access to the resource is possible
+    * This should be based on the content of the resources.json file
+    */
+    canRequestAccessToResource(resourceUrl: string): Promise<boolean>
+    /**
+    * Adds a resource to the shareable resource list (resources.json)
+    */
+    allowAccessRequest(resourceUrl: string): Promise<void>
+    /**
+    * Removes a resource from the shareable resource list (resources.json)
+    */
+    disallowAccessRequest(resourceUrl: string): Promise<void>
+
+    // Notifications
+    sendRequestNotification(originWebId: string, resources: string[], permissions: Permission[]): Promise<void>;
+    sendResponseNotification(type: "accept" | "reject", message: AccessRequestMessage): Promise<void>;
+
+    loadAccessRequests(): Promise<AccessRequestMessage[]>;
+    loadRequestResponses(): Promise<RequestResponseMessage[]>;
+    /**
+    * Remove the given message resource from the inbox
+    */
+    removeRequest(messageUrl: string): Promise<void>;
+}
+
+export interface IInboxConstructor<T = unknown> {
+    new(filePath: string): IInbox<T>
+}
+
+export interface IStoreConstructor<T = unknown> {
+    new(filePath: string, templateGenerator: () => T): IStore<T>
+}
+
+export interface IStore<T> {
     /**
     * Implemented by BaseStore
     * Will set the protected pod url property
@@ -42,19 +86,27 @@ export interface IStore<T extends Record<keyof T, BaseSubject<keyof T & string>>
     * Removes the pod url property value
     */
     unsetPodUrl(): void;
-    /**
-    * Returns the currently stored index or calls getOrCreateIndex if the index is not set
-    */
-    getCurrentIndex<K extends SubjectKey<T>>(): Promise<Index<T[K]>>;
+    getPodUrl(): string | undefined;
+
+    getDataUrl(): string;
 
     /**
-    * Tries to retrieve the stored index.json from the pod. If it doesn't exist, it creates an empty one.
+    * Returns the currently stored data or calls getOrCreate if the data is not set
     */
-    getOrCreateIndex(): Promise<Index>;
+    getCurrent(): Promise<T>;
+
     /**
-    * Saves the index to the pod
+    * Tries to retrieve the stored file from the pod. If it doesn't exist, it creates an empty one.
     */
-    saveToRemoteIndex(): Promise<void>;
+    getOrCreate(): Promise<T>;
+    /**
+    * Saves the data to the pod
+    */
+    saveToRemote(): Promise<void>;
+}
+
+export interface IInbox<T = unknown> extends IStore<T[]> {
+    getMessages(): Promise<Record<string, SolidDataset & WithResourceInfo>>;
 }
 
 export interface ISubjectResolver<T extends BaseSubject<string>> {

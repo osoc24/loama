@@ -11,9 +11,12 @@ export { url } from "./types";
  * @returns The URL's to the pods the user has access to
  */
 export async function listPodUrls(session: Session): Promise<url[]> {
-    const webId = session.info.webId!
+    return listWebIdPodUrls(session.info.webId!, session.fetch);
+}
+
+export async function listWebIdPodUrls(webId: string, fetch?: typeof globalThis.fetch): Promise<url[]> {
     const urls = await getPodUrlAll(webId, {
-        fetch: session.fetch,
+        fetch,
     });
 
     const fetchedUrl = await fetchStorageTriple(webId);

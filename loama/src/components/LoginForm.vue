@@ -50,9 +50,12 @@ const login = () => {
     isLoading.value = true;
     const issuer = solidPodUrl.value.trim() || defaultSolidPodUrl;
 
+    const searchParams = new URLSearchParams(location.search)
+    const nextPath = searchParams.get("next") ?? "home"
+
     store.session.login({
         oidcIssuer: issuer,
-        redirectUrl: new URL(`${import.meta.env.BASE_URL}home/`, window.location.href).toString(),
+        redirectUrl: new URL(`${import.meta.env.BASE_URL}${nextPath}/`, window.location.href).toString(),
         clientName: 'LOAMA',
     })
         .then(() => {

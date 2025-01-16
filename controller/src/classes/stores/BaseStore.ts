@@ -1,24 +1,37 @@
-import { SubjectKey } from "@/types/modules";
-import { BaseSubject, Index } from "../../types";
-
-export abstract class BaseStore<T extends Record<keyof T, BaseSubject<keyof T & string>>> {
+export abstract class BaseStore<T> {
     protected podUrl?: string = undefined;
-    protected index?: Index<T[keyof T]> = undefined;
+    protected filePath: string;
+    protected data?: T = undefined;
+
+    constructor(filePath: string) {
+        this.filePath = filePath
+    }
 
     setPodUrl(url: string): void {
         this.podUrl = url;
+        if (!this.podUrl.endsWith("/")) {
+            this.podUrl += "/";
+        }
     }
 
     unsetPodUrl(): void {
         this.podUrl = undefined;
     }
 
-    abstract getOrCreateIndex(): Promise<Index<T[keyof T]>>;
+    getPodUrl() {
+        return this.podUrl
+    }
 
-    async getCurrentIndex<K extends SubjectKey<T>>() {
-        if (!this.index) {
-            this.index = await this.getOrCreateIndex();
+    getDataUrl() {
+        return `${this.podUrl}${this.filePath}`
+    }
+
+    abstract getOrCreate(): Promise<T>;
+
+    async getCurrent() {
+        if (!this.data) {
+            this.data = await this.getOrCreate();
         }
-        return this.index as Index<T[K]>;
+        return this.data;
     }
 }

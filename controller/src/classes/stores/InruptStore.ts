@@ -1,5 +1,4 @@
-import { FetchError, getFile, overwriteFile, saveFileInContainer, WithResourceInfo } from "@inrupt/solid-client";
-import { BaseSubject, Index } from "../../types";
+import { FetchError, getFile, overwriteFile } from "@inrupt/solid-client";
 import { IStore } from "../../types/modules";
 import { BaseStore } from "./BaseStore";
 import { getDefaultSession, Session } from "@inrupt/solid-client-authn-browser";
@@ -9,65 +8,60 @@ import { getDefaultSession, Session } from "@inrupt/solid-client-authn-browser";
  * The "Inrupt" prefix is to indicate the usage of the inrupt sdk
  * This store can be used without the the InruptPermissionManager
 */
-export class InruptStore<T extends Record<keyof T, BaseSubject<keyof T & string>>> extends BaseStore<T> implements IStore<T> {
-    // TODO this should be a more resilient path: be.ugent.idlab.knows.solid.loama.index.js or smth
-    private indexPath = "index.json";
+export class InruptStore<T> extends BaseStore<T> implements IStore<T> {
     private session: Session;
+    private templateGenerator: () => T;
 
-    constructor() {
-        super()
+    // TODO this should be a more resilient path: be.ugent.idlab.knows.solid.loama.index.js or smth
+    constructor(filePath: string, templateGenerator: () => T) {
+        super(filePath)
+        this.templateGenerator = templateGenerator;
         this.session = getDefaultSession()
     }
 
-    private indexToIndexFile(): File {
-        return new File([JSON.stringify(this.index)], this.indexPath, {
+    private toJsonFile(data: unknown, path: string): File {
+        return new File([JSON.stringify(data)], path, {
             type: "application/json",
         });
     }
 
-    // NOTE: Possible will move the podUrl to the parameters, this works for the current POC
-    async getOrCreateIndex(): Promise<Index<T[keyof T]>> {
+    async getOrCreate(): Promise<T> {
         if (!this.podUrl) {
             throw new Error("Cannot get current index file: pod location is not set");
         }
 
-        if (this.index) {
-            return this.index;
+        if (this.data) {
+            return this.data;
         }
 
-        const indexUrl = `${this.podUrl}${this.indexPath}`;
-        let file: (Blob & WithResourceInfo) | undefined = undefined
         try {
-            file = await getFile(indexUrl, { fetch: this.session.fetch })
+            let file = await getFile(this.getDataUrl(), { fetch: this.session.fetch })
+            const fileText = await file?.text();
+            this.data = JSON.parse(fileText ?? "{}");
         } catch (error: unknown) {
             if (error instanceof FetchError && error.statusCode === 404) {
-                this.index = { id: indexUrl, items: [] }
-                file = await saveFileInContainer(
-                    this.podUrl,
-                    this.indexToIndexFile(),
-                    { fetch: this.session.fetch }
-                );
+                this.data = this.templateGenerator();
+                this.saveToRemote();
             }
         }
 
-        const fileText = await file?.text();
-        this.index = JSON.parse(fileText ?? "{}");
-        if (!this.index) {
-            throw new Error("Index not found or invalid");
+        if (!this.data) {
+            throw new Error(`Store data(${this.filePath}) not found or invalid`);
         }
 
-        return this.index;
+        return this.data;
     }
 
-    async saveToRemoteIndex() {
-        if (!this.index) {
-            await this.getOrCreateIndex();
+    async saveToRemote() {
+        if (!this.data) {
+            await this.getOrCreate();
         }
-        if (!this.index) {
-            throw new Error("Index not found or invalid");
+        if (!this.data) {
+            throw new Error(`Store data(${this.filePath}) not found or invalid`);
         }
 
-        overwriteFile(this.index.id, this.indexToIndexFile(), {
+        // NOTE: the fileUrl was stored in the file, do we want to enforce our generic to atleast have this id property available?
+        overwriteFile(this.getDataUrl(), this.toJsonFile(this.data, this.filePath), {
             fetch: this.session.fetch,
         });
     }

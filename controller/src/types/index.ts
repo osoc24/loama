@@ -1,6 +1,14 @@
 import { url } from "loama-common";
 
 /**
+ * The json schema for the resources file which holds the shareable resources inside a Solid data pod.
+ */
+export interface Resources {
+    id: url;
+    items: string[]
+}
+
+/**
  * The json schema for the index configuration file inside a Solid data pod.
  */
 export interface Index<T extends BaseSubject<string> = BaseSubject<string>> {
@@ -39,5 +47,35 @@ export interface SubjectPermissions<T = BaseSubject<string>> {
 
 export interface ResourcePermissions<T = BaseSubject<string>> {
     resourceUrl: url;
+    canRequestAccess: boolean;
     permissionsPerSubject: SubjectPermissions<T>[]
+}
+
+/**
+  * The node structure used in the tree-structure for requestable resources
+  */
+export interface ResourceAccessRequestNode {
+    resourceUrl: url;
+    canRequestAccess: boolean;
+    /**
+    * A map of the next url part to the informationNode for select part
+    * eg. example.com/a/b/c is a map of "a" with "b" in it's children map etc.
+    */
+    children?: Record<string, ResourceAccessRequestNode>;
+}
+
+export type AccessRequestMessage = {
+    id: string;
+    // The webid of the person performing the request
+    actor: string;
+    requestedAt: Date;
+    target: string;
+    permissions: string[];
+}
+
+export type RequestResponseMessage = {
+    id: string;
+    isAccepted: boolean;
+    target: string;
+    permissions: string[];
 }

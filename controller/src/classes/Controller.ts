@@ -1,14 +1,22 @@
-import { BaseSubject, IndexItem, Permission, ResourcePermissions, SubjectPermissions } from "../types";
-import { IController, IStore, SubjectConfig, SubjectConfigs, SubjectKey, SubjectType } from "../types/modules";
+import { BaseSubject, Index, IndexItem, Permission, ResourcePermissions, Resources, SubjectPermissions } from "../types";
+import { IAccessRequest, IController, IInboxConstructor, IStore, IStoreConstructor, SubjectConfig, SubjectConfigs, SubjectKey, SubjectType } from "../types/modules";
+import { AccessRequest } from "./accessRequests/AccessRequest";
+import { InruptAccessRequest } from "./accessRequests/InruptAccessRequest";
 import { Mutex } from "./utils/Mutex";
 
 export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>> extends Mutex implements IController<T> {
-    private store: IStore<T>
+    private index: IStore<Index<T[keyof T & string]>>
+    private resources: IStore<Resources>
+    private accessRequest: AccessRequest;
     private subjectConfigs: SubjectConfigs<T>
 
-    constructor(store: IStore<T>, subjects: SubjectConfigs<T>) {
+    // TODO : Find a better way of constructing the controller with all the different modules
+    constructor(storeConstructor: IStoreConstructor, inboxConstructor: IInboxConstructor, subjects: SubjectConfigs<T>) {
         super();
-        this.store = store;
+        // There is currently no "easy" solution to get around the as IStore...
+        this.index = new storeConstructor("index.json", () => ({ id: "", items: [] })) as IStore<Index<T[keyof T & string]>>;
+        this.resources = new storeConstructor("resources.json", () => ({ id: "", items: [] })) as IStore<Resources>;;
+        this.accessRequest = new InruptAccessRequest(this as unknown as Controller<{}>, inboxConstructor, this.resources);
         this.subjectConfigs = subjects;
     }
 
@@ -56,12 +64,12 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
                 subject: subject,
             }
 
-            const index = await this.store.getCurrentIndex();
+            const index = await this.index.getCurrent();
             index.items.push(item);
         }
 
         if (!alwaysKeepItem && permissions.length === 0 && manager.shouldDeleteOnAllRevoked()) {
-            const index = await this.store.getCurrentIndex();
+            const index = await this.index.getCurrent();
             const idx = index.items.findIndex(i => i.id === item.id);
             index.items.splice(idx, 1);
         } else {
@@ -78,19 +86,27 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
             }
         }
 
-        await this.store.saveToRemoteIndex();
+        await this.index.saveToRemote();
     }
 
-    setPodUrl(podUrl: string) {
-        this.store.setPodUrl(podUrl);
+    AccessRequest(): IAccessRequest {
+        return this.accessRequest;
+    }
+
+    async setPodUrl(podUrl: string) {
+        this.index.setPodUrl(podUrl);
+        this.resources.setPodUrl(podUrl);
+        await this.accessRequest.setPodUrl(podUrl)
     }
 
     unsetPodUrl() {
-        this.store.unsetPodUrl();
+        this.index.unsetPodUrl();
+        this.resources.unsetPodUrl();
+        this.accessRequest.unsetPodUrl();
     }
 
     async getOrCreateIndex() {
-        return this.store.getOrCreateIndex();
+        return this.index.getOrCreate();
     }
 
     getLabelForSubject<K extends SubjectKey<T>>(subject: T[K]): string {
@@ -101,7 +117,7 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
     async getItem<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>): Promise<IndexItem<T[K]> | undefined> {
         const { resolver } = this.getSubjectConfig<K>(subject);
 
-        const index = await this.store.getCurrentIndex<K>();
+        const index = await this.index.getCurrent() as Index<T[K]>;
         return resolver.getItem(index, resourceUrl, subject.selector)
     }
 
@@ -130,7 +146,7 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
         await this.updateItem(resourceUrl, subject, []);
 
         const subjectConfig = this.getSubjectConfig(subject);
-        const index = await this.store.getCurrentIndex<K>();
+        const index = await this.index.getCurrent() as Index<T[K]>;
 
         const item = subjectConfig.resolver.getItem(index, resourceUrl, subject.selector);
         if (!item) return;
@@ -140,7 +156,7 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
         const idx = index.items.findIndex(i => subjectConfig.resolver.checkMatch(i.subject, subject));
         index.items.splice(idx, 1);
 
-        await this.store.saveToRemoteIndex();
+        await this.index.saveToRemote();
     }
 
     async removePermission<K extends SubjectKey<T>>(resourceUrl: string, removedPermission: Permission, subject: SubjectType<T, K>) {
@@ -174,7 +190,7 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
         await manager.createPermissions(resource, subject, item.permissions);
 
         item.isEnabled = true;
-        await this.store.saveToRemoteIndex()
+        await this.index.saveToRemote()
     }
 
     async disablePermissions<K extends SubjectKey<T>>(resourceUrl: string, subject: SubjectType<T, K>) {
@@ -188,13 +204,13 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
 
         item.isEnabled = false;
 
-        await this.store.saveToRemoteIndex()
+        await this.index.saveToRemote()
     }
 
     async getContainerPermissionList(containerUrl: string): Promise<ResourcePermissions<T[keyof T]>[]> {
         const configs: SubjectConfig<T>[] = Object.values(this.subjectConfigs);
 
-        const index = await this.store.getCurrentIndex();
+        const index = await this.index.getCurrent();
         const resourcesToSkip = index.items.filter(i => {
             if (!i.resource.includes(containerUrl)) {
                 return false;
@@ -247,15 +263,16 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
             }
         }));
 
-        await this.store.saveToRemoteIndex();
+        await this.index.saveToRemote();
 
-        return index.items.reduce<ResourcePermissions<T[keyof T]>[]>((arr, v) => {
+        return await index.items.reduce<Promise<ResourcePermissions<T[keyof T]>[]>>(async (arr, v) => {
             const resourcePath = v.resource.replace(containerUrl, "");
             const amountOfSlashes = resourcePath.replace(/[^\/]/g, "").length;
             if ((amountOfSlashes == 1 && !resourcePath.endsWith("/")) || resourcePath.startsWith("/") || amountOfSlashes > 1) {
                 return arr;
             }
-            let existingInfo = arr.find((info) => info.resourceUrl === v.resource);
+            let indexItems = await arr;
+            let existingInfo = indexItems.find((info) => info.resourceUrl === v.resource);
             if (existingInfo) {
                 existingInfo.permissionsPerSubject.push({
                     permissions: v.permissions,
@@ -263,8 +280,9 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
                     isEnabled: v.isEnabled,
                 })
             } else {
-                arr.push({
+                indexItems.push({
                     resourceUrl: v.resource,
+                    canRequestAccess: await this.accessRequest.canRequestAccessToResource(v.resource),
                     permissionsPerSubject: [{
                         permissions: v.permissions,
                         subject: v.subject,
@@ -272,21 +290,22 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
                     }]
                 })
             }
-            return arr;
-        }, []);
+            return indexItems;
+        }, Promise.resolve([]));
     }
 
     // NOTE: Do we want to force this to only use the index stored in the store?
     async getResourcePermissionList(resourceUrl: string) {
         // Need to put it in a variable because the type declaration vanishes
         const configs: SubjectConfig<T>[] = Object.values(this.subjectConfigs);
-        const index = await this.store.getCurrentIndex<keyof T & string>();
+        const index = await this.index.getCurrent();
         const results = await Promise.allSettled(configs.map(c => c.manager.getRemotePermissions<keyof T & string>(resourceUrl)))
 
         let permissionsPerSubject = index.items.filter(i => i.resource === resourceUrl)
 
         return {
             resourceUrl,
+            canRequestAccess: await this.accessRequest.canRequestAccessToResource(resourceUrl),
             permissionsPerSubject: results.reduce<SubjectPermissions<T[keyof T & string]>[]>((arr, v) => {
                 if (v.status === "fulfilled") {
                     v.value.forEach(remotePps => {
@@ -305,5 +324,13 @@ export class Controller<T extends Record<keyof T, BaseSubject<keyof T & string>>
                 return arr;
             }, permissionsPerSubject)
         }
+    }
+
+    isSubjectSupported<K extends string, B extends BaseSubject<K>>(subject: BaseSubject<K>): IController<Record<K, B>> {
+        if (!this.subjectConfigs[subject.type as unknown as keyof T]) {
+
+            throw new Error(`Subject type ${subject.type} is not supported`);
+        }
+        return this as unknown as IController<Record<K, B>>
     }
 }

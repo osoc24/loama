@@ -4,7 +4,7 @@ import { IPermissionManager, SubjectKey } from "../../../types/modules";
 import { InruptPermissionManager } from "./InruptPermissionManager";
 import { getDefaultSession } from "@inrupt/solid-client-authn-browser";
 import { getPublicAccess, setPublicAccess } from "@inrupt/solid-client/universal";
-import { cacheBustedFetch } from "../../../util";
+import { cacheBustedSessionFetch } from "../../../util";
 
 export class PublicManager<T extends Record<keyof T, BaseSubject<keyof T & string>>> extends InruptPermissionManager<T> implements IPermissionManager<T> {
 
@@ -32,7 +32,7 @@ export class PublicManager<T extends Record<keyof T, BaseSubject<keyof T & strin
 
     async getRemotePermissions<K extends SubjectKey<T>>(resourceUrl: string) {
         const session = getDefaultSession();
-        const publicAccess = await getPublicAccess(resourceUrl, { fetch: cacheBustedFetch(session) })
+        const publicAccess = await getPublicAccess(resourceUrl, { fetch: cacheBustedSessionFetch(session) })
 
         if (!publicAccess) {
             return [];

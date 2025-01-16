@@ -1,7 +1,7 @@
 <template>
-    <a :href="href" :class="{ active: active }">
+    <RouterLink :to="href" activeClass="active">
         <slot />
-    </a>
+    </RouterLink>
 </template>
 
 <script setup lang="ts">
@@ -14,6 +14,7 @@ defineProps<{
 <style scoped>
 a {
     background-color: var(--lama-gray);
+    color: var(--off-black);
     display: inline-block;
     text-decoration: none;
     display: flex;
