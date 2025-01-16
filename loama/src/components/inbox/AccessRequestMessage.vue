@@ -90,6 +90,9 @@ const acceptAccessRequest = async () => {
                 }
             })
         }
+        else {
+            res()
+        }
     });
 
     for (const acl of props.message.permissions) {
